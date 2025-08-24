@@ -1,0 +1,74 @@
+openapi: 3.0.3
+info:
+  title: RefIntel API
+  version: 0.1.0
+servers:
+  - url: /api
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Role:
+      type: string
+      enum: [ADMIN, ANALYST, CHARTER]
+    User:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        role: { $ref: '#/components/schemas/Role' }
+    Game:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        date: { type: string, format: date-time }
+        homeTeam: { type: string }
+        awayTeam: { type: string }
+    Event:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        gameId: { type: string, format: uuid }
+        timestampMs: { type: integer }
+        videoUrl: { type: string }
+        type: { type: string }
+    Tag:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        eventId: { type: string, format: uuid }
+        createdById: { type: string, format: uuid }
+        label: { type: string }
+        notes: { type: string }
+    AnalystAction:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        tagId: { type: string, format: uuid }
+        analystId: { type: string, format: uuid }
+        action: { type: string, enum: [APPROVE, REQUEST_CHANGES] }
+        comment: { type: string }
+security:
+  - bearerAuth: []
+paths:
+  /auth/login:
+    post:
+      summary: Login with email/password
+      responses:
+        '200': { description: OK }
+  /games:
+    get: { summary: List games, responses: { '200': { description: OK } } }
+    post: { summary: Create game, responses: { '201': { description: Created } } }
+  /games/{gameId}/events:
+    get: { summary: List events for a game, responses: { '200': { description: OK } } }
+  /events/{eventId}/tags:
+    get: { summary: List tags, responses: { '200': { description: OK } } }
+    post: { summary: Create tag, responses: { '201': { description: Created } } }
+  /tags/{tagId}:
+    patch: { summary: Edit tag, responses: { '200': { description: OK } } }
+    delete: { summary: Delete tag, responses: { '204': { description: No Content } } }
+  /tags/{tagId}/analyst-actions:
+    post: { summary: Approve or request changes, responses: { '201': { description: Created } } }
