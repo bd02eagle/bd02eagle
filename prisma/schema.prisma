@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "sqlite"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+enum Role {
+  ADMIN
+  ANALYST
+  CHARTER
+}
+
+enum AnalystDecision {
+  APPROVE
+  REQUEST_CHANGES
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tags           Tag[]           @relation("TagCreatedBy")
+  analystActions AnalystAction[]
+}
+
+model Game {
+  id        String   @id @default(uuid())
+  date      DateTime
+  homeTeam  String
+  awayTeam  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  events Event[]
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  gameId      String
+  game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  timestampMs Int
+  videoUrl    String
+  type        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tags Tag[]
+}
+
+model Tag {
+  id          String   @id @default(uuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdById String?
+  createdBy   User?    @relation("TagCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  label       String
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  analystActions AnalystAction[]
+}
+
+model AnalystAction {
+  id    String @id @default(uuid())
+  tagId String
+  tag   Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  // MUST be optional if onDelete: SetNull
+  analystId String?
+  analyst   User?           @relation(fields: [analystId], references: [id], onDelete: SetNull)
+  action    AnalystDecision
+  comment   String?
+  createdAt DateTime        @default(now())
+}
