@@ -43,9 +43,9 @@ async function main() {
   // Create games
   const game1 = await prisma.game.create({
     data: {
-      date: new Date('2024-01-15T19:00:00Z'),
-      homeTeam: 'Lakers',
-      awayTeam: 'Warriors',
+      date: new Date('2025-01-15T19:00:00Z'),
+      homeTeam: 'Texas',
+      awayTeam: 'SC',
     },
   });
 
