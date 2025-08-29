@@ -1,0 +1,35 @@
+
+import { Router } from "express";
+import { prisma } from "../db.js";
+import { requireAuth } from "../auth.js";
+
+const r = Router();
+
+// list tags for an event
+r.get("/events/:eventId", requireAuth(["ADMIN","ANALYST","CHARTER"]), async (req, res) => {
+  const tags = await prisma.tag.findMany({ where: { eventId: req.params.eventId } });
+  res.json(tags);
+});
+
+// create tag on an event (charter/admin)
+r.post("/events/:eventId", requireAuth(["CHARTER","ADMIN"]), async (req, res) => {
+  const { label, notes } = req.body || {};
+  const tag = await prisma.tag.create({
+    data: { eventId: req.params.eventId, createdById: req.user.sub, label, notes }
+  });
+  res.status(201).json(tag);
+});
+
+// edit tag (owner/admin)
+r.patch("/:tagId", requireAuth(["CHARTER","ADMIN"]), async (req, res) => {
+  const tag = await prisma.tag.update({ where: { id: req.params.tagId }, data: req.body });
+  res.json(tag);
+});
+
+// delete tag (owner/admin)
+r.delete("/:tagId", requireAuth(["CHARTER","ADMIN"]), async (req, res) => {
+  await prisma.tag.delete({ where: { id: req.params.tagId } });
+  res.status(204).end();
+});
+
+export default r;
