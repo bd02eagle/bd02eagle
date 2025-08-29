@@ -1,0 +1,30 @@
+
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import { prisma } from "./db.js";
+
+export async function login(req, res) {
+  const { email, password } = req.body || {};
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) return res.status(401).json({ error: "Invalid credentials" });
+  const ok = await bcrypt.compare(password, user.password);
+  if (!ok) return res.status(401).json({ error: "Invalid credentials" });
+  const token = jwt.sign({ sub: user.id, role: user.role }, process.env.JWT_SECRET || "dev", { expiresIn: "1d" });
+  res.json({ token, role: user.role });
+}
+
+export function requireAuth(roles = []) {
+  return (req, res, next) => {
+    const auth = req.headers.authorization || "";
+    const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+    if (!token) return res.status(401).json({ error: "Unauthorized" });
+    try {
+      const payload = jwt.verify(token, process.env.JWT_SECRET || "dev");
+      if (roles.length && !roles.includes(payload.role)) return res.status(403).json({ error: "Forbidden" });
+      req.user = payload;
+      next();
+    } catch {
+      res.status(401).json({ error: "Unauthorized" });
+    }
+  };
+}
