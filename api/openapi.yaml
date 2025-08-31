@@ -1,74 +1,442 @@
+
 openapi: 3.0.3
 info:
   title: RefIntel API
+  description: API for managing game events, tags, and analyst actions in the RefIntel system
   version: 0.1.0
 servers:
   - url: /api
+    description: API server
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: JWT token obtained from login endpoint
   schemas:
     Role:
       type: string
       enum: [ADMIN, ANALYST, CHARTER]
+      description: User role in the system
     User:
       type: object
       properties:
-        id: { type: string, format: uuid }
-        email: { type: string, format: email }
-        role: { $ref: '#/components/schemas/Role' }
+        id: 
+          type: string
+          format: uuid
+          description: Unique user identifier
+        email: 
+          type: string
+          format: email
+          description: User email address
+        role: 
+          $ref: '#/components/schemas/Role'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
     Game:
       type: object
       properties:
-        id: { type: string, format: uuid }
-        date: { type: string, format: date-time }
-        homeTeam: { type: string }
-        awayTeam: { type: string }
+        id: 
+          type: string
+          format: uuid
+          description: Unique game identifier
+        date: 
+          type: string
+          format: date-time
+          description: Game date and time
+        homeTeam: 
+          type: string
+          description: Home team name
+        awayTeam: 
+          type: string
+          description: Away team name
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
     Event:
       type: object
       properties:
-        id: { type: string, format: uuid }
-        gameId: { type: string, format: uuid }
-        timestampMs: { type: integer }
-        videoUrl: { type: string }
-        type: { type: string }
+        id: 
+          type: string
+          format: uuid
+          description: Unique event identifier
+        gameId: 
+          type: string
+          format: uuid
+          description: Associated game ID
+        timestampMs: 
+          type: integer
+          description: Event timestamp in milliseconds
+        videoUrl: 
+          type: string
+          description: URL to event video
+        type: 
+          type: string
+          description: Type of event (e.g., FOUL, TIMEOUT)
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
     Tag:
       type: object
       properties:
-        id: { type: string, format: uuid }
-        eventId: { type: string, format: uuid }
-        createdById: { type: string, format: uuid }
-        label: { type: string }
-        notes: { type: string }
+        id: 
+          type: string
+          format: uuid
+          description: Unique tag identifier
+        eventId: 
+          type: string
+          format: uuid
+          description: Associated event ID
+        createdById: 
+          type: string
+          format: uuid
+          description: ID of user who created the tag
+        label: 
+          type: string
+          description: Tag label
+        notes: 
+          type: string
+          description: Additional notes
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
     AnalystAction:
       type: object
       properties:
-        id: { type: string, format: uuid }
-        tagId: { type: string, format: uuid }
-        analystId: { type: string, format: uuid }
-        action: { type: string, enum: [APPROVE, REQUEST_CHANGES] }
-        comment: { type: string }
+        id: 
+          type: string
+          format: uuid
+          description: Unique action identifier
+        tagId: 
+          type: string
+          format: uuid
+          description: Associated tag ID
+        analystId: 
+          type: string
+          format: uuid
+          description: ID of analyst who performed the action
+        action: 
+          type: string
+          enum: [APPROVE, REQUEST_CHANGES]
+          description: Action taken by analyst
+        comment: 
+          type: string
+          description: Analyst comment
+        createdAt:
+          type: string
+          format: date-time
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email
+        password:
+          type: string
+          description: User password
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT access token
+        role:
+          $ref: '#/components/schemas/Role'
+    CreateGameRequest:
+      type: object
+      required:
+        - date
+        - homeTeam
+        - awayTeam
+      properties:
+        date:
+          type: string
+          format: date-time
+        homeTeam:
+          type: string
+        awayTeam:
+          type: string
+    CreateTagRequest:
+      type: object
+      required:
+        - label
+      properties:
+        label:
+          type: string
+        notes:
+          type: string
+    CreateAnalystActionRequest:
+      type: object
+      required:
+        - action
+      properties:
+        action:
+          type: string
+          enum: [APPROVE, REQUEST_CHANGES]
+        comment:
+          type: string
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
 security:
   - bearerAuth: []
 paths:
   /auth/login:
     post:
-      summary: Login with email/password
+      summary: Login with email and password
+      description: Authenticate user and receive JWT token
+      tags:
+        - Authentication
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              email: "analyst1@refintel.com"
+              password: "analyst123"
       responses:
-        '200': { description: OK }
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /games:
-    get: { summary: List games, responses: { '200': { description: OK } } }
-    post: { summary: Create game, responses: { '201': { description: Created } } }
+    get:
+      summary: List all games
+      description: Retrieve a list of all games, ordered by date (most recent first)
+      tags:
+        - Games
+      responses:
+        '200':
+          description: List of games
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Game'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new game
+      description: Create a new game (Admin only)
+      tags:
+        - Games
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGameRequest'
+      responses:
+        '201':
+          description: Game created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin role required
   /games/{gameId}/events:
-    get: { summary: List events for a game, responses: { '200': { description: OK } } }
+    get:
+      summary: List events for a specific game
+      description: Retrieve all events associated with a game
+      tags:
+        - Events
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Game ID
+      responses:
+        '200':
+          description: List of events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+        '401':
+          description: Unauthorized
   /events/{eventId}/tags:
-    get: { summary: List tags, responses: { '200': { description: OK } } }
-    post: { summary: Create tag, responses: { '201': { description: Created } } }
+    get:
+      summary: List tags for an event
+      description: Retrieve all tags associated with an event
+      tags:
+        - Tags
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Event ID
+      responses:
+        '200':
+          description: List of tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+        '401':
+          description: Unauthorized
+    post:
+      summary: Create a tag for an event
+      description: Create a new tag on an event (Charter/Admin only)
+      tags:
+        - Tags
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Event ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTagRequest'
+      responses:
+        '201':
+          description: Tag created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Charter/Admin role required
   /tags/{tagId}:
-    patch: { summary: Edit tag, responses: { '200': { description: OK } } }
-    delete: { summary: Delete tag, responses: { '204': { description: No Content } } }
+    patch:
+      summary: Edit a tag
+      description: Update tag information (Owner/Admin only)
+      tags:
+        - Tags
+      parameters:
+        - name: tagId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Tag ID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                label:
+                  type: string
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Tag updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+    delete:
+      summary: Delete a tag
+      description: Remove a tag (Owner/Admin only)
+      tags:
+        - Tags
+      parameters:
+        - name: tagId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Tag ID
+      responses:
+        '204':
+          description: Tag deleted successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
   /tags/{tagId}/analyst-actions:
-    post: { summary: Approve or request changes, responses: { '201': { description: Created } } }
+    post:
+      summary: Create analyst action
+      description: Approve or request changes for a tag (Analyst/Admin only)
+      tags:
+        - Analyst Actions
+      parameters:
+        - name: tagId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Tag ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAnalystActionRequest'
+      responses:
+        '201':
+          description: Analyst action created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalystAction'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Analyst/Admin role required
