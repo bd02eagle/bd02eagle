@@ -48,4 +48,10 @@ app.use("/api", tags); // handles /api/events/:eventId/tags and /api/tags/:tagId
 app.use("/api/tags", analystActions); // handles /api/tags/:tagId/analyst-actions
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => log.info(`API listening on ${port}`));
+
+// Only start server if not in test environment
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(port, () => log.info(`API listening on ${port}`));
+}
+
+export default app;
