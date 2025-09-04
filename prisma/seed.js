@@ -7,33 +7,41 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding database...');
 
-  // Create users
-  const adminUser = await prisma.user.create({
-    data: {
+  // Create users (upsert to handle existing data)
+  const adminUser = await prisma.user.upsert({
+    where: { email: 'admin@refintel.com' },
+    update: {},
+    create: {
       email: 'admin@refintel.com',
       password: await bcrypt.hash('admin123', 10),
       role: 'ADMIN',
     },
   });
 
-  const analyst1 = await prisma.user.create({
-    data: {
+  const analyst1 = await prisma.user.upsert({
+    where: { email: 'analyst1@refintel.com' },
+    update: {},
+    create: {
       email: 'analyst1@refintel.com',
       password: await bcrypt.hash('analyst123', 10),
       role: 'ANALYST',
     },
   });
 
-  const analyst2 = await prisma.user.create({
-    data: {
+  const analyst2 = await prisma.user.upsert({
+    where: { email: 'analyst2@refintel.com' },
+    update: {},
+    create: {
       email: 'analyst2@refintel.com',
       password: await bcrypt.hash('analyst123', 10),
       role: 'ANALYST',
     },
   });
 
-  const charter = await prisma.user.create({
-    data: {
+  const charter = await prisma.user.upsert({
+    where: { email: 'charter@refintel.com' },
+    update: {},
+    create: {
       email: 'charter@refintel.com',
       password: await bcrypt.hash('charter123', 10),
       role: 'CHARTER',
