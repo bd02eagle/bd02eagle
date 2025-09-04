@@ -10,6 +10,7 @@ import client from "prom-client";
 
 import { login } from "./auth.js";
 import games from "./routes/games.js";
+import events from "./routes/events.js";
 import tags from "./routes/tags.js";
 import analystActions from "./routes/analyst-actions.js";
 
@@ -44,6 +45,7 @@ app.post("/api/auth/login", login);
 
 // domain routes
 app.use("/api/games", games);
+app.use("/api/events", events);
 app.use("/api", tags); // handles /api/events/:eventId/tags and /api/tags/:tagId
 app.use("/api/tags", analystActions); // handles /api/tags/:tagId/analyst-actions
 
