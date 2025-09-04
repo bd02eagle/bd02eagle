@@ -35,3 +35,12 @@ args = "npm run seed"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm start"
+
+[[workflows.workflow]]
+name = "Start Frontend"
+author = 44371205
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd frontend && node server.js"
