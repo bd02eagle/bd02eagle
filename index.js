@@ -47,6 +47,7 @@ app.post("/api/auth/login", login);
 app.use("/api/games", games);
 app.use("/api/events", events);
 app.use("/api", tags); // handles /api/events/:eventId/tags and /api/tags/:tagId
+app.use("/api/tags", tags); // handles /api/tags and /api/tags/:tagId routes
 app.use("/api/tags", analystActions); // handles /api/tags/:tagId/analyst-actions
 
 const port = process.env.PORT || 3000;

@@ -5,6 +5,27 @@ import { requireAuth } from "../auth.js";
 
 const r = Router();
 
+// get all tags for review management (analyst/admin)
+r.get("/", requireAuth(["ANALYST","ADMIN"]), async (req, res) => {
+  const tags = await prisma.tag.findMany({
+    include: { 
+      analystActions: {
+        include: {
+          analyst: { select: { id: true, email: true, role: true } }
+        }
+      },
+      createdBy: { select: { id: true, email: true, role: true } },
+      event: {
+        include: {
+          game: { select: { id: true, date: true, homeTeam: true, awayTeam: true } }
+        }
+      }
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+  res.json(tags);
+});
+
 // list tags for an event
 r.get("/events/:eventId", requireAuth(["ADMIN","ANALYST","CHARTER"]), async (req, res) => {
   const tags = await prisma.tag.findMany({ 
