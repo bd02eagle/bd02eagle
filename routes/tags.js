@@ -7,7 +7,10 @@ const r = Router();
 
 // list tags for an event
 r.get("/events/:eventId", requireAuth(["ADMIN","ANALYST","CHARTER"]), async (req, res) => {
-  const tags = await prisma.tag.findMany({ where: { eventId: req.params.eventId } });
+  const tags = await prisma.tag.findMany({ 
+    where: { eventId: req.params.eventId },
+    include: { analystActions: true, createdBy: { select: { id: true, email: true, role: true } } }
+  });
   res.json(tags);
 });
 
@@ -30,6 +33,20 @@ r.patch("/:tagId", requireAuth(["CHARTER","ADMIN"]), async (req, res) => {
 r.delete("/:tagId", requireAuth(["CHARTER","ADMIN"]), async (req, res) => {
   await prisma.tag.delete({ where: { id: req.params.tagId } });
   res.status(204).end();
+});
+
+// create analyst action on a tag (analyst/admin)
+r.post("/:tagId/analyst-actions", requireAuth(["ANALYST","ADMIN"]), async (req, res) => {
+  const { action, comment } = req.body || {};
+  const analystAction = await prisma.analystAction.create({
+    data: { 
+      tagId: req.params.tagId, 
+      analystId: req.user.sub, 
+      action, 
+      comment 
+    }
+  });
+  res.status(201).json(analystAction);
 });
 
 export default r;

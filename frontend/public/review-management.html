@@ -1,0 +1,168 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Inter&display=swap" rel="stylesheet" />
+  <link href="./css/review-management.css" rel="stylesheet" />
+  <title>RefIntel - Review Management</title>
+</head>
+<body>
+  <div class="v1_457">
+    <div class="v1_458">
+      <div class="v1_459">
+        <!-- Sidebar -->
+        <div class="v1_460">
+          <div class="v1_462">
+            <span class="v1_468">RefIntel</span>
+          </div>
+          <div class="v1_463">
+            <span class="v1_470">My Games</span>
+            <div class="v1_471">
+              <div class="v1_472">
+                <div class="v1_473"></div>
+              </div>
+            </div>
+            <span class="v1_475">Evaluation Workspace</span>
+            <div class="v1_476">
+              <div class="v1_477">
+                <div class="v1_478"></div>
+              </div>
+            </div>
+            <span class="v1_480" style="color: #60A5FA;">Review Management</span>
+            <div class="v1_481">
+              <div class="v1_482">
+                <div class="v1_483"></div>
+              </div>
+            </div>
+            <span class="v1_486">Settings</span>
+            <div class="v1_487">
+              <div class="v1_488">
+                <div class="v1_489"></div>
+              </div>
+            </div>
+          </div>
+          <div class="v1_464">
+            <div class="v1_490">
+              <div class="v1_498"></div>
+              <div class="v1_499">
+                <span class="v1_514">Ref Analyst 1</span>
+                <span class="v1_516">RefIntel Analyst</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="v1_461">
+          <!-- Header -->
+          <div class="v1_465">
+            <span class="v1_491">Review Management</span>
+          </div>
+
+          <!-- Stats Cards -->
+          <div class="v1_466">
+            <div class="v1_492">
+              <div class="v1_500">
+                <span class="v1_517">Pending Reviews</span>
+                <span class="v1_518" id="pending-count">0</span>
+              </div>
+            </div>
+            <div class="v1_493">
+              <div class="v1_501">
+                <span class="v1_519">Approved Today</span>
+                <span class="v1_520" id="approved-count">0</span>
+              </div>
+            </div>
+            <div class="v1_494">
+              <div class="v1_502">
+                <span class="v1_521">Changes Requested</span>
+                <span class="v1_522" id="changes-count">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="v1_467">
+            <div class="v1_495">
+              <span class="v1_503">Filter Tags Awaiting Review</span>
+              <div class="v1_504">
+                <input type="text" id="search-input" placeholder="Search by game, event, or tag label..." class="search-input">
+                <select id="status-filter" class="filter-select">
+                  <option value="all">All Statuses</option>
+                  <option value="pending">Pending Review</option>
+                  <option value="approved">Approved</option>
+                  <option value="changes_requested">Changes Requested</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tags Table -->
+          <div class="v1_496">
+            <div class="v1_505">
+              <div class="v1_523">
+                <div class="v1_524">
+                  <span class="v1_525">Tag Details</span>
+                </div>
+                <div class="v1_526">
+                  <span class="v1_527">Game</span>
+                </div>
+                <div class="v1_528">
+                  <span class="v1_529">Event</span>
+                </div>
+                <div class="v1_530">
+                  <span class="v1_531">Created By</span>
+                </div>
+                <div class="v1_532">
+                  <span class="v1_533">Status</span>
+                </div>
+                <div class="v1_534">
+                  <span class="v1_535">Actions</span>
+                </div>
+              </div>
+            </div>
+            <div class="v1_506" id="tags-container">
+              <!-- Tags will be loaded here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Review Modal -->
+  <div id="review-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-title">Review Tag</h3>
+        <span class="close-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div class="tag-details">
+          <h4>Tag Information</h4>
+          <p><strong>Label:</strong> <span id="modal-label"></span></p>
+          <p><strong>Notes:</strong> <span id="modal-notes"></span></p>
+          <p><strong>Created:</strong> <span id="modal-created"></span></p>
+        </div>
+        <div class="action-section">
+          <h4>Analyst Action</h4>
+          <div class="action-buttons">
+            <button id="approve-btn" class="action-btn approve">Approve Tag</button>
+            <button id="request-changes-btn" class="action-btn request-changes">Request Changes</button>
+          </div>
+          <div class="comment-section">
+            <label for="analyst-comment">Comment (optional):</label>
+            <textarea id="analyst-comment" placeholder="Add any comments about this tag..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="submit-review" class="submit-btn">Submit Review</button>
+        <button id="cancel-review" class="cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./js/review-management.js"></script>
+</body>
+</html>

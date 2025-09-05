@@ -24,6 +24,11 @@ app.get('/evaluation', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'evaluation.html'));
 });
 
+// Serve the review management page
+app.get('/review-management', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'review-management.html'));
+});
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Frontend server running on http://0.0.0.0:${PORT}`);
 });
