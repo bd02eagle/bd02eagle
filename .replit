@@ -25,7 +25,7 @@ externalPort = 5000
 expertMode = true
 
 [workflows]
-runButton = "Start Server"
+runButton = "Start API Server"
 
 [[workflows.workflow]]
 name = "Start Server"
@@ -48,3 +48,12 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd frontend && npm install && npm start"
+
+[[workflows.workflow]]
+name = "Start API Server"
+author = 44371205
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm start"
