@@ -54,7 +54,7 @@ const port = process.env.PORT || 3000;
 
 // Only start server if not in test environment
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(port, () => log.info(`API listening on ${port}`));
+  app.listen(port, '0.0.0.0', () => log.info(`API listening on ${port}`));
 }
 
 export default app;
