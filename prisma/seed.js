@@ -25,6 +25,9 @@ async function main() {
       email: 'analyst1@refintel.com',
       password: await bcrypt.hash('analyst123', 10),
       role: 'ANALYST',
+      firstName: 'Sarah',
+      lastName: 'Johnson',
+      profilePicture: 'https://via.placeholder.com/150?text=SJ'
     },
   });
 
@@ -35,6 +38,9 @@ async function main() {
       email: 'analyst2@refintel.com',
       password: await bcrypt.hash('analyst123', 10),
       role: 'ANALYST',
+      firstName: 'Michael',
+      lastName: 'Chen',
+      profilePicture: 'https://via.placeholder.com/150?text=MC'
     },
   });
 
@@ -45,23 +51,64 @@ async function main() {
       email: 'charter@refintel.com',
       password: await bcrypt.hash('charter123', 10),
       role: 'CHARTER',
+      firstName: 'David',
+      lastName: 'Rodriguez',
+      profilePicture: 'https://via.placeholder.com/150?text=DR'
     },
   });
 
-  // Create games
+  // Create teams
+  const teams = [
+    { name: 'Los Angeles Lakers', shortName: 'LAL', primaryColor: '#552583', secondaryColor: '#FDB927' },
+    { name: 'Boston Celtics', shortName: 'BOS', primaryColor: '#007A33', secondaryColor: '#BA9653' },
+    { name: 'Miami Heat', shortName: 'MIA', primaryColor: '#98002E', secondaryColor: '#F9A01B' },
+    { name: 'Golden State Warriors', shortName: 'GSW', primaryColor: '#1D428A', secondaryColor: '#FFC72C' },
+    { name: 'Chicago Bulls', shortName: 'CHI', primaryColor: '#CE1141', secondaryColor: '#000000' },
+    { name: 'San Antonio Spurs', shortName: 'SAS', primaryColor: '#C4CED4', secondaryColor: '#000000' }
+  ];
+
+  const createdTeams = [];
+  for (const team of teams) {
+    const createdTeam = await prisma.team.create({
+      data: {
+        name: team.name,
+        shortName: team.shortName,
+        primaryColor: team.primaryColor,
+        secondaryColor: team.secondaryColor,
+        logo: `https://via.placeholder.com/100?text=${team.shortName}` // Placeholder logo
+      }
+    });
+    createdTeams.push(createdTeam);
+  }
+
+  // Create games with enhanced data
   const game1 = await prisma.game.create({
     data: {
       date: new Date('2025-01-15T19:00:00Z'),
-      homeTeam: 'Texas',
-      awayTeam: 'SC',
+      homeTeamId: createdTeams[0].id, // Lakers
+      awayTeamId: createdTeams[5].id,  // Spurs
+      status: 'COMPLETED',
+      homeScore: 118,
+      awayScore: 102,
+      venue: 'Crypto.com Arena',
+      season: '2024-25',
+      gameType: 'Regular Season',
+      thumbnail: 'https://via.placeholder.com/300x200?text=LAL+vs+SAS'
     },
   });
 
   const game2 = await prisma.game.create({
     data: {
-      date: new Date('2024-01-16T20:30:00Z'),
-      homeTeam: 'Celtics',
-      awayTeam: 'Heat',
+      date: new Date('2025-01-16T20:30:00Z'),
+      homeTeamId: createdTeams[1].id, // Celtics
+      awayTeamId: createdTeams[2].id,  // Heat
+      status: 'COMPLETED',
+      homeScore: 125,
+      awayScore: 119,
+      venue: 'TD Garden',
+      season: '2024-25',
+      gameType: 'Regular Season',
+      thumbnail: 'https://via.placeholder.com/300x200?text=BOS+vs+MIA'
     },
   });
 

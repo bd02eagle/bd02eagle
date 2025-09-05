@@ -6,7 +6,13 @@ import { requireAuth } from "../auth.js";
 const r = Router();
 
 r.get("/", requireAuth(["ADMIN","ANALYST","CHARTER"]), async (_req, res) => {
-  const games = await prisma.game.findMany({ orderBy: { date: "desc" } });
+  const games = await prisma.game.findMany({ 
+    orderBy: { date: "desc" },
+    include: {
+      homeTeam: true,
+      awayTeam: true
+    }
+  });
   res.json(games);
 });
 
