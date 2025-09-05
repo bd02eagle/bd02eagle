@@ -114,8 +114,11 @@ async function loadGameData() {
     const games = await gamesResponse.json();
 
     if (games.length > 0) {
-      // Load events for the first game (SC vs TX)
-      const game = games.find(g => g.homeTeam === 'Texas' && g.awayTeam === 'SC') || games[0];
+      // Load events for the first game (SC vs UConn)
+      const game = games.find(g => 
+        (g.homeTeam?.shortName === 'SC' && g.awayTeam?.shortName === 'CONN') ||
+        (g.homeTeam?.name?.includes('South Carolina') && g.awayTeam?.name?.includes('UConn'))
+      ) || games[0];
       await loadEvents(game.id);
     }
   } catch (error) {

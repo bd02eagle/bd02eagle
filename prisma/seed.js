@@ -57,14 +57,14 @@ async function main() {
     },
   });
 
-  // Create teams
+  // Create teams - Women's College Basketball
   const teams = [
-    { name: 'Los Angeles Lakers', shortName: 'LAL', primaryColor: '#552583', secondaryColor: '#FDB927' },
-    { name: 'Boston Celtics', shortName: 'BOS', primaryColor: '#007A33', secondaryColor: '#BA9653' },
-    { name: 'Miami Heat', shortName: 'MIA', primaryColor: '#98002E', secondaryColor: '#F9A01B' },
-    { name: 'Golden State Warriors', shortName: 'GSW', primaryColor: '#1D428A', secondaryColor: '#FFC72C' },
-    { name: 'Chicago Bulls', shortName: 'CHI', primaryColor: '#CE1141', secondaryColor: '#000000' },
-    { name: 'San Antonio Spurs', shortName: 'SAS', primaryColor: '#C4CED4', secondaryColor: '#000000' }
+    { name: 'UConn Huskies', shortName: 'CONN', primaryColor: '#000E2F', secondaryColor: '#C8102E' },
+    { name: 'South Carolina Gamecocks', shortName: 'SC', primaryColor: '#73000A', secondaryColor: '#000000' },
+    { name: 'Stanford Cardinal', shortName: 'STAN', primaryColor: '#8C1515', secondaryColor: '#FFFFFF' },
+    { name: 'NC State Wolfpack', shortName: 'NCST', primaryColor: '#CC0000', secondaryColor: '#000000' },
+    { name: 'LSU Tigers', shortName: 'LSU', primaryColor: '#461D7C', secondaryColor: '#FDD023' },
+    { name: 'Iowa Hawkeyes', shortName: 'IOWA', primaryColor: '#FFCD00', secondaryColor: '#000000' }
   ];
 
   const createdTeams = [];
@@ -85,30 +85,30 @@ async function main() {
   const game1 = await prisma.game.create({
     data: {
       date: new Date('2025-01-15T19:00:00Z'),
-      homeTeamId: createdTeams[0].id, // Lakers
-      awayTeamId: createdTeams[5].id,  // Spurs
+      homeTeamId: createdTeams[1].id, // South Carolina
+      awayTeamId: createdTeams[0].id,  // UConn
       status: 'COMPLETED',
-      homeScore: 118,
-      awayScore: 102,
-      venue: 'Crypto.com Arena',
+      homeScore: 78,
+      awayScore: 72,
+      venue: 'Colonial Life Arena',
       season: '2024-25',
       gameType: 'Regular Season',
-      thumbnail: 'https://via.placeholder.com/300x200?text=LAL+vs+SAS'
+      thumbnail: 'https://via.placeholder.com/300x200?text=SC+vs+CONN'
     },
   });
 
   const game2 = await prisma.game.create({
     data: {
       date: new Date('2025-01-16T20:30:00Z'),
-      homeTeamId: createdTeams[1].id, // Celtics
-      awayTeamId: createdTeams[2].id,  // Heat
+      homeTeamId: createdTeams[2].id, // Stanford
+      awayTeamId: createdTeams[4].id,  // LSU
       status: 'COMPLETED',
-      homeScore: 125,
-      awayScore: 119,
-      venue: 'TD Garden',
+      homeScore: 82,
+      awayScore: 79,
+      venue: 'Maples Pavilion',
       season: '2024-25',
       gameType: 'Regular Season',
-      thumbnail: 'https://via.placeholder.com/300x200?text=BOS+vs+MIA'
+      thumbnail: 'https://via.placeholder.com/300x200?text=STAN+vs+LSU'
     },
   });
 
