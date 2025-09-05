@@ -51,6 +51,11 @@ function init() {
 
     // Set active navigation state based on current page
     setActiveNavigation();
+    
+    // Load game data for evaluation workspace
+    if (window.location.pathname.includes('evaluation') || window.location.pathname === '/') {
+        loadGameData();
+    }
 }
 
 function setActiveNavigation() {
@@ -97,9 +102,38 @@ async function login() {
   }
 }
 
+// Load events for a specific game
+async function loadEvents(gameId) {
+  try {
+    const eventsResponse = await fetch(`${API_BASE}/games/${gameId}/events`, {
+      headers: {
+        'Authorization': `Bearer ${authToken}`
+      }
+    });
+
+    if (!eventsResponse.ok) {
+      throw new Error('Failed to fetch events');
+    }
+
+    const events = await eventsResponse.json();
+    console.log('Loaded events:', events);
+    
+    // Here you can update the UI with the events
+    // For now, just log them
+    return events;
+  } catch (error) {
+    console.error('Error loading events:', error);
+  }
+}
+
 // Load game data and events
 async function loadGameData() {
   try {
+    // First ensure we're logged in
+    if (!authToken || authToken === 'demo-token') {
+      await login();
+    }
+
     // Get games
     const gamesResponse = await fetch(`${API_BASE}/games`, {
       headers: {
@@ -108,10 +142,12 @@ async function loadGameData() {
     });
 
     if (!gamesResponse.ok) {
+      console.error('Games request failed:', gamesResponse.status, gamesResponse.statusText);
       throw new Error('Failed to fetch games');
     }
 
     const games = await gamesResponse.json();
+    console.log('Loaded games:', games);
 
     if (games.length > 0) {
       // Load events for the first game (SC vs UConn)
@@ -119,6 +155,8 @@ async function loadGameData() {
         (g.homeTeam?.shortName === 'SC' && g.awayTeam?.shortName === 'CONN') ||
         (g.homeTeam?.name?.includes('South Carolina') && g.awayTeam?.name?.includes('UConn'))
       ) || games[0];
+      
+      console.log('Selected game:', game);
       await loadEvents(game.id);
     }
   } catch (error) {

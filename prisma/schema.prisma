@@ -1,38 +1,17 @@
 
-<old_str>enum Role {
-  ADMIN
-  ANALYST
-  CHARTER
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
 }
 
-enum AnalystDecision {
-  APPROVE
-  REQUEST_CHANGES
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  role      Role
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  tags           Tag[]           @relation("TagCreatedBy")
-  analystActions AnalystAction[]
-}
-
-model Game {
-  id        String   @id @default(uuid())
-  date      DateTime
-  homeTeam  String
-  awayTeam  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  events Event[]
-}</old_str>
-<new_str>enum Role {
+enum Role {
   ADMIN
   ANALYST
   CHARTER
@@ -98,4 +77,43 @@ model Game {
   updatedAt DateTime  @updatedAt
 
   events Event[]
-}</old_str>
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  gameId      String
+  timestampMs Int
+  videoUrl    String
+  type        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  game Game  @relation(fields: [gameId], references: [id])
+  tags Tag[]
+}
+
+model Tag {
+  id          String   @id @default(uuid())
+  eventId     String
+  createdById String
+  label       String
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  event          Event           @relation(fields: [eventId], references: [id])
+  createdBy      User            @relation("TagCreatedBy", fields: [createdById], references: [id])
+  analystActions AnalystAction[]
+}
+
+model AnalystAction {
+  id        String          @id @default(uuid())
+  tagId     String
+  analystId String
+  action    AnalystDecision
+  comment   String?
+  createdAt DateTime        @default(now())
+
+  tag     Tag  @relation(fields: [tagId], references: [id])
+  analyst User @relation(fields: [analystId], references: [id])
+}
