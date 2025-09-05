@@ -94,11 +94,14 @@ async function login() {
       authToken = data.token;
       localStorage.setItem('authToken', authToken);
       console.log('Logged in successfully');
+      return true;
     } else {
-      console.error('Login failed');
+      console.error('Login failed:', response.status, response.statusText);
+      return false;
     }
   } catch (error) {
     console.error('Login error:', error);
+    return false;
   }
 }
 
@@ -131,7 +134,11 @@ async function loadGameData() {
   try {
     // First ensure we're logged in
     if (!authToken || authToken === 'demo-token') {
-      await login();
+      const loginSuccess = await login();
+      if (!loginSuccess) {
+        displayError('Failed to authenticate');
+        return;
+      }
     }
 
     // Get games
@@ -143,6 +150,16 @@ async function loadGameData() {
 
     if (!gamesResponse.ok) {
       console.error('Games request failed:', gamesResponse.status, gamesResponse.statusText);
+      
+      // If unauthorized, try to login again
+      if (gamesResponse.status === 401) {
+        const loginSuccess = await login();
+        if (loginSuccess) {
+          // Retry the request
+          return await loadGameData();
+        }
+      }
+      
       throw new Error('Failed to fetch games');
     }
 
@@ -158,6 +175,8 @@ async function loadGameData() {
       
       console.log('Selected game:', game);
       await loadEvents(game.id);
+    } else {
+      displayError('No games found');
     }
   } catch (error) {
     console.error('Error loading games:', error);
