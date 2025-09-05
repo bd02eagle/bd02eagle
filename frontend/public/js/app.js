@@ -133,7 +133,7 @@ function displayEvents(events) {
     }
     
     return `
-      <div class="event-item">
+      <div class="event-item" onclick="openEvaluationWorkspace('${event.id}')">
         <div class="event-info">
           <h3>${event.type} - ${formatTimestamp(event.timestampMs)}</h3>
           <p>${event.tags.length} tag(s) • ${event.tags.map(tag => tag.label).join(', ')}</p>
@@ -144,6 +144,11 @@ function displayEvents(events) {
       </div>
     `;
   }).join('');
+}
+
+// Navigate to evaluation workspace
+function openEvaluationWorkspace(eventId) {
+  window.location.href = `/evaluation?eventId=${eventId}`;
 }
 
 // Helper function to format timestamp

@@ -1,0 +1,293 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Inter&display=swap" rel="stylesheet" />
+  <link href="./css/evaluation.css" rel="stylesheet" />
+  <title>RefIntel - Event Evaluation</title>
+</head>
+<body>
+  <div class="v1_252">
+    <div class="v1_253">
+      <div class="v1_254">
+        <!-- Top Header -->
+        <div class="v1_255">
+          <div class="v1_258">
+            <span class="v1_265">RefIntel</span>
+            <div class="v1_266">
+              <div class="v1_267">
+                <div class="v1_268"></div>
+              </div>
+            </div>
+            <span class="v1_270">Evaluation Workspace</span>
+          </div>
+          <div class="v1_259">
+            <div class="v1_271">
+              <div class="v1_286">
+                <div class="v1_287">
+                  <div class="v1_288"></div>
+                </div>
+              </div>
+            </div>
+            <div class="v1_272">
+              <div class="v1_289">
+                <div class="v1_290">
+                  <div class="v1_291"></div>
+                </div>
+              </div>
+            </div>
+            <div class="v1_273"></div>
+            <div class="v1_274">
+              <div class="v1_292"></div>
+              <div class="v1_293">
+                <span class="v1_326">Ref Analyst 1</span>
+                <span class="v1_328">RefIntel</span>
+              </div>
+              <div class="v1_294">
+                <div class="v1_295">
+                  <div class="v1_296"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="v1_256">
+          <!-- Left Panel - Tag Creation Form -->
+          <div class="v1_260">
+            <div class="v1_275">
+              <span class="v1_298" id="event-number">EVENT #100174</span>
+              <span class="v1_300" id="event-type">Shooting Foul</span>
+            </div>
+            
+            <div class="v1_276">
+              <!-- Infraction Type Section -->
+              <div class="v1_301">
+                <div class="v1_329">
+                  <span class="v1_358">Infraction Type</span>
+                  <div class="v1_359">
+                    <div class="v1_360">
+                      <div class="v1_361"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="v1_330">
+                  <div class="v1_362 infraction-btn" data-value="turnover">
+                    <span class="v1_391">Turnover</span>
+                  </div>
+                  <div class="v1_363 infraction-btn active" data-value="foul">
+                    <span class="v1_393">Foul</span>
+                  </div>
+                  <div class="v1_364 infraction-btn" data-value="violation">
+                    <span class="v1_395">Violation</span>
+                  </div>
+                  <div class="v1_365 infraction-btn" data-value="stoppage">
+                    <span class="v1_397">Stoppage</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Foul Type Section -->
+              <div class="v1_302">
+                <div class="v1_331">
+                  <span class="v1_367">Foul Type</span>
+                </div>
+                <div class="v1_332">
+                  <div class="v1_368 foul-btn" data-value="away-from-play">
+                    <span class="v1_399">Away from Play</span>
+                  </div>
+                  <div class="v1_369 foul-btn active" data-value="shooting">
+                    <span class="v1_401">Shooting</span>
+                  </div>
+                  <div class="v1_370 foul-btn" data-value="offensive">
+                    <span class="v1_403">Offensive</span>
+                  </div>
+                  <div class="v1_371 foul-btn" data-value="loose-ball">
+                    <span class="v1_405">Loose Ball</span>
+                  </div>
+                  <div class="v1_372 foul-btn" data-value="technical">
+                    <span class="v1_407">Technical</span>
+                  </div>
+                  <div class="v1_373 foul-btn" data-value="flagrant">
+                    <span class="v1_409">Flagrant</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Call Correctness Section -->
+              <div class="v1_303">
+                <div class="v1_333">
+                  <span class="v1_375">Call Correctness</span>
+                </div>
+                <div class="v1_334">
+                  <div class="v1_376 correctness-btn active" data-value="correct">
+                    <span class="v1_411">Correct Call</span>
+                  </div>
+                  <div class="v1_377 correctness-btn" data-value="incorrect">
+                    <span class="v1_413">Incorrect Call</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Referee Section -->
+              <div class="v1_304">
+                <div class="v1_335">
+                  <span class="v1_379">Referee</span>
+                </div>
+                <div class="v1_336">
+                  <span class="v1_337" id="referee-name">John Smith (Crew Chief)</span>
+                  <div class="v1_339">
+                    <div class="v1_340"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Notes Section -->
+              <div class="v1_305">
+                <div class="v1_341">
+                  <span class="v1_381">Notes</span>
+                </div>
+                <div class="v1_342">
+                  <textarea class="v1_383" id="tag-notes" placeholder="Add any relevant details about the play..."></textarea>
+                </div>
+              </div>
+
+              <!-- Supervisor Review Checkbox -->
+              <div class="v1_306">
+                <input type="checkbox" class="v1_343" id="supervisor-review">
+                <div class="v1_344">
+                  <label for="supervisor-review" class="v1_385">Flag this event for supervisor review</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Save Button -->
+            <div class="v1_277">
+              <button class="v1_307" id="save-tag-btn">
+                <span class="v1_346">Save & Advance to Next Event</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Right Panel - Video Player -->
+          <div class="v1_261">
+            <div class="v1_278">
+              <div class="v1_308">
+                <video id="event-video" class="video-player" controls>
+                  <source src="" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video>
+                
+                <!-- Video Progress Bar -->
+                <div class="v1_347">
+                  <div class="v1_386">
+                    <div class="v1_414"></div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Video Controls -->
+              <div class="v1_309">
+                <div class="v1_348">
+                  <div class="v1_387">
+                    <div class="v1_415">
+                      <div class="v1_426">
+                        <div class="v1_427">
+                          <div class="v1_428"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <span class="v1_417" id="video-time">00:47 / 02:30</span>
+                  </div>
+                  
+                  <!-- Trim Controls -->
+                  <div class="v1_388">
+                    <span class="v1_419">Trim Clip:</span>
+                    <div class="v1_420" data-trim="-5">
+                      <span class="v1_430">-5s</span>
+                    </div>
+                    <div class="v1_421" data-trim="-1">
+                      <span class="v1_432">-1s</span>
+                    </div>
+                    <div class="v1_422" data-trim="+1">
+                      <span class="v1_434">+1s</span>
+                    </div>
+                    <div class="v1_423" data-trim="+5">
+                      <span class="v1_436">+5s</span>
+                    </div>
+                  </div>
+                  
+                  <!-- Volume Controls -->
+                  <div class="v1_389">
+                    <div class="v1_424">
+                      <div class="v1_437">
+                        <div class="v1_438">
+                          <div class="v1_439"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="v1_425">
+                      <div class="v1_440">
+                        <div class="v1_441">
+                          <div class="v1_442"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Game Info Bar -->
+        <div class="v1_257">
+          <div class="v1_262">
+            <div class="v1_279">
+              <span class="v1_311" id="game-title">SC vs. TX</span>
+            </div>
+            <div class="v1_280">
+              <div class="v1_312">
+                <span class="v1_350">LIVE</span>
+              </div>
+              <span class="v1_314" id="game-time">Q4 | 04:39.5</span>
+            </div>
+            <div class="v1_281">
+              <span class="v1_316">Possession:</span>
+              <span class="v1_318" id="possession-team">South Carolina</span>
+            </div>
+          </div>
+          
+          <!-- Navigation Controls -->
+          <div class="v1_263">
+            <span class="v1_283" id="event-counter">Event 25 of 214</span>
+            <div class="v1_284" id="prev-event-btn">
+              <div class="v1_319">
+                <div class="v1_351">
+                  <div class="v1_352">
+                    <div class="v1_353"></div>
+                  </div>
+                </div>
+              </div>
+              <span class="v1_321">Prev</span>
+            </div>
+            <div class="v1_285" id="next-event-btn">
+              <span class="v1_323">Next</span>
+              <div class="v1_324">
+                <div class="v1_354">
+                  <div class="v1_355">
+                    <div class="v1_356"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="./js/evaluation.js"></script>
+</body>
+</html>
