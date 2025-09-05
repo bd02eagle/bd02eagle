@@ -69,8 +69,10 @@ async function main() {
 
   const createdTeams = [];
   for (const team of teams) {
-    const createdTeam = await prisma.team.create({
-      data: {
+    const createdTeam = await prisma.team.upsert({
+      where: { name: team.name },
+      update: {},
+      create: {
         name: team.name,
         shortName: team.shortName,
         primaryColor: team.primaryColor,
