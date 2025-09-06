@@ -69,19 +69,11 @@ args = "npm run seed"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "echo \"Starting backend server...\""
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
 args = "npm start &"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "sleep 5"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "echo \"Backend started, now starting frontend...\""
+args = "sleep 3"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
