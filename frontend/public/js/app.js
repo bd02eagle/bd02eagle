@@ -52,7 +52,7 @@ function initNavigation() {
     // Add click handlers to navigation items
     const navItems = [
         { selector: '.v1_23', url: '/my-games.html' },
-        { selector: '.v1_44, .v1_21, .v1_28', url: '/evaluation.html' },
+        { selector: '.v1_44, .v1_21, .v1_28', url: '/index.html' },
         { selector: '.v1_33', url: '/review-management.html' },
         { selector: '.v1_516', url: '/exports.html' }
     ];

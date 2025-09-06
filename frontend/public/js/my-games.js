@@ -28,7 +28,7 @@ function setupNavigation() {
   
   // Add click handlers
   document.querySelector('.v1_28').addEventListener('click', function() {
-    window.location.href = '/evaluation.html';
+    window.location.href = '/index.html';
   });
   
   document.querySelector('.v1_33').addEventListener('click', function() {
