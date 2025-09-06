@@ -1,4 +1,3 @@
-
 const API_BASE = '/api';
 let currentEventId = null;
 let currentGameId = null;
@@ -22,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.location.href = '/';
     return;
   }
-  
+
   initializeEventListeners();
   loadCurrentGame();
 });
@@ -32,32 +31,32 @@ function initializeEventListeners() {
   document.querySelectorAll('.infraction-btn').forEach(btn => {
     btn.addEventListener('click', () => selectInfraction(btn.dataset.value));
   });
-  
+
   document.querySelectorAll('.foul-btn').forEach(btn => {
     btn.addEventListener('click', () => selectFoulType(btn.dataset.value));
   });
-  
+
   document.querySelectorAll('.correctness-btn').forEach(btn => {
     btn.addEventListener('click', () => selectCorrectness(btn.dataset.value));
   });
-  
+
   // Navigation controls
   document.getElementById('prev-event-btn').addEventListener('click', () => navigateEvent(-1));
   document.getElementById('next-event-btn').addEventListener('click', () => navigateEvent(1));
-  
+
   // Save button
   document.getElementById('save-tag-btn').addEventListener('click', saveTag);
-  
+
   // Video trim controls
   document.querySelectorAll('[data-trim]').forEach(btn => {
     btn.addEventListener('click', () => trimVideo(btn.dataset.trim));
   });
-  
+
   // Notes textarea
   document.getElementById('tag-notes').addEventListener('input', (e) => {
     formData.notes = e.target.value;
   });
-  
+
   // Supervisor review checkbox
   document.getElementById('supervisor-review').addEventListener('change', (e) => {
     formData.supervisorReview = e.target.checked;
@@ -95,37 +94,37 @@ async function loadCurrentGame() {
         'Authorization': `Bearer ${authToken}`
       }
     });
-    
+
     if (!gamesResponse.ok) {
       throw new Error('Failed to fetch games');
     }
-    
+
     const games = await gamesResponse.json();
     if (games.length === 0) {
       displayError('No games found');
       return;
     }
-    
+
     // Load the most recent game (first in the ordered list)
     const game = games[0];
-    
+
     currentGameId = game.id;
-    
+
     // Update game info with proper team names
     document.getElementById('game-title').textContent = `${game.homeTeam.shortName} vs. ${game.awayTeam.shortName}`;
-    
+
     // Update game status and time
     const gameTimeElement = document.getElementById('game-time');
     if (gameTimeElement) {
       gameTimeElement.textContent = 'Q4 | 04:39.5';
     }
-    
+
     // Update possession
     const possessionElement = document.getElementById('possession-team');
     if (possessionElement) {
       possessionElement.textContent = game.homeTeam.name;
     }
-    
+
     await loadEvents(game.id);
   } catch (error) {
     console.error('Error loading game:', error);
@@ -140,18 +139,18 @@ async function loadEvents(gameId) {
         'Authorization': `Bearer ${authToken}`
       }
     });
-    
+
     if (!eventsResponse.ok) {
       throw new Error('Failed to fetch events');
     }
-    
+
     events = await eventsResponse.json();
-    
+
     if (events.length === 0) {
       displayError('No events found for this game');
       return;
     }
-    
+
     // Load tags for each event with better error handling
     const tagPromises = events.map(async (event, index) => {
       try {
@@ -160,7 +159,7 @@ async function loadEvents(gameId) {
             'Authorization': `Bearer ${authToken}`
           }
         });
-        
+
         if (tagsResponse.ok) {
           events[index].tags = await tagsResponse.json();
         } else {
@@ -172,9 +171,9 @@ async function loadEvents(gameId) {
         events[index].tags = [];
       }
     });
-    
+
     await Promise.all(tagPromises);
-    
+
     currentEventIndex = 0;
     loadCurrentEvent();
   } catch (error) {
@@ -185,16 +184,16 @@ async function loadEvents(gameId) {
 
 function loadCurrentEvent() {
   if (!events.length || currentEventIndex < 0 || currentEventIndex >= events.length) return;
-  
+
   const event = events[currentEventIndex];
   currentEventId = event.id;
-  
+
   // Update event info with more descriptive display
   const eventNumber = String(currentEventIndex + 1).padStart(3, '0');
   document.getElementById('event-number').textContent = `EVENT #${eventNumber}`;
   document.getElementById('event-type').textContent = event.type;
   document.getElementById('event-counter').textContent = `Event ${currentEventIndex + 1} of ${events.length}`;
-  
+
   // Load video with improved error handling
   const video = document.getElementById('event-video');
   if (event.videoUrl) {
@@ -203,13 +202,13 @@ function loadCurrentEvent() {
     video.oncanplay = null;
     video.onerror = null;
     video.onloadeddata = null;
-    
+
     // Set up new event listeners
     video.onloadstart = () => {
       console.log('Loading video:', event.videoUrl);
       showVideoStatus('Loading video...');
     };
-    
+
     video.oncanplay = () => {
       console.log('Video ready to play');
       showVideoStatus('Video ready');
@@ -219,17 +218,17 @@ function loadCurrentEvent() {
         showVideoStatus('Click to play video');
       });
     };
-    
+
     video.onerror = (e) => {
       console.error('Video error:', e, 'URL:', event.videoUrl);
       showVideoStatus('Video failed to load - trying backup...');
-      
+
       // Try backup video URLs if primary fails
       const backupUrls = [
         'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
         'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4'
       ];
-      
+
       const currentBackup = backupUrls.find(url => url !== event.videoUrl);
       if (currentBackup) {
         console.log('Trying backup URL:', currentBackup);
@@ -239,21 +238,21 @@ function loadCurrentEvent() {
         showVideoStatus('Video unavailable');
       }
     };
-    
+
     video.onloadeddata = () => {
       console.log('Video data loaded successfully');
       updateVideoTime();
     };
-    
+
     // Set CORS attributes for better compatibility
     video.crossOrigin = 'anonymous';
     video.preload = 'metadata';
-    
+
     // Clear current source first to avoid invalid state
     video.pause();
     video.removeAttribute('src');
     video.load();
-    
+
     // Set new source after clearing
     setTimeout(() => {
       video.src = event.videoUrl;
@@ -262,10 +261,10 @@ function loadCurrentEvent() {
   } else {
     showVideoStatus('No video available');
   }
-  
+
   // Load existing tags if any
   loadExistingTags(event);
-  
+
   // Update navigation buttons
   updateNavigationButtons();
 }
@@ -273,13 +272,13 @@ function loadCurrentEvent() {
 function loadExistingTags(event) {
   if (event.tags && event.tags.length > 0) {
     const tag = event.tags[0]; // Load first tag
-    
+
     // Update form with existing tag data
     if (tag.label.includes('foul')) {
       formData.infractionType = 'foul';
       selectInfraction('foul');
     }
-    
+
     if (tag.notes) {
       formData.notes = tag.notes;
       document.getElementById('tag-notes').value = tag.notes;
@@ -299,7 +298,7 @@ function resetForm() {
     notes: '',
     supervisorReview: false
   };
-  
+
   // Reset UI
   selectInfraction('foul');
   selectFoulType('shooting');
@@ -311,14 +310,14 @@ function resetForm() {
 function updateNavigationButtons() {
   const prevBtn = document.getElementById('prev-event-btn');
   const nextBtn = document.getElementById('next-event-btn');
-  
+
   prevBtn.style.opacity = currentEventIndex === 0 ? '0.5' : '1';
   nextBtn.style.opacity = currentEventIndex === events.length - 1 ? '0.5' : '1';
 }
 
 function navigateEvent(direction) {
   const newIndex = currentEventIndex + direction;
-  
+
   if (newIndex >= 0 && newIndex < events.length) {
     currentEventIndex = newIndex;
     loadCurrentEvent();
@@ -327,21 +326,21 @@ function navigateEvent(direction) {
 
 async function saveTag() {
   if (!currentEventId) return;
-  
+
   const saveButton = document.getElementById('save-tag-btn');
   const originalText = saveButton.textContent;
-  
+
   try {
     // Show saving state
     saveButton.textContent = 'Saving...';
     saveButton.disabled = true;
     saveButton.style.opacity = '0.7';
-    
+
     const tagData = {
       label: `${formData.infractionType}_${formData.foulType}_${formData.callCorrectness}`,
       notes: formData.notes
     };
-    
+
     const response = await fetch(`${API_BASE}/events/${currentEventId}/tags`, {
       method: 'POST',
       headers: {
@@ -350,18 +349,18 @@ async function saveTag() {
       },
       body: JSON.stringify(tagData)
     });
-    
+
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.error || 'Failed to save tag');
     }
-    
+
     const savedTag = await response.json();
-    
+
     // Update local event data
     const currentEvent = events[currentEventIndex];
     if (!currentEvent.tags) currentEvent.tags = [];
-    
+
     // Replace existing tag or add new one
     const existingIndex = currentEvent.tags.findIndex(tag => tag.label === savedTag.label);
     if (existingIndex >= 0) {
@@ -369,10 +368,10 @@ async function saveTag() {
     } else {
       currentEvent.tags.push(savedTag);
     }
-    
+
     // Show success message
     showSuccessMessage('Tag saved successfully!');
-    
+
     // Auto-advance to next event after a short delay
     setTimeout(() => {
       if (currentEventIndex < events.length - 1) {
@@ -382,7 +381,7 @@ async function saveTag() {
         showSuccessMessage('All events completed!');
       }
     }, 1500);
-    
+
   } catch (error) {
     console.error('Error saving tag:', error);
     displayError(`Failed to save tag: ${error.message}`);
@@ -397,14 +396,14 @@ async function saveTag() {
 function trimVideo(seconds) {
   const video = document.getElementById('event-video');
   const trimAmount = parseInt(seconds);
-  
+
   try {
     // Check if video is ready and has valid duration
     if (video && video.readyState >= 1 && video.duration && !isNaN(video.duration)) {
       const newTime = video.currentTime + trimAmount;
       video.currentTime = Math.max(0, Math.min(video.duration, newTime));
       updateVideoTime();
-      
+
       // Visual feedback for trim action
       showTrimFeedback(trimAmount);
     } else {
@@ -434,7 +433,7 @@ function showTrimFeedback(seconds) {
     pointer-events: none;
   `;
   feedback.textContent = `${seconds > 0 ? '+' : ''}${seconds}s`;
-  
+
   document.body.appendChild(feedback);
   setTimeout(() => feedback.remove(), 1000);
 }
@@ -442,7 +441,7 @@ function showTrimFeedback(seconds) {
 function updateVideoTime() {
   const video = document.getElementById('event-video');
   const timeDisplay = document.getElementById('video-time');
-  
+
   if (video && timeDisplay) {
     try {
       // Check if video is in a valid state
@@ -450,11 +449,11 @@ function updateVideoTime() {
         const current = formatTime(video.currentTime || 0);
         const duration = formatTime(video.duration || 0);
         timeDisplay.textContent = `${current} / ${duration}`;
-        
+
         // Update video state
         videoState.currentTime = video.currentTime || 0;
         videoState.duration = video.duration || 0;
-        
+
         // Hide video status overlay when video is playing normally
         if (video.currentTime > 0 && !video.paused) {
           const statusOverlay = document.getElementById('video-status-overlay');
@@ -498,7 +497,7 @@ document.addEventListener('DOMContentLoaded', function() {
       video.play().catch(e => console.log('Auto-play prevented:', e));
     });
   }
-  
+
   // Add keyboard shortcuts
   document.addEventListener('keydown', handleKeyboardShortcuts);
 });
@@ -506,7 +505,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function handleKeyboardShortcuts(e) {
   const video = document.getElementById('event-video');
   if (!video || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
-  
+
   switch(e.key) {
     case ' ':
     case 'k':
@@ -587,17 +586,17 @@ function showVideoStatus(message) {
       pointer-events: none;
       font-family: Inter, sans-serif;
     `;
-    
+
     const videoContainer = document.querySelector('.v1_308');
     if (videoContainer) {
       videoContainer.style.position = 'relative';
       videoContainer.appendChild(statusOverlay);
     }
   }
-  
+
   statusOverlay.textContent = message;
   statusOverlay.style.display = 'block';
-  
+
   // Hide status after 3 seconds for success messages
   if (message.includes('ready') || message.includes('Click to play')) {
     setTimeout(() => {
@@ -615,10 +614,10 @@ function showSuccessMessage(message) {
   // Simple success display - could be enhanced with a proper toast/modal
   const button = document.getElementById('save-tag-btn');
   const originalText = button.textContent;
-  
+
   button.textContent = '✓ Saved!';
   button.style.background = 'rgba(16,185,129,1)';
-  
+
   setTimeout(() => {
     button.textContent = originalText;
     button.style.background = 'rgba(59,130,246,1)';

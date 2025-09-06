@@ -89,10 +89,9 @@ function init() {
 }
 
 function addLogoutHandler() {
-    const userProfile = document.querySelector('.v1_37');
-    if (userProfile) {
-        userProfile.style.cursor = 'pointer';
-        userProfile.addEventListener('click', function() {
+    const logoutButton = document.getElementById('logoutButton');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', function() {
             if (confirm('Are you sure you want to logout?')) {
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('userRole');

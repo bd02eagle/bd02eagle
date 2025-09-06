@@ -38,6 +38,18 @@ function setupNavigation() {
   document.querySelector('.v1_516').addEventListener('click', function() {
     alert('Exports feature coming soon!');
   });
+  
+  // Add logout handler
+  const logoutButton = document.getElementById('logoutButton');
+  if (logoutButton) {
+    logoutButton.addEventListener('click', function() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userRole');
+        window.location.href = '/login.html';
+      }
+    });
+  }
 }
 
 function getCurrentUser() {
