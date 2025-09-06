@@ -69,4 +69,4 @@ args = "cd frontend && npm start"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run seed && npm start"
+args = "node prisma/seed.js && node index.js"
