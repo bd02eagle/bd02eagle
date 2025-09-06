@@ -1,0 +1,139 @@
+
+const API_BASE = 'http://0.0.0.0:3000/api';
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if already logged in
+    const authToken = localStorage.getItem('authToken');
+    if (authToken) {
+        // Verify token is still valid
+        verifyToken(authToken).then(valid => {
+            if (valid) {
+                redirectToApp();
+            } else {
+                localStorage.removeItem('authToken');
+            }
+        });
+    }
+
+    // Initialize login form
+    initializeLoginForm();
+    initializeDemoCredentials();
+});
+
+function initializeLoginForm() {
+    const loginForm = document.getElementById('loginForm');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const loginButton = document.getElementById('loginButton');
+    const buttonText = document.getElementById('buttonText');
+    const spinner = document.getElementById('spinner');
+    const errorMessage = document.getElementById('errorMessage');
+
+    loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+        
+        if (!email || !password) {
+            showError('Please enter both email and password');
+            return;
+        }
+
+        // Show loading state
+        setLoadingState(true);
+        hideError();
+
+        try {
+            const response = await fetch(`${API_BASE}/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Login successful
+                localStorage.setItem('authToken', data.token);
+                localStorage.setItem('userRole', data.role);
+                console.log('Login successful, role:', data.role);
+                
+                // Redirect to main app
+                redirectToApp();
+            } else {
+                // Login failed
+                showError(data.error || 'Login failed');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            showError('Connection error. Please check if the API server is running.');
+        } finally {
+            setLoadingState(false);
+        }
+    });
+
+    function setLoadingState(loading) {
+        loginButton.disabled = loading;
+        buttonText.style.display = loading ? 'none' : 'block';
+        spinner.style.display = loading ? 'block' : 'none';
+    }
+
+    function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = 'block';
+    }
+
+    function hideError() {
+        errorMessage.style.display = 'none';
+    }
+}
+
+function initializeDemoCredentials() {
+    const credentialRows = document.querySelectorAll('.credential-row');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+
+    credentialRows.forEach(row => {
+        row.addEventListener('click', function() {
+            const text = row.textContent;
+            
+            if (text.includes('analyst1@refintel.com')) {
+                emailInput.value = 'analyst1@refintel.com';
+                passwordInput.value = 'analyst123';
+            } else if (text.includes('admin@refintel.com')) {
+                emailInput.value = 'admin@refintel.com';
+                passwordInput.value = 'admin123';
+            } else if (text.includes('charter1@refintel.com')) {
+                emailInput.value = 'charter1@refintel.com';
+                passwordInput.value = 'charter123';
+            }
+            
+            // Add visual feedback
+            row.style.background = '#e0e7ff';
+            setTimeout(() => {
+                row.style.background = '#f9fafb';
+            }, 200);
+        });
+    });
+}
+
+async function verifyToken(token) {
+    try {
+        const response = await fetch(`${API_BASE}/games`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.ok;
+    } catch (error) {
+        console.error('Token verification error:', error);
+        return false;
+    }
+}
+
+function redirectToApp() {
+    window.location.href = '/';
+}

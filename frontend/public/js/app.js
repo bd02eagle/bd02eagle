@@ -7,16 +7,44 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check authentication
     const authToken = localStorage.getItem('authToken');
     if (!authToken) {
-        // For demo purposes, create a mock token
-        localStorage.setItem('authToken', 'demo-token');
+        // Redirect to login page
+        window.location.href = '/login.html';
+        return;
     }
 
-    // Initialize navigation
-    initNavigation();
+    // Verify token is still valid
+    verifyToken(authToken).then(valid => {
+        if (!valid) {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userRole');
+            window.location.href = '/login.html';
+            return;
+        }
+        
+        // Initialize navigation
+        initNavigation();
 
-    // Initialize the app
-    init();
+        // Initialize the app
+        init();
+    }).catch(error => {
+        console.error('Token verification failed:', error);
+        window.location.href = '/login.html';
+    });
 });
+
+async function verifyToken(token) {
+    try {
+        const response = await fetch(`${API_BASE}/games`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.ok;
+    } catch (error) {
+        console.error('Token verification error:', error);
+        return false;
+    }
+}
 
 function initNavigation() {
     // Add click handlers to navigation items
@@ -52,9 +80,26 @@ function init() {
     // Set active navigation state based on current page
     setActiveNavigation();
     
+    // Add logout functionality to user profile
+    addLogoutHandler();
+    
     // Load game data for evaluation workspace
     if (window.location.pathname.includes('evaluation') || window.location.pathname === '/') {
         loadGameData();
+    }
+}
+
+function addLogoutHandler() {
+    const userProfile = document.querySelector('.v1_37');
+    if (userProfile) {
+        userProfile.style.cursor = 'pointer';
+        userProfile.addEventListener('click', function() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('userRole');
+                window.location.href = '/login.html';
+            }
+        });
     }
 }
 

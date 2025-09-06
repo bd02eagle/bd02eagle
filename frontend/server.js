@@ -29,6 +29,11 @@ app.get('/review-management', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'review-management.html'));
 });
 
+// Serve the login page
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Frontend server running on http://0.0.0.0:${PORT}`);
 });
