@@ -23,10 +23,42 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   initializeEventListeners();
+  checkGameSelection();
   loadCurrentGame();
 });
 
+function checkGameSelection() {
+  const selectedGameId = localStorage.getItem('selectedGameId');
+  
+  // If no game was selected and user came from somewhere other than My Games,
+  // show a helpful message
+  if (!selectedGameId && !document.referrer.includes('my-games')) {
+    const gameTitle = document.getElementById('game-title');
+    if (gameTitle) {
+      const notice = document.createElement('div');
+      notice.style.cssText = `
+        background: #FEF3C7;
+        border: 1px solid #F59E0B;
+        border-radius: 6px;
+        padding: 12px;
+        margin: 12px 0;
+        font-size: 14px;
+        color: #92400E;
+      `;
+      notice.innerHTML = `
+        <strong>Tip:</strong> Select a specific game from 
+        <a href="/my-games.html" style="color: #3B82F6; text-decoration: underline;">My Games</a> 
+        to evaluate your assigned events, or continue with the most recent game.
+      `;
+      gameTitle.parentNode.insertBefore(notice, gameTitle.nextSibling);
+    }
+  }
+}
+
 function initializeEventListeners() {
+  // Navigation setup
+  setupNavigation();
+  
   // Form controls
   document.querySelectorAll('.infraction-btn').forEach(btn => {
     btn.addEventListener('click', () => selectInfraction(btn.dataset.value));
@@ -89,6 +121,8 @@ function selectCorrectness(type) {
 
 async function loadCurrentGame() {
   try {
+    const selectedGameId = localStorage.getItem('selectedGameId');
+    
     const gamesResponse = await fetch(`${API_BASE}/games`, {
       headers: {
         'Authorization': `Bearer ${authToken}`
@@ -105,13 +139,32 @@ async function loadCurrentGame() {
       return;
     }
 
-    // Load the most recent game (first in the ordered list)
-    const game = games[0];
+    // Load the selected game from My Games, or default to most recent
+    let game;
+    if (selectedGameId) {
+      game = games.find(g => g.id === selectedGameId);
+      // Clear the selection after using it
+      localStorage.removeItem('selectedGameId');
+    }
+    
+    // Fallback to most recent game if no selection or game not found
+    if (!game) {
+      game = games[0];
+    }
 
     currentGameId = game.id;
 
     // Update game info with proper team names
     document.getElementById('game-title').textContent = `${game.homeTeam.shortName} vs. ${game.awayTeam.shortName}`;
+
+    // Show indicator if this game was selected from My Games
+    if (selectedGameId) {
+      const gameTitle = document.getElementById('game-title');
+      const indicator = document.createElement('span');
+      indicator.style.cssText = 'color: #10B981; font-size: 12px; margin-left: 8px;';
+      indicator.textContent = '(Selected from My Games)';
+      gameTitle.appendChild(indicator);
+    }
 
     // Update game status and time
     const gameTimeElement = document.getElementById('game-time');
@@ -474,6 +527,21 @@ function formatTime(seconds) {
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+function setupNavigation() {
+  // Add logout handler
+  const logoutButton = document.getElementById('logoutButton');
+  if (logoutButton) {
+    logoutButton.addEventListener('click', function() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('selectedGameId'); // Clean up game selection
+        window.location.href = '/login.html';
+      }
+    });
+  }
 }
 
 // Video state management

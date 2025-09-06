@@ -126,7 +126,7 @@ function renderGames() {
             Review Tags
           </button>
           <button class="action-btn secondary" onclick="openGame('${game.id}')">
-            Start Review
+            Start Evaluation
           </button>
         </div>
       </div>
@@ -254,9 +254,9 @@ function viewVideo(videoUrl) {
 }
 
 function openGame(gameId) {
-  // Navigate to review management with game filter
+  // Navigate to evaluation workspace with game context
   localStorage.setItem('selectedGameId', gameId);
-  window.location.href = '/review-management.html';
+  window.location.href = '/evaluation.html';
 }
 
 function formatTimestamp(timestampMs) {
