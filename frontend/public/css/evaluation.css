@@ -86,15 +86,43 @@ body {
   left: 1px;
 }
 .v1_270 {
-  width: 216px;
   color: rgba(31,41,55,1);
-  position: absolute;
-  top: 0px;
-  left: 117px;
   font-family: Inter;
   font-weight: 600;
   font-size: 20px;
   text-align: left;
+}
+
+.breadcrumb-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: absolute;
+  top: 0px;
+  left: 117px;
+}
+
+.breadcrumb-link {
+  color: rgba(59,130,246,1);
+  font-family: Inter;
+  font-weight: 500;
+  font-size: 18px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.breadcrumb-link:hover {
+  color: rgba(37,99,235,1);
+  text-decoration: underline;
+}
+
+.breadcrumb-separator {
+  color: rgba(107,114,128,1);
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 16px;
+  margin: 0 4px;
 }
 .v1_259 {
   width: 229px;
