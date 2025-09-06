@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = 'http://0.0.0.0:3000/api';
 
 // Review Management JavaScript
 let authToken = localStorage.getItem('authToken');

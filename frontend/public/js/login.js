@@ -65,11 +65,16 @@ function initializeLoginForm() {
                 redirectToApp();
             } else {
                 // Login failed
-                showError(data.error || 'Login failed');
+                console.error('Login failed:', response.status, response.statusText);
+                showError(data.error || `Login failed (${response.status})`);
             }
         } catch (error) {
             console.error('Login error:', error);
-            showError('Connection error. Please check if the API server is running.');
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                showError('Cannot connect to API server. Please ensure the backend is running on port 3000.');
+            } else {
+                showError('Connection error. Please try again.');
+            }
         } finally {
             setLoadingState(false);
         }

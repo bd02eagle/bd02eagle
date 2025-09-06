@@ -28,6 +28,8 @@ document.addEventListener('DOMContentLoaded', function() {
         init();
     }).catch(error => {
         console.error('Token verification failed:', error);
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userRole');
         window.location.href = '/login.html';
     });
 });
