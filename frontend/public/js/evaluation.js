@@ -297,15 +297,36 @@ function trimVideo(seconds) {
   const video = document.getElementById('event-video');
   const trimAmount = parseInt(seconds);
   
-  if (trimAmount < 0) {
-    // Trim from beginning
-    video.currentTime = Math.max(0, video.currentTime + trimAmount);
-  } else {
-    // Trim from end (extend current time)
-    video.currentTime = Math.min(video.duration, video.currentTime + trimAmount);
+  if (video.duration) {
+    const newTime = video.currentTime + trimAmount;
+    video.currentTime = Math.max(0, Math.min(video.duration, newTime));
+    updateVideoTime();
+    
+    // Visual feedback for trim action
+    showTrimFeedback(trimAmount);
   }
+}
+
+function showTrimFeedback(seconds) {
+  // Create temporary feedback element
+  const feedback = document.createElement('div');
+  feedback.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    z-index: 1000;
+    pointer-events: none;
+  `;
+  feedback.textContent = `${seconds > 0 ? '+' : ''}${seconds}s`;
   
-  updateVideoTime();
+  document.body.appendChild(feedback);
+  setTimeout(() => feedback.remove(), 1000);
 }
 
 function updateVideoTime() {
@@ -326,14 +347,60 @@ function formatTime(seconds) {
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
 
+// Video state management
+let videoState = {
+  isPlaying: false,
+  currentTime: 0,
+  duration: 0
+};
+
 // Video event listeners
 document.addEventListener('DOMContentLoaded', function() {
   const video = document.getElementById('event-video');
   if (video) {
     video.addEventListener('timeupdate', updateVideoTime);
     video.addEventListener('loadedmetadata', updateVideoTime);
+    video.addEventListener('play', () => videoState.isPlaying = true);
+    video.addEventListener('pause', () => videoState.isPlaying = false);
+    video.addEventListener('loadeddata', () => {
+      videoState.duration = video.duration;
+      // Auto-play video when loaded
+      video.play().catch(e => console.log('Auto-play prevented:', e));
+    });
   }
+  
+  // Add keyboard shortcuts
+  document.addEventListener('keydown', handleKeyboardShortcuts);
 });
+
+function handleKeyboardShortcuts(e) {
+  const video = document.getElementById('event-video');
+  if (!video || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+  
+  switch(e.key) {
+    case ' ':
+    case 'k':
+      e.preventDefault();
+      video.paused ? video.play() : video.pause();
+      break;
+    case 'ArrowLeft':
+      e.preventDefault();
+      trimVideo(-5);
+      break;
+    case 'ArrowRight':
+      e.preventDefault();
+      trimVideo(5);
+      break;
+    case 'j':
+      e.preventDefault();
+      trimVideo(-10);
+      break;
+    case 'l':
+      e.preventDefault();
+      trimVideo(10);
+      break;
+  }
+}
 
 function displayError(message) {
   // Simple error display - could be enhanced with a proper toast/modal
