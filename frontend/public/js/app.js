@@ -51,10 +51,10 @@ async function verifyToken(token) {
 function initNavigation() {
     // Add click handlers to navigation items
     const navItems = [
-        { selector: '.v1_44, .v1_21', url: '/' },
-        { selector: '.v1_23', url: '/review-management.html' },
+        { selector: '.v1_44, .v1_21', url: '/evaluation.html' },
+        { selector: '.v1_23', url: '/my-games.html' },
         { selector: '.v1_28', url: '/exports.html' },
-        { selector: '.v1_33', url: '/settings.html' }
+        { selector: '.v1_33', url: '/review-management.html' }
     ];
 
     navItems.forEach(item => {
@@ -62,12 +62,9 @@ function initNavigation() {
         elements.forEach(element => {
             element.style.cursor = 'pointer';
             element.addEventListener('click', () => {
-                if (item.url.startsWith('/') && !item.url.includes('.html')) {
-                    // Root path, redirect to evaluation
-                    window.location.href = '/evaluation.html';
-                } else if (item.url === '/exports.html' || item.url === '/settings.html') {
-                    // Placeholder pages
-                    alert(`${item.url.replace('/', '').replace('.html', '')} feature coming soon!`);
+                if (item.url === '/exports.html') {
+                    // Placeholder page
+                    alert('Exports feature coming soon!');
                 } else {
                     window.location.href = item.url;
                 }
@@ -109,7 +106,7 @@ function setActiveNavigation() {
     const currentPage = window.location.pathname;
 
     // Reset all nav items
-    document.querySelectorAll('.v1_23, .v1_28, .v1_33').forEach(item => {
+    document.querySelectorAll('.v1_23, .v1_28, .v1_33, .v1_44').forEach(item => {
         item.style.color = 'rgba(156,163,175,1)';
     });
 
@@ -121,7 +118,7 @@ function setActiveNavigation() {
         const reviewNav = document.querySelector('.v1_33');
         if (reviewNav) reviewNav.style.color = 'rgba(59,130,246,1)';
     } else if (currentPage.includes('evaluation') || currentPage === '/') {
-        const evalNav = document.querySelector('.v1_28');
+        const evalNav = document.querySelector('.v1_44');
         if (evalNav) evalNav.style.color = 'rgba(59,130,246,1)';
     }
 }
