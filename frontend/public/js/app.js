@@ -114,11 +114,15 @@ function setActiveNavigation() {
     });
 
     // Set active state
-    if (currentPage.includes('review-management')) {
-        const reviewNav = document.querySelector('.v1_23');
+    if (currentPage.includes('my-games')) {
+        const myGamesNav = document.querySelector('.v1_23');
+        if (myGamesNav) myGamesNav.style.color = 'rgba(59,130,246,1)';
+    } else if (currentPage.includes('review-management')) {
+        const reviewNav = document.querySelector('.v1_33');
         if (reviewNav) reviewNav.style.color = 'rgba(59,130,246,1)';
     } else if (currentPage.includes('evaluation') || currentPage === '/') {
-        // Evaluation workspace is already styled as active
+        const evalNav = document.querySelector('.v1_28');
+        if (evalNav) evalNav.style.color = 'rgba(59,130,246,1)';
     }
 }
 

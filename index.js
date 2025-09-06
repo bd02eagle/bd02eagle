@@ -1,4 +1,3 @@
-
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -13,6 +12,7 @@ import games from "./routes/games.js";
 import events from "./routes/events.js";
 import tags from "./routes/tags.js";
 import analystActions from "./routes/analyst-actions.js";
+import assignments from "./routes/assignments.js";
 
 dotenv.config();
 const app = express();
@@ -44,10 +44,11 @@ app.get("/metrics", async (_req, res) => {
 app.post("/api/auth/login", login);
 
 // domain routes
-app.use("/api/games", games);
+app.use("/api/tags", tags);
 app.use("/api/events", events);
-app.use("/api", tags); // handles /api/events/:eventId/tags and /api/tags/:tagId
-app.use("/api/tags", analystActions); // handles /api/tags/:tagId/analyst-actions
+app.use("/api/games", games);
+app.use("/api/tags", analystActions);
+app.use("/api/assignments", assignments);
 
 const port = process.env.PORT || 3000;
 

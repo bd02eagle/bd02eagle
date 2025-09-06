@@ -43,6 +43,7 @@ model User {
 
   tags           Tag[]           @relation("TagCreatedBy")
   analystActions AnalystAction[]
+  gameAssignments GameAssignment[] @relation("GameAssignments")
 }
 
 model Team {
@@ -77,6 +78,7 @@ model Game {
   updatedAt DateTime  @updatedAt
 
   events Event[]
+  assignments GameAssignment[]
 }
 
 model Event {
@@ -116,4 +118,19 @@ model AnalystAction {
 
   tag     Tag  @relation(fields: [tagId], references: [id])
   analyst User @relation(fields: [analystId], references: [id])
+}
+
+model GameAssignment {
+  id        String   @id @default(uuid())
+  gameId    String
+  analystId String
+  assignedAt DateTime @default(now())
+  priority  String   @default("medium") // high, medium, low
+  dueDate   DateTime?
+  isActive  Boolean  @default(true)
+
+  game    Game @relation(fields: [gameId], references: [id])
+  analyst User @relation("GameAssignments", fields: [analystId], references: [id])
+
+  @@unique([gameId, analystId])
 }
