@@ -56,6 +56,9 @@ async function main() {
     },
   });
 
+  const createdUsers = [adminUser, analyst1, analyst2, charter];
+
+
   // Create teams - Women's College Basketball
   const teams = [
     {
@@ -184,6 +187,8 @@ async function main() {
     },
   });
 
+  const createdGames = [game1, game2, game3, game4, game5];
+
   // Create events
   const event1 = await prisma.event.create({
     data: {
@@ -235,6 +240,8 @@ async function main() {
     },
   });
 
+  const createdEvents = [event1, event2, event3, event4, event5];
+
   // Create tags
   const tag1 = await prisma.tag.create({
     data: {
@@ -281,6 +288,9 @@ async function main() {
     },
   });
 
+  const createdTags = [tag1, tag2, tag3, tag4, tag5];
+
+
   // Create analyst actions
   await prisma.analystAction.create({
     data: {
@@ -309,40 +319,61 @@ async function main() {
     },
   });
 
-  // Leave tag4 and tag5 without analyst actions for pending work
+  const createdAnalystActions = [
+    {
+      tagId: tag1.id,
+      analystId: analyst1.id,
+      action: "APPROVE",
+      comment: "Correct call, clear blocking foul",
+    },
+    {
+      tagId: tag2.id,
+      analystId: analyst2.id,
+      action: "REQUEST_CHANGES",
+      comment: "Should be classified as unsportsmanlike conduct instead",
+    },
+    {
+      tagId: tag3.id,
+      analystId: analyst1.id,
+      action: "APPROVE",
+      comment: "Appropriate flagrant 1 classification",
+    },
+  ];
+
 
   // Create sample game assignments
-  await prisma.gameAssignment.createMany({
-    data: [
-      {
-        gameId: game1.id,
-        analystId: analyst1.id,
-        priority: "high",
-        dueDate: new Date("2025-01-20T00:00:00Z"),
-      },
-      {
-        gameId: game2.id,
-        analystId: analyst1.id,
-        priority: "medium",
-        dueDate: new Date("2025-01-22T00:00:00Z"),
-      },
-      {
-        gameId: game1.id,
-        analystId: analyst2.id,
-        priority: "low",
-        dueDate: new Date("2025-01-25T00:00:00Z"),
-      },
-    ],
-    skipDuplicates: true,
+  const assignments = [
+    {
+      gameId: game1.id,
+      analystId: createdUsers.find(u => u.email === 'analyst1@refintel.com').id,
+      priority: 'high',
+      dueDate: new Date('2025-01-20T23:59:59Z')
+    },
+    {
+      gameId: game2.id,
+      analystId: createdUsers.find(u => u.email === 'analyst1@refintel.com').id,
+      priority: 'medium',
+      dueDate: new Date('2025-01-22T23:59:59Z')
+    },
+    {
+      gameId: game3.id,
+      analystId: createdUsers.find(u => u.email === 'analyst2@refintel.com').id,
+      priority: 'low',
+      dueDate: new Date('2025-01-25T23:59:59Z')
+    }
+  ];
+
+  const createdAssignments = await prisma.gameAssignment.createMany({
+    data: assignments
   });
 
   console.log("✅ Database seeded successfully!");
-  console.log(`Created ${await prisma.user.count()} users`);
-  console.log(`Created ${await prisma.game.count()} games`);
-  console.log(`Created ${await prisma.event.count()} events`);
-  console.log(`Created ${await prisma.tag.count()} tags`);
-  console.log(`Created ${await prisma.analystAction.count()} analyst actions`);
-  console.log(`Created ${await prisma.gameAssignment.count()} game assignments`);
+  console.log(`Created ${createdUsers.length} users`);
+  console.log(`Created ${createdGames.length} games`);
+  console.log(`Created ${createdEvents.length} events`);
+  console.log(`Created ${createdTags.length} tags`);
+  console.log(`Created ${createdAnalystActions.length} analyst actions`);
+  console.log(`Created ${createdAssignments.count} game assignments`);
 }
 
 main()
