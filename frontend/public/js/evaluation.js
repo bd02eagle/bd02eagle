@@ -106,10 +106,8 @@ async function loadCurrentGame() {
       return;
     }
     
-    // Load the SC vs CONN game for demonstration
-    const game = games.find(g => 
-      g.homeTeam.shortName === 'SC' && g.awayTeam.shortName === 'CONN'
-    ) || games[0];
+    // Load the most recent game (first in the ordered list)
+    const game = games[0];
     
     currentGameId = game.id;
     

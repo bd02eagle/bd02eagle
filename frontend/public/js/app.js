@@ -182,11 +182,8 @@ async function loadGameData() {
     console.log('Loaded games:', games);
 
     if (games.length > 0) {
-      // Load events for the first game (SC vs UConn)
-      const game = games.find(g => 
-        (g.homeTeam?.shortName === 'SC' && g.awayTeam?.shortName === 'CONN') ||
-        (g.homeTeam?.name?.includes('South Carolina') && g.awayTeam?.name?.includes('UConn'))
-      ) || games[0];
+      // Load events for the most recent game
+      const game = games[0];
       
       console.log('Selected game:', game);
       await loadEvents(game.id);
