@@ -90,7 +90,6 @@ function selectCorrectness(type) {
 
 async function loadCurrentGame() {
   try {
-    // For demo, we'll load the first game
     const gamesResponse = await fetch(`${API_BASE}/games`, {
       headers: {
         'Authorization': `Bearer ${authToken}`
@@ -107,11 +106,27 @@ async function loadCurrentGame() {
       return;
     }
     
-    const game = games[0];
+    // Load the SC vs CONN game for demonstration
+    const game = games.find(g => 
+      g.homeTeam.shortName === 'SC' && g.awayTeam.shortName === 'CONN'
+    ) || games[0];
+    
     currentGameId = game.id;
     
-    // Update game info
-    document.getElementById('game-title').textContent = `${game.homeTeam} vs. ${game.awayTeam}`;
+    // Update game info with proper team names
+    document.getElementById('game-title').textContent = `${game.homeTeam.shortName} vs. ${game.awayTeam.shortName}`;
+    
+    // Update game status and time
+    const gameTimeElement = document.getElementById('game-time');
+    if (gameTimeElement) {
+      gameTimeElement.textContent = 'Q4 | 04:39.5';
+    }
+    
+    // Update possession
+    const possessionElement = document.getElementById('possession-team');
+    if (possessionElement) {
+      possessionElement.textContent = game.homeTeam.name;
+    }
     
     await loadEvents(game.id);
   } catch (error) {
@@ -139,16 +154,28 @@ async function loadEvents(gameId) {
       return;
     }
     
-    // Load tags for each event
-    for (let i = 0; i < events.length; i++) {
-      const tagsResponse = await fetch(`${API_BASE}/events/${events[i].id}/tags`, {
-        headers: {
-          'Authorization': `Bearer ${authToken}`
+    // Load tags for each event with better error handling
+    const tagPromises = events.map(async (event, index) => {
+      try {
+        const tagsResponse = await fetch(`${API_BASE}/events/${event.id}/tags`, {
+          headers: {
+            'Authorization': `Bearer ${authToken}`
+          }
+        });
+        
+        if (tagsResponse.ok) {
+          events[index].tags = await tagsResponse.json();
+        } else {
+          console.warn(`Failed to load tags for event ${event.id}`);
+          events[index].tags = [];
         }
-      });
-      
-      events[i].tags = tagsResponse.ok ? await tagsResponse.json() : [];
-    }
+      } catch (error) {
+        console.warn(`Error loading tags for event ${event.id}:`, error);
+        events[index].tags = [];
+      }
+    });
+    
+    await Promise.all(tagPromises);
     
     currentEventIndex = 0;
     loadCurrentEvent();
@@ -164,16 +191,31 @@ function loadCurrentEvent() {
   const event = events[currentEventIndex];
   currentEventId = event.id;
   
-  // Update event info
-  document.getElementById('event-number').textContent = `EVENT #${event.id.slice(-6).toUpperCase()}`;
+  // Update event info with more descriptive display
+  const eventNumber = String(currentEventIndex + 1).padStart(3, '0');
+  document.getElementById('event-number').textContent = `EVENT #${eventNumber}`;
   document.getElementById('event-type').textContent = event.type;
   document.getElementById('event-counter').textContent = `Event ${currentEventIndex + 1} of ${events.length}`;
   
-  // Load video
+  // Load video with loading state
   const video = document.getElementById('event-video');
   if (event.videoUrl) {
     video.src = event.videoUrl;
     video.load();
+    
+    // Show loading state
+    video.addEventListener('loadstart', () => {
+      console.log('Loading video:', event.videoUrl);
+    });
+    
+    video.addEventListener('canplay', () => {
+      console.log('Video ready to play');
+    });
+    
+    video.addEventListener('error', (e) => {
+      console.error('Video error:', e);
+      displayError('Failed to load video');
+    });
   }
   
   // Update video timestamp display
@@ -184,6 +226,13 @@ function loadCurrentEvent() {
   
   // Update navigation buttons
   updateNavigationButtons();
+  
+  // Auto-play video when loaded (if supported)
+  setTimeout(() => {
+    if (video.readyState >= 3) {
+      video.play().catch(e => console.log('Auto-play prevented:', e));
+    }
+  }, 100);
 }
 
 function loadExistingTags(event) {
@@ -244,7 +293,15 @@ function navigateEvent(direction) {
 async function saveTag() {
   if (!currentEventId) return;
   
+  const saveButton = document.getElementById('save-tag-btn');
+  const originalText = saveButton.textContent;
+  
   try {
+    // Show saving state
+    saveButton.textContent = 'Saving...';
+    saveButton.disabled = true;
+    saveButton.style.opacity = '0.7';
+    
     const tagData = {
       label: `${formData.infractionType}_${formData.foulType}_${formData.callCorrectness}`,
       notes: formData.notes
@@ -260,7 +317,8 @@ async function saveTag() {
     });
     
     if (!response.ok) {
-      throw new Error('Failed to save tag');
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to save tag');
     }
     
     const savedTag = await response.json();
@@ -280,16 +338,24 @@ async function saveTag() {
     // Show success message
     showSuccessMessage('Tag saved successfully!');
     
-    // Auto-advance to next event
+    // Auto-advance to next event after a short delay
     setTimeout(() => {
       if (currentEventIndex < events.length - 1) {
         navigateEvent(1);
+      } else {
+        // All events completed
+        showSuccessMessage('All events completed!');
       }
-    }, 1000);
+    }, 1500);
     
   } catch (error) {
     console.error('Error saving tag:', error);
-    displayError('Failed to save tag');
+    displayError(`Failed to save tag: ${error.message}`);
+  } finally {
+    // Reset button state
+    saveButton.textContent = originalText;
+    saveButton.disabled = false;
+    saveButton.style.opacity = '1';
   }
 }
 
@@ -385,11 +451,19 @@ function handleKeyboardShortcuts(e) {
       break;
     case 'ArrowLeft':
       e.preventDefault();
-      trimVideo(-5);
+      if (e.shiftKey) {
+        navigateEvent(-1);
+      } else {
+        trimVideo(-5);
+      }
       break;
     case 'ArrowRight':
       e.preventDefault();
-      trimVideo(5);
+      if (e.shiftKey) {
+        navigateEvent(1);
+      } else {
+        trimVideo(5);
+      }
       break;
     case 'j':
       e.preventDefault();
@@ -398,6 +472,27 @@ function handleKeyboardShortcuts(e) {
     case 'l':
       e.preventDefault();
       trimVideo(10);
+      break;
+    case 'Enter':
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        saveTag();
+      }
+      break;
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+      e.preventDefault();
+      const infractionTypes = ['turnover', 'foul', 'violation', 'stoppage'];
+      const selectedType = infractionTypes[parseInt(e.key) - 1];
+      if (selectedType) {
+        selectInfraction(selectedType);
+      }
+      break;
+    case 'r':
+      e.preventDefault();
+      resetForm();
       break;
   }
 }
