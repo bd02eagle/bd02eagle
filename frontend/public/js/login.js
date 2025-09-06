@@ -1,5 +1,5 @@
-
-const API_BASE = 'http://0.0.0.0:3000/api';
+// API Configuration - Use relative URL to avoid CORS issues
+const API_BASE = '/api';
 
 document.addEventListener('DOMContentLoaded', function() {
     // Check if already logged in
@@ -31,10 +31,10 @@ function initializeLoginForm() {
 
     loginForm.addEventListener('submit', async function(e) {
         e.preventDefault();
-        
+
         const email = emailInput.value.trim();
         const password = passwordInput.value;
-        
+
         if (!email || !password) {
             showError('Please enter both email and password');
             return;
@@ -60,7 +60,7 @@ function initializeLoginForm() {
                 localStorage.setItem('authToken', data.token);
                 localStorage.setItem('userRole', data.role);
                 console.log('Login successful, role:', data.role);
-                
+
                 // Redirect to main app
                 redirectToApp();
             } else {
@@ -71,7 +71,7 @@ function initializeLoginForm() {
         } catch (error) {
             console.error('Login error:', error);
             if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                showError('Cannot connect to API server. Please ensure the backend is running on port 3000.');
+                showError('Cannot connect to API server. Please ensure the backend is running.');
             } else {
                 showError('Connection error. Please try again.');
             }
@@ -104,7 +104,7 @@ function initializeDemoCredentials() {
     credentialRows.forEach(row => {
         row.addEventListener('click', function() {
             const text = row.textContent;
-            
+
             if (text.includes('analyst1@refintel.com')) {
                 emailInput.value = 'analyst1@refintel.com';
                 passwordInput.value = 'analyst123';
@@ -115,7 +115,7 @@ function initializeDemoCredentials() {
                 emailInput.value = 'charter1@refintel.com';
                 passwordInput.value = 'charter123';
             }
-            
+
             // Add visual feedback
             row.style.background = '#e0e7ff';
             setTimeout(() => {

@@ -14,6 +14,27 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
+// Proxy API requests to backend
+app.use('/api', async (req, res) => {
+  try {
+    const backendUrl = `http://0.0.0.0:3000${req.originalUrl}`;
+    const response = await fetch(backendUrl, {
+      method: req.method,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': req.headers.authorization || ''
+      },
+      body: req.method !== 'GET' ? JSON.stringify(req.body) : undefined
+    });
+    
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error('Proxy error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Serve the main evaluation workspace
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

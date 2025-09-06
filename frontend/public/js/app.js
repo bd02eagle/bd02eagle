@@ -1,5 +1,5 @@
-// API Configuration
-const API_BASE = 'http://0.0.0.0:3000/api';
+// API Configuration - Use relative URL to avoid CORS issues  
+const API_BASE = '/api';
 let authToken = localStorage.getItem('authToken');
 
 // Main app functionality
