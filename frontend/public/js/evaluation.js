@@ -197,42 +197,72 @@ function loadCurrentEvent() {
   document.getElementById('event-type').textContent = event.type;
   document.getElementById('event-counter').textContent = `Event ${currentEventIndex + 1} of ${events.length}`;
   
-  // Load video with loading state
+  // Load video with improved error handling
   const video = document.getElementById('event-video');
   if (event.videoUrl) {
+    // Clear any previous event listeners
+    video.onloadstart = null;
+    video.oncanplay = null;
+    video.onerror = null;
+    video.onloadeddata = null;
+    
+    // Set up new event listeners
+    video.onloadstart = () => {
+      console.log('Loading video:', event.videoUrl);
+      showVideoStatus('Loading video...');
+    };
+    
+    video.oncanplay = () => {
+      console.log('Video ready to play');
+      showVideoStatus('Video ready');
+      // Auto-play video when ready
+      video.play().catch(e => {
+        console.log('Auto-play prevented by browser:', e);
+        showVideoStatus('Click to play video');
+      });
+    };
+    
+    video.onerror = (e) => {
+      console.error('Video error:', e, 'URL:', event.videoUrl);
+      showVideoStatus('Video failed to load - trying backup...');
+      
+      // Try backup video URLs if primary fails
+      const backupUrls = [
+        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4'
+      ];
+      
+      const currentBackup = backupUrls.find(url => url !== event.videoUrl);
+      if (currentBackup) {
+        console.log('Trying backup URL:', currentBackup);
+        video.src = currentBackup;
+        video.load();
+      } else {
+        showVideoStatus('Video unavailable');
+      }
+    };
+    
+    video.onloadeddata = () => {
+      console.log('Video data loaded successfully');
+      updateVideoTime();
+    };
+    
+    // Set CORS attributes for better compatibility
+    video.crossOrigin = 'anonymous';
+    video.preload = 'metadata';
+    
+    // Load the video
     video.src = event.videoUrl;
     video.load();
-    
-    // Show loading state
-    video.addEventListener('loadstart', () => {
-      console.log('Loading video:', event.videoUrl);
-    });
-    
-    video.addEventListener('canplay', () => {
-      console.log('Video ready to play');
-    });
-    
-    video.addEventListener('error', (e) => {
-      console.error('Video error:', e);
-      displayError('Failed to load video');
-    });
+  } else {
+    showVideoStatus('No video available');
   }
-  
-  // Update video timestamp display
-  updateVideoTime();
   
   // Load existing tags if any
   loadExistingTags(event);
   
   // Update navigation buttons
   updateNavigationButtons();
-  
-  // Auto-play video when loaded (if supported)
-  setTimeout(() => {
-    if (video.readyState >= 3) {
-      video.play().catch(e => console.log('Auto-play prevented:', e));
-    }
-  }, 100);
 }
 
 function loadExistingTags(event) {
@@ -403,6 +433,18 @@ function updateVideoTime() {
     const current = formatTime(video.currentTime || 0);
     const duration = formatTime(video.duration || 0);
     timeDisplay.textContent = `${current} / ${duration}`;
+    
+    // Update video state
+    videoState.currentTime = video.currentTime || 0;
+    videoState.duration = video.duration || 0;
+    
+    // Hide video status overlay when video is playing normally
+    if (video.currentTime > 0 && !video.paused) {
+      const statusOverlay = document.getElementById('video-status-overlay');
+      if (statusOverlay) {
+        statusOverlay.style.display = 'none';
+      }
+    }
   }
 }
 
@@ -497,9 +539,48 @@ function handleKeyboardShortcuts(e) {
   }
 }
 
+function showVideoStatus(message) {
+  // Create or update video status overlay
+  let statusOverlay = document.getElementById('video-status-overlay');
+  if (!statusOverlay) {
+    statusOverlay = document.createElement('div');
+    statusOverlay.id = 'video-status-overlay';
+    statusOverlay.style.cssText = `
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      z-index: 100;
+      pointer-events: none;
+      font-family: Inter, sans-serif;
+    `;
+    
+    const videoContainer = document.querySelector('.v1_308');
+    if (videoContainer) {
+      videoContainer.style.position = 'relative';
+      videoContainer.appendChild(statusOverlay);
+    }
+  }
+  
+  statusOverlay.textContent = message;
+  statusOverlay.style.display = 'block';
+  
+  // Hide status after 3 seconds for success messages
+  if (message.includes('ready') || message.includes('Click to play')) {
+    setTimeout(() => {
+      statusOverlay.style.display = 'none';
+    }, 3000);
+  }
+}
+
 function displayError(message) {
-  // Simple error display - could be enhanced with a proper toast/modal
-  alert(`Error: ${message}`);
+  console.error('Error:', message);
+  showVideoStatus(`Error: ${message}`);
 }
 
 function showSuccessMessage(message) {
