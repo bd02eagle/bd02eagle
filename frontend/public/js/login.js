@@ -57,12 +57,12 @@ function initializeLoginForm() {
 
             if (response.ok) {
                 // Login successful
+                console.log('Login successful, role:', data.role);
                 localStorage.setItem('authToken', data.token);
                 localStorage.setItem('userRole', data.role);
-                console.log('Login successful, role:', data.role);
 
-                // Redirect to main app
-                redirectToApp();
+                // Always redirect to My Games as the first screen
+                window.location.href = '/my-games.html';
             } else {
                 // Login failed
                 console.error('Login failed:', response.status, response.statusText);

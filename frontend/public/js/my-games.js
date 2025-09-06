@@ -34,6 +34,10 @@ function setupNavigation() {
   document.querySelector('.v1_33').addEventListener('click', function() {
     window.location.href = '/review-management.html';
   });
+  
+  document.querySelector('.v1_516').addEventListener('click', function() {
+    alert('Exports feature coming soon!');
+  });
 }
 
 function getCurrentUser() {
