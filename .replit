@@ -65,11 +65,19 @@ mode = "parallel"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd frontend && npm start"
+args = "npm run seed"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run seed && sleep 2 && npm start"
+args = "npm start &"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "sleep 3"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd frontend && npm start"
 
 [[workflows.workflow]]
 name = "Backend First"
