@@ -251,9 +251,16 @@ function loadCurrentEvent() {
     video.crossOrigin = 'anonymous';
     video.preload = 'metadata';
     
-    // Load the video
-    video.src = event.videoUrl;
+    // Clear current source first to avoid invalid state
+    video.pause();
+    video.removeAttribute('src');
     video.load();
+    
+    // Set new source after clearing
+    setTimeout(() => {
+      video.src = event.videoUrl;
+      video.load();
+    }, 100);
   } else {
     showVideoStatus('No video available');
   }
@@ -393,13 +400,22 @@ function trimVideo(seconds) {
   const video = document.getElementById('event-video');
   const trimAmount = parseInt(seconds);
   
-  if (video.duration) {
-    const newTime = video.currentTime + trimAmount;
-    video.currentTime = Math.max(0, Math.min(video.duration, newTime));
-    updateVideoTime();
-    
-    // Visual feedback for trim action
-    showTrimFeedback(trimAmount);
+  try {
+    // Check if video is ready and has valid duration
+    if (video && video.readyState >= 1 && video.duration && !isNaN(video.duration)) {
+      const newTime = video.currentTime + trimAmount;
+      video.currentTime = Math.max(0, Math.min(video.duration, newTime));
+      updateVideoTime();
+      
+      // Visual feedback for trim action
+      showTrimFeedback(trimAmount);
+    } else {
+      console.warn('Video not ready for trimming');
+      showVideoStatus('Video not ready');
+    }
+  } catch (error) {
+    console.warn('Trim video error:', error);
+    showVideoStatus('Video control error');
   }
 }
 
@@ -430,20 +446,28 @@ function updateVideoTime() {
   const timeDisplay = document.getElementById('video-time');
   
   if (video && timeDisplay) {
-    const current = formatTime(video.currentTime || 0);
-    const duration = formatTime(video.duration || 0);
-    timeDisplay.textContent = `${current} / ${duration}`;
-    
-    // Update video state
-    videoState.currentTime = video.currentTime || 0;
-    videoState.duration = video.duration || 0;
-    
-    // Hide video status overlay when video is playing normally
-    if (video.currentTime > 0 && !video.paused) {
-      const statusOverlay = document.getElementById('video-status-overlay');
-      if (statusOverlay) {
-        statusOverlay.style.display = 'none';
+    try {
+      // Check if video is in a valid state
+      if (video.readyState >= 1) {
+        const current = formatTime(video.currentTime || 0);
+        const duration = formatTime(video.duration || 0);
+        timeDisplay.textContent = `${current} / ${duration}`;
+        
+        // Update video state
+        videoState.currentTime = video.currentTime || 0;
+        videoState.duration = video.duration || 0;
+        
+        // Hide video status overlay when video is playing normally
+        if (video.currentTime > 0 && !video.paused) {
+          const statusOverlay = document.getElementById('video-status-overlay');
+          if (statusOverlay) {
+            statusOverlay.style.display = 'none';
+          }
+        }
       }
+    } catch (error) {
+      console.warn('Video state error:', error);
+      // Don't update if video is in invalid state
     }
   }
 }
@@ -489,7 +513,13 @@ function handleKeyboardShortcuts(e) {
     case ' ':
     case 'k':
       e.preventDefault();
-      video.paused ? video.play() : video.pause();
+      try {
+        if (video.readyState >= 1) {
+          video.paused ? video.play() : video.pause();
+        }
+      } catch (error) {
+        console.warn('Video play/pause error:', error);
+      }
       break;
     case 'ArrowLeft':
       e.preventDefault();
