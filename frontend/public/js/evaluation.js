@@ -1,5 +1,5 @@
 
-const API_BASE = 'http://0.0.0.0:3000/api';
+const API_BASE = '/api';
 let currentEventId = null;
 let currentGameId = null;
 let events = [];
