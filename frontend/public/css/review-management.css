@@ -455,7 +455,7 @@ body {
 
 /* Logout button */
 .logout-button {
-  position: absolute;
+  position: fixed;
   top: 20px;
   right: 20px;
   background: rgba(239, 68, 68, 1);
@@ -467,7 +467,7 @@ body {
   font-size: 12px;
   font-family: Inter, sans-serif;
   transition: background-color 0.2s;
-  z-index: 100;
+  z-index: 1000;
 }
 
 .logout-button:hover {
