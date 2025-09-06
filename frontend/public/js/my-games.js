@@ -3,7 +3,7 @@
 const API_BASE = '/api';
 let authToken = localStorage.getItem('authToken');
 let currentUserId = null;
-let assignedGames = [];
+let myGameAssignments = [];
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
@@ -18,8 +18,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // Get current user info from token
   getCurrentUser();
   
-  // Load assigned games
-  loadMyGames();
+  // Load my game assignments
+  loadMyGameAssignments();
 });
 
 function setupNavigation() {
@@ -47,165 +47,194 @@ function getCurrentUser() {
   }
 }
 
-async function loadMyGames() {
+async function loadMyGameAssignments() {
   try {
     showLoading();
 
-    // Get all games
-    const gamesResponse = await fetch(`${API_BASE}/games`, {
+    const response = await fetch(`${API_BASE}/assignments/my-games`, {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
 
-    if (!gamesResponse.ok) throw new Error('Failed to fetch games');
-    const allGames = await gamesResponse.json();
-
-    // Get tags for each game to determine assignments
-    assignedGames = [];
-
-    for (const game of allGames) {
-      const eventsResponse = await fetch(`${API_BASE}/games/${game.id}/events`, {
-        headers: { 'Authorization': `Bearer ${authToken}` }
-      });
-
-      if (eventsResponse.ok) {
-        const events = await eventsResponse.json();
-        let totalTags = 0;
-        let myTags = 0;
-        let pendingTags = 0;
-        let completedToday = 0;
-
-        for (const event of events) {
-          const tagsResponse = await fetch(`${API_BASE}/events/${event.id}/tags`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-          });
-
-          if (tagsResponse.ok) {
-            const tags = await tagsResponse.json();
-            totalTags += tags.length;
-
-            for (const tag of tags) {
-              // Check if I have reviewed this tag
-              const myActions = tag.analystActions?.filter(action => action.analystId === currentUserId) || [];
-              
-              if (myActions.length > 0) {
-                myTags++;
-                
-                // Check if completed today
-                const latestAction = myActions[myActions.length - 1];
-                const actionDate = new Date(latestAction.createdAt);
-                const today = new Date();
-                
-                if (actionDate.toDateString() === today.toDateString()) {
-                  completedToday++;
-                }
-              } else if (!tag.analystActions || tag.analystActions.length === 0) {
-                // Tag has no reviews yet - could be assigned to me
-                pendingTags++;
-              }
-            }
-          }
-        }
-
-        // Consider a game "assigned" if I have activity on it or there are pending tags
-        if (myTags > 0 || pendingTags > 0) {
-          const progress = totalTags > 0 ? (myTags / totalTags) * 100 : 0;
-          const priority = getPriority(game, pendingTags, progress);
-
-          assignedGames.push({
-            ...game,
-            totalTags,
-            myTags,
-            pendingTags,
-            completedToday,
-            progress,
-            priority
-          });
-        }
+    if (!response.ok) {
+      if (response.status === 401) {
+        localStorage.removeItem('authToken');
+        window.location.href = '/login.html';
+        return;
       }
+      throw new Error('Failed to fetch assignments');
     }
 
-    // Sort by priority and date
-    assignedGames.sort((a, b) => {
-      const priorityOrder = { 'high': 3, 'medium': 2, 'low': 1 };
-      if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
-        return priorityOrder[b.priority] - priorityOrder[a.priority];
-      }
-      return new Date(a.date) - new Date(b.date);
-    });
-
+    myGameAssignments = await response.json();
     renderGames();
     updateStats();
 
   } catch (error) {
-    console.error('Error loading games:', error);
+    console.error('Error loading game assignments:', error);
     showError('Failed to load your assigned games');
   }
-}
-
-function getPriority(game, pendingTags, progress) {
-  const gameDate = new Date(game.date);
-  const today = new Date();
-  const daysUntilGame = Math.ceil((gameDate - today) / (1000 * 60 * 60 * 24));
-
-  // High priority: recent games with many pending tags
-  if (daysUntilGame <= 1 && pendingTags > 5) return 'high';
-  if (pendingTags > 10) return 'high';
-
-  // Medium priority: moderate workload
-  if (daysUntilGame <= 3 && pendingTags > 0) return 'medium';
-  if (progress < 50 && pendingTags > 0) return 'medium';
-
-  // Low priority: everything else
-  return 'low';
 }
 
 function renderGames() {
   const container = document.getElementById('games-container');
 
-  if (assignedGames.length === 0) {
+  if (myGameAssignments.length === 0) {
     container.innerHTML = '<div class="loading">No games assigned to you yet</div>';
     return;
   }
 
-  container.innerHTML = assignedGames.map(game => `
-    <div class="game-row">
-      <div class="game-info">
-        <div class="game-title">${escapeHtml(game.homeTeam.shortName)} vs. ${escapeHtml(game.awayTeam.shortName)}</div>
-        <div class="game-venue">${escapeHtml(game.venue || 'TBD')}</div>
-      </div>
-      <div class="game-date">${formatDate(game.date)}</div>
-      <div class="pending-count">${game.pendingTags}</div>
-      <div class="progress-container">
-        <div class="progress-bar">
-          <div class="progress-fill" style="width: ${game.progress}%"></div>
+  container.innerHTML = myGameAssignments.map(assignment => {
+    const game = assignment.game;
+    const pendingTags = assignment.totalTags - assignment.completedTags;
+    
+    return `
+      <div class="game-row">
+        <div class="game-info">
+          <div class="game-title">${escapeHtml(game.homeTeam.shortName)} vs. ${escapeHtml(game.awayTeam.shortName)}</div>
+          <div class="game-venue">${escapeHtml(game.venue || 'TBD')}</div>
         </div>
-        <div class="progress-text">${Math.round(game.progress)}% complete</div>
+        <div class="game-date">${formatDate(game.date)}</div>
+        <div class="pending-count">${pendingTags}</div>
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${assignment.progress}%"></div>
+          </div>
+          <div class="progress-text">${assignment.progress}% complete</div>
+        </div>
+        <div>
+          <span class="priority-badge priority-${assignment.priority}">
+            ${assignment.priority}
+          </span>
+        </div>
+        <div class="action-buttons">
+          <button class="action-btn primary" onclick="viewGameTags('${game.id}', '${escapeHtml(game.homeTeam.shortName)} vs. ${escapeHtml(game.awayTeam.shortName)}')">
+            Review Tags
+          </button>
+          <button class="action-btn secondary" onclick="openGame('${game.id}')">
+            Start Review
+          </button>
+        </div>
       </div>
-      <div>
-        <span class="priority-badge priority-${game.priority}">
-          ${game.priority}
-        </span>
-      </div>
-      <div class="action-buttons">
-        <button class="action-btn primary" onclick="openGame('${game.id}')">
-          Start Review
-        </button>
-        <button class="action-btn secondary" onclick="viewProgress('${game.id}')">
-          Details
-        </button>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function updateStats() {
-  const totalAssigned = assignedGames.length;
-  const inProgress = assignedGames.filter(game => game.myTags > 0 && game.progress < 100).length;
-  const completedToday = assignedGames.reduce((sum, game) => sum + game.completedToday, 0);
-
+  const totalAssigned = myGameAssignments.length;
+  const inProgress = myGameAssignments.filter(assignment => 
+    assignment.completedTags > 0 && assignment.progress < 100
+  ).length;
+  
+  // Count tags completed today
+  const today = new Date().toDateString();
+  let completedToday = 0;
+  // This would need to be calculated from actual completion dates in a real implementation
+  
   document.getElementById('assigned-games-count').textContent = totalAssigned;
   document.getElementById('in-progress-count').textContent = inProgress;
   document.getElementById('completed-count').textContent = completedToday;
+}
+
+async function viewGameTags(gameId, gameTitle) {
+  try {
+    showTagsLoading(gameTitle);
+
+    const response = await fetch(`${API_BASE}/assignments/games/${gameId}/tags`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch tags for game');
+    }
+
+    const tags = await response.json();
+    displayGameTags(gameTitle, tags);
+
+  } catch (error) {
+    console.error('Error loading game tags:', error);
+    showError('Failed to load tags for this game');
+  }
+}
+
+function showTagsLoading(gameTitle) {
+  const container = document.getElementById('games-container');
+  container.innerHTML = `
+    <div class="tags-view">
+      <div class="tags-header">
+        <button class="back-btn" onclick="loadMyGameAssignments()">← Back to My Games</button>
+        <h3>Tags for ${gameTitle}</h3>
+      </div>
+      <div class="loading">Loading tags...</div>
+    </div>
+  `;
+}
+
+function displayGameTags(gameTitle, tags) {
+  const container = document.getElementById('games-container');
+  
+  if (tags.length === 0) {
+    container.innerHTML = `
+      <div class="tags-view">
+        <div class="tags-header">
+          <button class="back-btn" onclick="loadMyGameAssignments()">← Back to My Games</button>
+          <h3>Tags for ${gameTitle}</h3>
+        </div>
+        <div class="no-tags">No tags found for this game</div>
+      </div>
+    `;
+    return;
+  }
+
+  const tagsHtml = tags.map(tag => {
+    const hasMyAction = tag.analystActions.some(action => action.analyst.id === currentUserId);
+    const statusClass = hasMyAction ? 'reviewed' : 'pending';
+    const statusText = hasMyAction ? 'Reviewed' : 'Pending Review';
+    
+    return `
+      <div class="tag-item ${statusClass}">
+        <div class="tag-header">
+          <span class="tag-label">${escapeHtml(tag.label)}</span>
+          <span class="tag-status ${statusClass}">${statusText}</span>
+        </div>
+        <div class="tag-details">
+          <div class="tag-time">Event Type: ${escapeHtml(tag.event.type)} | Time: ${formatTimestamp(tag.event.timestampMs)}</div>
+          ${tag.notes ? `<div class="tag-notes">${escapeHtml(tag.notes)}</div>` : ''}
+          <div class="tag-creator">Created by: ${escapeHtml(tag.createdBy.firstName || tag.createdBy.email)}</div>
+        </div>
+        <div class="tag-actions">
+          <button class="action-btn primary" onclick="reviewTag('${tag.id}')">
+            ${hasMyAction ? 'Update Review' : 'Review Tag'}
+          </button>
+          <button class="action-btn secondary" onclick="viewVideo('${tag.event.videoUrl}')">
+            View Video
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="tags-view">
+      <div class="tags-header">
+        <button class="back-btn" onclick="loadMyGameAssignments()">← Back to My Games</button>
+        <h3>Tags for ${gameTitle}</h3>
+        <div class="tags-summary">${tags.length} total tags</div>
+      </div>
+      <div class="tags-list">
+        ${tagsHtml}
+      </div>
+    </div>
+  `;
+}
+
+function reviewTag(tagId) {
+  // Navigate to review management with specific tag
+  localStorage.setItem('selectedTagId', tagId);
+  window.location.href = '/review-management.html';
+}
+
+function viewVideo(videoUrl) {
+  // Open video in new tab
+  window.open(videoUrl, '_blank');
 }
 
 function openGame(gameId) {
@@ -214,10 +243,10 @@ function openGame(gameId) {
   window.location.href = '/review-management.html';
 }
 
-function viewProgress(gameId) {
-  // Navigate to evaluation workspace for this specific game
-  localStorage.setItem('selectedGameId', gameId);
-  window.location.href = '/evaluation.html';
+function formatTimestamp(timestampMs) {
+  const minutes = Math.floor(timestampMs / 60000);
+  const seconds = Math.floor((timestampMs % 60000) / 1000);
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
 function formatDate(dateString) {

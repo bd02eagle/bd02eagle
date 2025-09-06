@@ -140,5 +140,5 @@ async function verifyToken(token) {
 }
 
 function redirectToApp() {
-    window.location.href = '/';
+    window.location.href = '/my-games.html';
 }

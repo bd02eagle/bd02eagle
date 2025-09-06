@@ -1,4 +1,3 @@
-
 * {
   box-sizing: border-box;
 }
@@ -293,22 +292,172 @@ body {
   font-family: Inter;
   font-weight: Medium;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .priority-high {
-  background: rgba(254,226,226,1);
-  color: rgba(185,28,28,1);
+  background: rgba(239,68,68,0.1);
+  color: rgba(239,68,68,1);
 }
 
 .priority-medium {
-  background: rgba(254,243,199,1);
-  color: rgba(180,83,9,1);
+  background: rgba(245,158,11,0.1);
+  color: rgba(245,158,11,1);
 }
 
 .priority-low {
-  background: rgba(220,252,231,1);
-  color: rgba(21,128,61,1);
+  background: rgba(34,197,94,0.1);
+  color: rgba(34,197,94,1);
+}
+
+/* Tags View */
+.tags-view {
+  padding: 0;
+}
+
+.tags-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(229,231,235,1);
+  background: rgba(249,250,251,1);
+}
+
+.back-btn {
+  background: rgba(59,130,246,1);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: Inter;
+  font-weight: Medium;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.back-btn:hover {
+  background: rgba(37,99,235,1);
+}
+
+.tags-header h3 {
+  color: rgba(17,24,39,1);
+  font-size: 18px;
+  font-family: Inter;
+  font-weight: Semibold;
+  margin: 0;
+}
+
+.tags-summary {
+  color: rgba(107,114,128,1);
+  font-size: 14px;
+  font-family: Inter;
+  font-weight: Regular;
+  margin-left: auto;
+}
+
+.tags-list {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tag-item {
+  border: 1px solid rgba(229,231,235,1);
+  border-radius: 8px;
+  padding: 16px;
+  background: white;
+  transition: box-shadow 0.2s;
+}
+
+.tag-item:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.tag-item.pending {
+  border-left: 4px solid rgba(245,158,11,1);
+}
+
+.tag-item.reviewed {
+  border-left: 4px solid rgba(34,197,94,1);
+}
+
+.tag-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.tag-label {
+  color: rgba(17,24,39,1);
+  font-size: 16px;
+  font-family: Inter;
+  font-weight: Semibold;
+}
+
+.tag-status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: Inter;
+  font-weight: Medium;
+  text-transform: uppercase;
+}
+
+.tag-status.pending {
+  background: rgba(245,158,11,0.1);
+  color: rgba(245,158,11,1);
+}
+
+.tag-status.reviewed {
+  background: rgba(34,197,94,0.1);
+  color: rgba(34,197,94,1);
+}
+
+.tag-details {
+  margin-bottom: 12px;
+}
+
+.tag-time {
+  color: rgba(107,114,128,1);
+  font-size: 14px;
+  font-family: Inter;
+  font-weight: Regular;
+  margin-bottom: 4px;
+}
+
+.tag-notes {
+  color: rgba(55,65,81,1);
+  font-size: 14px;
+  font-family: Inter;
+  font-weight: Regular;
+  margin-bottom: 4px;
+  padding: 8px;
+  background: rgba(249,250,251,1);
+  border-radius: 4px;
+}
+
+.tag-creator {
+  color: rgba(107,114,128,1);
+  font-size: 12px;
+  font-family: Inter;
+  font-weight: Regular;
+}
+
+.tag-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.no-tags {
+  text-align: center;
+  padding: 40px;
+  color: rgba(107,114,128,1);
+  font-size: 16px;
+  font-family: Inter;
+  font-weight: Regular;
 }
 
 /* Action Buttons */
