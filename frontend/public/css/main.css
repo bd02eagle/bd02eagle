@@ -127,6 +127,7 @@ body {
 .v1_37 {
   display: flex;
   align-items: center;
+  justify-content: center;
   padding: 12px;
 }
 
@@ -135,28 +136,6 @@ body {
   height: 40px;
   background: rgba(75,85,99,1);
   border-radius: 20px;
-  margin-right: 12px;
-}
-
-.v1_60 {
-  color: rgba(255,255,255,1);
-  font-family: Inter;
-  font-weight: 500;
-  font-size: 14px;
-  display: block;
-}
-
-.v1_62 {
-  width: 100px;
-  color: rgba(156,163,175,1);
-  position: absolute;
-  top: 20px;
-  left: 0px;
-  font-family: Inter;
-  font-weight: Regular;
-  font-size: 12px;
-  opacity: 1;
-  text-align: left;
 }
 
 .logout-button {
