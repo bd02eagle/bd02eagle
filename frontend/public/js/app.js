@@ -120,35 +120,7 @@ function setActiveNavigation() {
     }
 }
 
-// Simple login function (for demo)
-async function login() {
-  try {
-    const response = await fetch(`${API_BASE}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: 'analyst1@refintel.com',
-        password: 'analyst123'
-      })
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      authToken = data.token;
-      localStorage.setItem('authToken', authToken);
-      console.log('Logged in successfully');
-      return true;
-    } else {
-      console.error('Login failed:', response.status, response.statusText);
-      return false;
-    }
-  } catch (error) {
-    console.error('Login error:', error);
-    return false;
-  }
-}
+// Remove auto-login function - users should login through the login page
 
 // Load events for a specific game
 async function loadEvents(gameId) {
@@ -177,13 +149,10 @@ async function loadEvents(gameId) {
 // Load game data and events
 async function loadGameData() {
   try {
-    // First ensure we're logged in
-    if (!authToken || authToken === 'demo-token') {
-      const loginSuccess = await login();
-      if (!loginSuccess) {
-        displayError('Failed to authenticate');
-        return;
-      }
+    // Check if user is authenticated
+    if (!authToken) {
+      displayError('Please login to view games');
+      return;
     }
 
     // Get games
@@ -196,13 +165,12 @@ async function loadGameData() {
     if (!gamesResponse.ok) {
       console.error('Games request failed:', gamesResponse.status, gamesResponse.statusText);
       
-      // If unauthorized, try to login again
+      // If unauthorized, redirect to login
       if (gamesResponse.status === 401) {
-        const loginSuccess = await login();
-        if (loginSuccess) {
-          // Retry the request
-          return await loadGameData();
-        }
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userRole');
+        window.location.href = '/login.html';
+        return;
       }
       
       throw new Error('Failed to fetch games');
