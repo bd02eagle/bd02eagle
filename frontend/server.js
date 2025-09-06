@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fetch from 'node-fetch';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,20 +19,27 @@ app.use(express.static('public'));
 app.use('/api', async (req, res) => {
   try {
     const backendUrl = `http://0.0.0.0:3000${req.originalUrl}`;
+    console.log('Proxying request to:', backendUrl);
+    
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    
+    if (req.headers.authorization) {
+      headers['Authorization'] = req.headers.authorization;
+    }
+    
     const response = await fetch(backendUrl, {
       method: req.method,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': req.headers.authorization || ''
-      },
-      body: req.method !== 'GET' ? JSON.stringify(req.body) : undefined
+      headers: headers,
+      body: req.method !== 'GET' && req.body ? JSON.stringify(req.body) : undefined
     });
     
     const data = await response.json();
     res.status(response.status).json(data);
   } catch (error) {
     console.error('Proxy error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
 
