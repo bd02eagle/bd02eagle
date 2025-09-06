@@ -143,6 +143,47 @@ async function main() {
     },
   });
 
+  const game3 = await prisma.game.create({
+    data: {
+      date: new Date("2025-01-18T21:00:00Z"),
+      homeTeamId: createdTeams[5].id, // Iowa
+      awayTeamId: createdTeams[3].id, // NC State
+      status: "COMPLETED",
+      homeScore: 85,
+      awayScore: 71,
+      venue: "Carver-Hawkeye Arena",
+      season: "2024-25",
+      gameType: "Regular Season",
+      thumbnail: "https://via.placeholder.com/300x200?text=IOWA+vs+NCST",
+    },
+  });
+
+  const game4 = await prisma.game.create({
+    data: {
+      date: new Date("2025-01-20T18:00:00Z"),
+      homeTeamId: createdTeams[0].id, // UConn
+      awayTeamId: createdTeams[2].id, // Stanford
+      status: "SCHEDULED",
+      venue: "Gampel Pavilion",
+      season: "2024-25",
+      gameType: "Regular Season",
+      thumbnail: "https://via.placeholder.com/300x200?text=CONN+vs+STAN",
+    },
+  });
+
+  const game5 = await prisma.game.create({
+    data: {
+      date: new Date("2025-01-22T19:30:00Z"),
+      homeTeamId: createdTeams[4].id, // LSU
+      awayTeamId: createdTeams[1].id, // South Carolina
+      status: "SCHEDULED",
+      venue: "Pete Maravich Assembly Center",
+      season: "2024-25",
+      gameType: "Regular Season",
+      thumbnail: "https://via.placeholder.com/300x200?text=LSU+vs+SC",
+    },
+  });
+
   // Create events
   const event1 = await prisma.event.create({
     data: {
@@ -174,6 +215,26 @@ async function main() {
     },
   });
 
+  const event4 = await prisma.event.create({
+    data: {
+      gameId: game3.id,
+      timestampMs: 600000, // 10 minutes
+      videoUrl:
+        "https://dvsportreplay.blob.core.windows.net/wbb-clips//VIDEOS//2023-24//SEC//00 CLIPS//LSU//LSU VS KENT ST - 11.14.23 - 10-56-24//PLAY 103 - PGM2023-11-14T12.05.17.MP4",
+      type: "OFFENSIVE_FOUL",
+    },
+  });
+
+  const event5 = await prisma.event.create({
+    data: {
+      gameId: game4.id,
+      timestampMs: 240000, // 4 minutes
+      videoUrl:
+        "https://dvsportreplay.blob.core.windows.net/wbb-clips//VIDEOS//2023-24//BIG 12//00 CLIPS//OKLAHOMA//OKLAHOMA VS ORAL ROBERTS - 11.12.23 - 13-47-33//PLAY 091 - ISO2023-11-12T14.36.15.MP4",
+      type: "TRAVEL",
+    },
+  });
+
   // Create tags
   const tag1 = await prisma.tag.create({
     data: {
@@ -199,6 +260,24 @@ async function main() {
       createdById: charter.id,
       label: "Flagrant 1",
       notes: "Unnecessary contact during shot attempt",
+    },
+  });
+
+  const tag4 = await prisma.tag.create({
+    data: {
+      eventId: event4.id,
+      createdById: charter.id,
+      label: "Offensive Foul",
+      notes: "Player charged into defender",
+    },
+  });
+
+  const tag5 = await prisma.tag.create({
+    data: {
+      eventId: event5.id,
+      createdById: charter.id,
+      label: "Travel Violation",
+      notes: "Player took extra steps without dribbling",
     },
   });
 
@@ -230,12 +309,40 @@ async function main() {
     },
   });
 
+  // Leave tag4 and tag5 without analyst actions for pending work
+
+  // Create sample game assignments
+  await prisma.gameAssignment.createMany({
+    data: [
+      {
+        gameId: game1.id,
+        analystId: analyst1.id,
+        priority: "high",
+        dueDate: new Date("2025-01-20T00:00:00Z"),
+      },
+      {
+        gameId: game2.id,
+        analystId: analyst1.id,
+        priority: "medium",
+        dueDate: new Date("2025-01-22T00:00:00Z"),
+      },
+      {
+        gameId: game1.id,
+        analystId: analyst2.id,
+        priority: "low",
+        dueDate: new Date("2025-01-25T00:00:00Z"),
+      },
+    ],
+    skipDuplicates: true,
+  });
+
   console.log("✅ Database seeded successfully!");
   console.log(`Created ${await prisma.user.count()} users`);
   console.log(`Created ${await prisma.game.count()} games`);
   console.log(`Created ${await prisma.event.count()} events`);
   console.log(`Created ${await prisma.tag.count()} tags`);
   console.log(`Created ${await prisma.analystAction.count()} analyst actions`);
+  console.log(`Created ${await prisma.gameAssignment.count()} game assignments`);
 }
 
 main()
