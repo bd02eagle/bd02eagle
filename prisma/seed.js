@@ -363,9 +363,13 @@ async function main() {
     }
   ];
 
-  const createdAssignments = await prisma.gameAssignment.createMany({
-    data: assignments
-  });
+  const createdAssignments = [];
+  for (const assignment of assignments) {
+    const created = await prisma.gameAssignment.create({
+      data: assignment
+    });
+    createdAssignments.push(created);
+  }
 
   console.log("✅ Database seeded successfully!");
   console.log(`Created ${createdUsers.length} users`);
@@ -373,7 +377,7 @@ async function main() {
   console.log(`Created ${createdEvents.length} events`);
   console.log(`Created ${createdTags.length} tags`);
   console.log(`Created ${createdAnalystActions.length} analyst actions`);
-  console.log(`Created ${createdAssignments.count} game assignments`);
+  console.log(`Created ${createdAssignments.length} game assignments`);
 }
 
 main()
