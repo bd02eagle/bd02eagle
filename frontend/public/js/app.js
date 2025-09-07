@@ -567,7 +567,7 @@ async function loadGameForWorkspace(gameId) {
       throw new Error('Failed to fetch games');
     }
 
-    const games = await gamesResponse.json();
+    const games = await gameResponse.json();
     const game = games.find(g => g.id === gameId);
 
     if (!game) {
