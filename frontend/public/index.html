@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,117 +7,174 @@
   <title>RefIntel - Evaluation Workspace</title>
 </head>
 <body>
-  <div class="v1_4">
-    <div class="v1_5">
-      <div class="v1_6">
-        <!-- Sidebar -->
-        <div class="v1_7">
-          <div class="v1_9">
-            <span class="v1_15">RefIntel</span>
-          </div>
-          <div class="v1_10">
-            <!-- My Games -->
-            <span class="v1_23">My Games</span>
-            <div class="v1_24">
-              <div class="v1_25">
-                <div class="v1_26"></div>
-              </div>
-            </div>
-            <!-- Evaluation Workspace -->
-            <div class="v1_21">
-              <div class="v1_42">
-                <div class="v1_56">
-                  <div class="v1_57">
-                    <div class="v1_58"></div>
-                  </div>
-                </div>
-              </div>
-              <span class="v1_44">Evaluation Workspace</span>
-            </div>
-            <!-- Review Management -->
-            <span class="v1_33">Review Management</span>
-            <div class="v1_34">
-              <div class="v1_35">
-                <div class="v1_36"></div>
-              </div>
-            </div>
-            <!-- Exports -->
-            <span class="v1_28">Exports</span>
-            <div class="v1_29">
-              <div class="v1_30">
-                <div class="v1_31"></div>
-              </div>
-            </div>
-          </div>
-          <!-- User Profile -->
-          <div class="v1_11">
-            <div class="v1_37">
-              <div class="v1_45"></div>
-              <div class="v1_46">
-                <span class="v1_60">Ref Analyst 1</span>
-                <span class="v1_62">RefIntel Analyst</span>
-              </div>
-            </div>
-          </div>
+  <div class="workspace-container">
+    <!-- Left Navigation Sidebar -->
+    <div class="nav-sidebar">
+      <div class="nav-header">
+        <span class="nav-logo">RefIntel</span>
+      </div>
+      <div class="nav-items">
+        <div class="nav-item active" onclick="window.location.href='/index.html'">
+          <span class="nav-icon">📊</span>
+          <span class="nav-text">Evaluation Workspace</span>
         </div>
-
-        <!-- Logout Button -->
-        <div class="logout-button" id="logoutButton">
-          <span>Logout</span>
+        <div class="nav-item" onclick="window.location.href='/my-games.html'">
+          <span class="nav-icon">🎮</span>
+          <span class="nav-text">My Games</span>
         </div>
-
-        <!-- Main Content Area -->
-        <div class="v1_8">
-          <!-- Header -->
-          <div class="v1_12">
-            <div class="v1_38">
-              <span class="v1_48">Evaluation: SC vs. TX</span>
-              <div class="v1_49">
-                <span class="v1_64">PUBLISHED</span>
-              </div>
-            </div>
-            <div class="v1_39">
-              <div class="v1_50">
-                <span class="v1_66">Tagging Progress</span>
-                <span class="v1_68">42 of 128 tagged</span>
-              </div>
-              <div class="v1_51">
-                <div class="v1_69"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Filters and Content -->
-          <div class="v1_13">
-            <div class="v1_40">
-              <div class="v1_52">
-                <span class="v1_71">Filters</span>
-              </div>
-              <!-- Filter controls will be added here -->
-              <div class="v1_75">
-                <div class="v1_87">
-                  <span class="v1_88">Event Type</span>
-                  <div class="v1_90">
-                    <div class="v1_91"></div>
-                  </div>
-                </div>
-                <div class="v1_92">
-                  <span class="v1_93">Status</span>
-                  <div class="v1_96">
-                    <div class="v1_97"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Event List Area -->
-            <div id="event-list" class="event-list">
-              <!-- Events will be loaded here via JavaScript -->
-            </div>
+        <div class="nav-item" onclick="window.location.href='/review-management.html'">
+          <span class="nav-icon">📋</span>
+          <span class="nav-text">Review Management</span>
+        </div>
+        <div class="nav-item" onclick="alert('Exports feature coming soon!')">
+          <span class="nav-icon">📈</span>
+          <span class="nav-text">Exports</span>
+        </div>
+        <div class="nav-item" onclick="alert('Settings feature coming soon!')">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-text">Settings</span>
+        </div>
+      </div>
+      <div class="nav-footer">
+        <div class="user-info">
+          <div class="user-avatar"></div>
+          <div class="user-details">
+            <span class="user-name">Ref Analyst 1</span>
+            <span class="user-role">RefIntel Analyst</span>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <!-- Top Header with Game Info -->
+      <div class="game-header">
+        <div class="game-title-section">
+          <span class="game-title" id="game-title">Evaluation: SC vs. TX</span>
+          <span class="game-status published" id="game-status">PUBLISHED</span>
+        </div>
+        <div class="game-progress">
+          <div class="progress-info">
+            <span class="progress-label">Tagging Progress</span>
+            <span class="progress-count" id="progress-count">42 of 124 tagged</span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar">
+              <div class="progress-fill" id="progress-fill" style="width: 34%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Grid -->
+      <div class="content-grid">
+        <!-- Events List Panel -->
+        <div class="events-panel">
+          <div class="events-header">
+            <h3>Filter Events</h3>
+            <div class="filter-row">
+              <select class="filter-select" id="quarter-filter">
+                <option value="">All Quarters</option>
+                <option value="Q1">1st Quarter</option>
+                <option value="Q2">2nd Quarter</option>
+                <option value="Q3">3rd Quarter</option>
+                <option value="Q4">4th Quarter</option>
+              </select>
+              <select class="filter-select" id="type-filter">
+                <option value="">All Types</option>
+                <option value="Foul">Foul</option>
+                <option value="Violation">Violation</option>
+                <option value="Turnover">Turnover</option>
+                <option value="Stoppage">Stoppage</option>
+              </select>
+            </div>
+          </div>
+          <div class="events-list" id="events-list">
+            <div class="loading">Loading events...</div>
+          </div>
+        </div>
+
+        <!-- Event Details Panel -->
+        <div class="event-details-panel">
+          <div class="event-info-header">
+            <div class="possession-info">
+              <span class="possession-label">POSSESSION: Q4 04:17.5</span>
+            </div>
+            <div class="event-title">
+              <span class="event-number" id="event-number">EVENT #100124</span>
+              <span class="event-type" id="event-type">SHOT</span>
+            </div>
+            <div class="event-actions">
+              <button class="flag-btn" id="flag-btn">🚩 Flag for Review</button>
+              <button class="save-btn" id="save-next-btn">Save & Next →</button>
+            </div>
+          </div>
+
+          <!-- Video Player -->
+          <div class="video-container">
+            <video id="event-video" class="video-player" controls>
+              <source src="" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+            <div class="video-controls">
+              <div class="video-time" id="video-time">2:28:15 / 2:35:30</div>
+              <div class="video-actions">
+                <button class="video-btn" onclick="skipVideo(-10)">-10s</button>
+                <button class="video-btn" onclick="skipVideo(-5)">-5s</button>
+                <button class="video-btn" onclick="skipVideo(5)">+5s</button>
+                <button class="video-btn" onclick="skipVideo(10)">+10s</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Evaluation Form Panel -->
+        <div class="evaluation-form-panel">
+          <div class="form-section">
+            <h4>Infraction Type</h4>
+            <div class="button-group infraction-buttons">
+              <button class="form-btn" data-value="foul">Foul</button>
+              <button class="form-btn" data-value="violation">Violation</button>
+              <button class="form-btn" data-value="turnover">Turnover</button>
+              <button class="form-btn" data-value="stoppage">Stoppage</button>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h4>Infraction Rating</h4>
+            <div class="rating-options">
+              <div class="rating-option">
+                <input type="radio" id="correct-call" name="rating" value="correct">
+                <label for="correct-call" class="correct-label">Correct Call</label>
+              </div>
+              <div class="rating-option">
+                <input type="radio" id="incorrect-call" name="rating" value="incorrect">
+                <label for="incorrect-call" class="incorrect-label">Incorrect Call</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h4>Observability</h4>
+            <div class="button-group observability-buttons">
+              <button class="form-btn" data-value="observable">Observable</button>
+              <button class="form-btn" data-value="unobservable">Unobservable</button>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h4>Notes</h4>
+            <textarea class="notes-textarea" id="notes" placeholder="Add your evaluation notes here..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logout Button -->
+  <div class="logout-button" id="logoutButton">
+    <span>Logout</span>
   </div>
 
   <script src="./js/app.js"></script>

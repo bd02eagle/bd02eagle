@@ -254,9 +254,9 @@ function viewVideo(videoUrl) {
 }
 
 function openGame(gameId) {
-  // Navigate to evaluation workspace with game context
+  // Navigate to main evaluation workspace with game context
   localStorage.setItem('selectedGameId', gameId);
-  window.location.href = '/evaluation.html';
+  window.location.href = '/index.html';
 }
 
 function formatTimestamp(timestampMs) {

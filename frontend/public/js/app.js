@@ -1,293 +1,503 @@
-// API Configuration - Use relative URL to avoid CORS issues  
+
 const API_BASE = '/api';
 let authToken = localStorage.getItem('authToken');
+let currentGameId = null;
+let events = [];
+let currentEventIndex = 0;
+let filteredEvents = [];
 
-// Main app functionality
+// Form state
+let evaluationData = {
+  infractionType: '',
+  rating: '',
+  observability: '',
+  notes: '',
+  flagged: false
+};
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Check authentication
-    const authToken = localStorage.getItem('authToken');
-    if (!authToken) {
-        // Redirect to login page
-        window.location.href = '/login.html';
-        return;
-    }
-
-    // Verify token is still valid
-    verifyToken(authToken).then(valid => {
-        if (!valid) {
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('userRole');
-            window.location.href = '/login.html';
-            return;
-        }
-        
-        // Initialize navigation
-        initNavigation();
-
-        // Initialize the app
-        init();
-    }).catch(error => {
-        console.error('Token verification failed:', error);
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('userRole');
-        window.location.href = '/login.html';
-    });
-});
-
-async function verifyToken(token) {
-    try {
-        const response = await fetch(`${API_BASE}/games`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        return response.ok;
-    } catch (error) {
-        console.error('Token verification error:', error);
-        return false;
-    }
-}
-
-function initNavigation() {
-    // Add click handlers to navigation items
-    const navItems = [
-        { selector: '.v1_23', url: '/my-games.html' },
-        { selector: '.v1_44, .v1_21', url: '/index.html' },
-        { selector: '.v1_33', url: '/review-management.html' },
-        { selector: '.v1_28, .v1_516', url: '/exports.html' }
-    ];
-
-    navItems.forEach(item => {
-        const elements = document.querySelectorAll(item.selector);
-        elements.forEach(element => {
-            element.style.cursor = 'pointer';
-            element.addEventListener('click', () => {
-                if (item.url === '/exports.html') {
-                    // Placeholder page
-                    alert('Exports feature coming soon!');
-                } else {
-                    window.location.href = item.url;
-                }
-            });
-        });
-    });
-}
-
-function init() {
-    console.log('App initialized');
-
-    // Set active navigation state based on current page
-    setActiveNavigation();
-    
-    // Add logout functionality to user profile
-    addLogoutHandler();
-    
-    // Load game data for evaluation workspace
-    if (window.location.pathname.includes('evaluation') || window.location.pathname === '/') {
-        loadGameData();
-    }
-}
-
-function addLogoutHandler() {
-    const logoutButton = document.getElementById('logoutButton');
-    if (logoutButton) {
-        logoutButton.addEventListener('click', function() {
-            if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('authToken');
-                localStorage.removeItem('userRole');
-                window.location.href = '/login.html';
-            }
-        });
-    }
-}
-
-function setActiveNavigation() {
-    const currentPage = window.location.pathname;
-
-    // Reset all nav items
-    document.querySelectorAll('.v1_23, .v1_28, .v1_33, .v1_44').forEach(item => {
-        item.style.color = 'rgba(156,163,175,1)';
-    });
-
-    // Set active state
-    if (currentPage.includes('my-games')) {
-        const myGamesNav = document.querySelector('.v1_23');
-        if (myGamesNav) myGamesNav.style.color = 'rgba(59,130,246,1)';
-    } else if (currentPage.includes('review-management')) {
-        const reviewNav = document.querySelector('.v1_33');
-        if (reviewNav) reviewNav.style.color = 'rgba(59,130,246,1)';
-    } else if (currentPage.includes('evaluation') || currentPage === '/') {
-        const evalNav = document.querySelector('.v1_44');
-        if (evalNav) evalNav.style.color = 'rgba(59,130,246,1)';
-    }
-}
-
-// Remove auto-login function - users should login through the login page
-
-// Load events for a specific game
-async function loadEvents(gameId) {
-  try {
-    const eventsResponse = await fetch(`${API_BASE}/games/${gameId}/events`, {
-      headers: {
-        'Authorization': `Bearer ${authToken}`
-      }
-    });
-
-    if (!eventsResponse.ok) {
-      throw new Error('Failed to fetch events');
-    }
-
-    const events = await eventsResponse.json();
-    console.log('Loaded events:', events);
-    
-    // Here you can update the UI with the events
-    // For now, just log them
-    return events;
-  } catch (error) {
-    console.error('Error loading events:', error);
-  }
-}
-
-// Load game data and events
-async function loadGameData() {
-  try {
-    // Check if user is authenticated
-    if (!authToken) {
-      displayError('Please login to view games');
-      return;
-    }
-
-    // Get games
-    const gamesResponse = await fetch(`${API_BASE}/games`, {
-      headers: {
-        'Authorization': `Bearer ${authToken}`
-      }
-    });
-
-    if (!gamesResponse.ok) {
-      console.error('Games request failed:', gamesResponse.status, gamesResponse.statusText);
-      
-      // If unauthorized, redirect to login
-      if (gamesResponse.status === 401) {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('userRole');
-        window.location.href = '/login.html';
-        return;
-      }
-      
-      throw new Error('Failed to fetch games');
-    }
-
-    const games = await gamesResponse.json();
-    console.log('Loaded games:', games);
-
-    if (games.length > 0) {
-      // Load events for the most recent game
-      const game = games[0];
-      
-      console.log('Selected game:', game);
-      await loadEvents(game.id);
-    } else {
-      displayError('No games found');
-    }
-  } catch (error) {
-    console.error('Error loading games:', error);
-    displayError('Failed to load game data');
-  }
-}
-
-// Load events for a specific game
-async function loadEvents(gameId) {
-  try {
-    const eventsResponse = await fetch(`${API_BASE}/games/${gameId}/events`, {
-      headers: {
-        'Authorization': `Bearer ${authToken}`
-      }
-    });
-
-    if (!eventsResponse.ok) {
-      throw new Error('Failed to fetch events');
-    }
-
-    const events = await eventsResponse.json();
-
-    // Load tags for each event
-    const eventsWithTags = await Promise.all(
-      events.map(async (event) => {
-        const tagsResponse = await fetch(`${API_BASE}/events/${event.id}/tags`, {
-          headers: {
-            'Authorization': `Bearer ${authToken}`
-          }
-        });
-
-        const tags = tagsResponse.ok ? await tagsResponse.json() : [];
-        return { ...event, tags };
-      })
-    );
-
-    displayEvents(eventsWithTags);
-  } catch (error) {
-    console.error('Error loading events:', error);
-    displayError('Failed to load events');
-  }
-}
-
-// Display events in the UI
-function displayEvents(events) {
-  const eventList = document.getElementById('event-list');
-
-  if (events.length === 0) {
-    eventList.innerHTML = '<p style="text-align: center; color: #6B7280; padding: 40px;">No events found</p>';
+  if (!authToken) {
+    window.location.href = '/login.html';
     return;
   }
 
-  eventList.innerHTML = events.map(event => {
-    const hasApprovedTags = event.tags.some(tag => 
-      tag.analystActions && tag.analystActions.some(action => action.action === 'APPROVE')
-    );
-    const hasRequestedChanges = event.tags.some(tag => 
-      tag.analystActions && tag.analystActions.some(action => action.action === 'REQUEST_CHANGES')
-    );
+  initializeApp();
+});
 
-    let status = 'pending';
-    let statusText = 'Pending Review';
+function initializeApp() {
+  setupEventListeners();
+  loadGameFromSelection();
+  setupLogout();
+}
 
-    if (hasRequestedChanges) {
-      status = 'changes-requested';
-      statusText = 'Changes Requested';
-    } else if (hasApprovedTags) {
-      status = 'approved';
-      statusText = 'Approved';
+function setupEventListeners() {
+  // Filter controls
+  document.getElementById('quarter-filter').addEventListener('change', filterEvents);
+  document.getElementById('type-filter').addEventListener('change', filterEvents);
+  
+  // Form controls
+  setupFormControls();
+  
+  // Action buttons
+  document.getElementById('flag-btn').addEventListener('click', toggleFlag);
+  document.getElementById('save-next-btn').addEventListener('click', saveAndNext);
+  
+  // Video controls
+  setupVideoControls();
+}
+
+function setupFormControls() {
+  // Infraction type buttons
+  document.querySelectorAll('.infraction-buttons .form-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectInfractionType(btn.dataset.value);
+    });
+  });
+
+  // Observability buttons
+  document.querySelectorAll('.observability-buttons .form-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectObservability(btn.dataset.value);
+    });
+  });
+
+  // Rating radio buttons
+  document.querySelectorAll('input[name="rating"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      evaluationData.rating = e.target.value;
+    });
+  });
+
+  // Notes textarea
+  document.getElementById('notes').addEventListener('input', (e) => {
+    evaluationData.notes = e.target.value;
+  });
+}
+
+function setupVideoControls() {
+  const video = document.getElementById('event-video');
+  if (video) {
+    video.addEventListener('loadeddata', updateVideoTime);
+    video.addEventListener('timeupdate', updateVideoTime);
+  }
+}
+
+function setupLogout() {
+  const logoutButton = document.getElementById('logoutButton');
+  if (logoutButton) {
+    logoutButton.addEventListener('click', function() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('selectedGameId');
+        window.location.href = '/login.html';
+      }
+    });
+  }
+}
+
+async function loadGameFromSelection() {
+  try {
+    const selectedGameId = localStorage.getItem('selectedGameId');
+    
+    const gamesResponse = await fetch(`${API_BASE}/games`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+
+    if (!gamesResponse.ok) throw new Error('Failed to fetch games');
+    
+    const games = await gamesResponse.json();
+    if (games.length === 0) {
+      showError('No games found');
+      return;
+    }
+
+    let game;
+    if (selectedGameId) {
+      game = games.find(g => g.id === selectedGameId);
+      localStorage.removeItem('selectedGameId'); // Clear selection
+    }
+    
+    if (!game) {
+      game = games[0]; // Default to most recent
+    }
+
+    currentGameId = game.id;
+    updateGameHeader(game);
+    await loadGameEvents(game.id);
+    
+  } catch (error) {
+    console.error('Error loading game:', error);
+    showError('Failed to load game data');
+  }
+}
+
+function updateGameHeader(game) {
+  const gameTitle = document.getElementById('game-title');
+  const gameStatus = document.getElementById('game-status');
+  
+  if (gameTitle) {
+    gameTitle.textContent = `Evaluation: ${game.homeTeam.shortName} vs. ${game.awayTeam.shortName}`;
+  }
+  
+  if (gameStatus) {
+    gameStatus.textContent = game.status === 'COMPLETED' ? 'PUBLISHED' : 'IN PROGRESS';
+    gameStatus.className = `game-status ${game.status === 'COMPLETED' ? 'published' : 'in-progress'}`;
+  }
+}
+
+async function loadGameEvents(gameId) {
+  try {
+    const eventsResponse = await fetch(`${API_BASE}/games/${gameId}/events`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+
+    if (!eventsResponse.ok) throw new Error('Failed to fetch events');
+    
+    events = await eventsResponse.json();
+    
+    // Load tags for each event
+    for (let i = 0; i < events.length; i++) {
+      try {
+        const tagsResponse = await fetch(`${API_BASE}/events/${events[i].id}/tags`, {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        
+        if (tagsResponse.ok) {
+          events[i].tags = await tagsResponse.json();
+        } else {
+          events[i].tags = [];
+        }
+      } catch (error) {
+        console.warn(`Failed to load tags for event ${events[i].id}`);
+        events[i].tags = [];
+      }
+    }
+
+    filteredEvents = [...events];
+    renderEventsList();
+    
+    if (events.length > 0) {
+      selectEvent(0);
+    }
+    
+    updateProgress();
+    
+  } catch (error) {
+    console.error('Error loading events:', error);
+    showError('Failed to load events');
+  }
+}
+
+function renderEventsList() {
+  const eventsList = document.getElementById('events-list');
+  
+  if (filteredEvents.length === 0) {
+    eventsList.innerHTML = '<div class="loading">No events found</div>';
+    return;
+  }
+
+  eventsList.innerHTML = filteredEvents.map((event, index) => {
+    const timeStr = formatEventTime(event.timestampMs);
+    const hasTag = event.tags && event.tags.length > 0;
+    const tagInfo = hasTag ? event.tags[0] : null;
+    
+    let tagClass = 'untagged';
+    let tagText = 'Untagged';
+    
+    if (tagInfo) {
+      if (tagInfo.label.toLowerCase().includes('foul')) {
+        tagClass = 'foul';
+        tagText = 'Foul';
+      } else if (tagInfo.label.toLowerCase().includes('violation')) {
+        tagClass = 'violation';
+        tagText = 'Violation';
+      } else if (tagInfo.label.toLowerCase().includes('turnover')) {
+        tagClass = 'turnover';
+        tagText = 'Turnover';
+      } else {
+        tagClass = 'challenge';
+        tagText = 'Challenge';
+      }
     }
 
     return `
-      <div class="event-item" onclick="openEvaluationWorkspace('${event.id}')">
-        <div class="event-info">
-          <h3>${event.type} - ${formatTimestamp(event.timestampMs)}</h3>
-          <p>${event.tags.length} tag(s) • ${event.tags.map(tag => tag.label).join(', ')}</p>
-        </div>
-        <div class="event-status status-${status}">
-          ${statusText}
+      <div class="event-item ${currentEventIndex === index ? 'active' : ''}" onclick="selectEvent(${index})">
+        <div class="event-time">Q4 - ${timeStr}</div>
+        <div class="event-description">${event.type}</div>
+        <div class="event-id">Event #${String(index + 1).padStart(6, '0')}
+          <span class="event-tag ${tagClass}">${tagText}</span>
         </div>
       </div>
     `;
   }).join('');
 }
 
-// Navigate to evaluation workspace
-function openEvaluationWorkspace(eventId) {
-  window.location.href = `/evaluation?eventId=${eventId}`;
+function selectEvent(index) {
+  if (index < 0 || index >= filteredEvents.length) return;
+  
+  currentEventIndex = index;
+  const event = filteredEvents[index];
+  
+  // Update active event in list
+  document.querySelectorAll('.event-item').forEach((item, i) => {
+    item.classList.toggle('active', i === index);
+  });
+  
+  // Update event details
+  updateEventDetails(event, index);
+  
+  // Load existing tag data if available
+  loadExistingEvaluation(event);
+  
+  // Load video
+  loadEventVideo(event);
 }
 
-// Helper function to format timestamp
-function formatTimestamp(timestampMs) {
+function updateEventDetails(event, index) {
+  const eventNumber = document.getElementById('event-number');
+  const eventType = document.getElementById('event-type');
+  
+  if (eventNumber) {
+    eventNumber.textContent = `EVENT #${String(index + 1).padStart(6, '0')}`;
+  }
+  
+  if (eventType) {
+    eventType.textContent = event.type;
+  }
+}
+
+function loadExistingEvaluation(event) {
+  // Reset form
+  resetEvaluationForm();
+  
+  // If event has tags, load the first one
+  if (event.tags && event.tags.length > 0) {
+    const tag = event.tags[0];
+    
+    // Try to parse evaluation data from tag
+    if (tag.label.includes('foul')) {
+      selectInfractionType('foul');
+    } else if (tag.label.includes('violation')) {
+      selectInfractionType('violation');
+    } else if (tag.label.includes('turnover')) {
+      selectInfractionType('turnover');
+    } else if (tag.label.includes('stoppage')) {
+      selectInfractionType('stoppage');
+    }
+    
+    if (tag.notes) {
+      evaluationData.notes = tag.notes;
+      document.getElementById('notes').value = tag.notes;
+    }
+  }
+}
+
+function resetEvaluationForm() {
+  evaluationData = {
+    infractionType: '',
+    rating: '',
+    observability: '',
+    notes: '',
+    flagged: false
+  };
+  
+  // Reset UI
+  document.querySelectorAll('.form-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  document.querySelectorAll('input[name="rating"]').forEach(radio => {
+    radio.checked = false;
+  });
+  
+  document.getElementById('notes').value = '';
+  updateFlagButton(false);
+}
+
+function selectInfractionType(type) {
+  evaluationData.infractionType = type;
+  
+  document.querySelectorAll('.infraction-buttons .form-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.value === type);
+  });
+}
+
+function selectObservability(type) {
+  evaluationData.observability = type;
+  
+  document.querySelectorAll('.observability-buttons .form-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.value === type);
+  });
+}
+
+function toggleFlag() {
+  evaluationData.flagged = !evaluationData.flagged;
+  updateFlagButton(evaluationData.flagged);
+}
+
+function updateFlagButton(flagged) {
+  const flagBtn = document.getElementById('flag-btn');
+  if (flagBtn) {
+    flagBtn.textContent = flagged ? '🚩 Flagged' : '🚩 Flag for Review';
+    flagBtn.style.background = flagged ? '#fef2f2' : 'white';
+  }
+}
+
+async function saveAndNext() {
+  if (!currentEventIndex >= 0 || !filteredEvents[currentEventIndex]) return;
+  
+  const event = filteredEvents[currentEventIndex];
+  const saveBtn = document.getElementById('save-next-btn');
+  const originalText = saveBtn.textContent;
+  
+  try {
+    saveBtn.textContent = 'Saving...';
+    saveBtn.disabled = true;
+    
+    // Create tag data
+    const tagData = {
+      label: `${evaluationData.infractionType}_${evaluationData.rating}_${evaluationData.observability}`,
+      notes: evaluationData.notes
+    };
+    
+    const response = await fetch(`${API_BASE}/events/${event.id}/tags`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(tagData)
+    });
+    
+    if (!response.ok) throw new Error('Failed to save evaluation');
+    
+    const savedTag = await response.json();
+    
+    // Update local data
+    if (!event.tags) event.tags = [];
+    const existingIndex = event.tags.findIndex(tag => tag.id === savedTag.id);
+    if (existingIndex >= 0) {
+      event.tags[existingIndex] = savedTag;
+    } else {
+      event.tags.push(savedTag);
+    }
+    
+    // Update UI
+    renderEventsList();
+    updateProgress();
+    
+    // Move to next event
+    setTimeout(() => {
+      const nextIndex = currentEventIndex + 1;
+      if (nextIndex < filteredEvents.length) {
+        selectEvent(nextIndex);
+      } else {
+        alert('All events completed!');
+      }
+    }, 500);
+    
+  } catch (error) {
+    console.error('Error saving evaluation:', error);
+    alert('Failed to save evaluation: ' + error.message);
+  } finally {
+    saveBtn.textContent = originalText;
+    saveBtn.disabled = false;
+  }
+}
+
+function loadEventVideo(event) {
+  const video = document.getElementById('event-video');
+  if (!video) return;
+  
+  if (event.videoUrl) {
+    video.src = event.videoUrl;
+    video.load();
+  } else {
+    // Use sample video for demo
+    video.src = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+    video.load();
+  }
+}
+
+function updateVideoTime() {
+  const video = document.getElementById('event-video');
+  const timeDisplay = document.getElementById('video-time');
+  
+  if (video && timeDisplay && video.duration) {
+    const current = formatTime(video.currentTime || 0);
+    const duration = formatTime(video.duration || 0);
+    timeDisplay.textContent = `${current} / ${duration}`;
+  }
+}
+
+function skipVideo(seconds) {
+  const video = document.getElementById('event-video');
+  if (video && video.duration) {
+    video.currentTime = Math.max(0, Math.min(video.duration, video.currentTime + seconds));
+  }
+}
+
+function filterEvents() {
+  const quarterFilter = document.getElementById('quarter-filter').value;
+  const typeFilter = document.getElementById('type-filter').value;
+  
+  filteredEvents = events.filter(event => {
+    const quarterMatch = !quarterFilter || event.quarter === quarterFilter;
+    const typeMatch = !typeFilter || event.type.toLowerCase().includes(typeFilter.toLowerCase());
+    
+    return quarterMatch && typeMatch;
+  });
+  
+  renderEventsList();
+  
+  // Select first event if available
+  if (filteredEvents.length > 0) {
+    selectEvent(0);
+  }
+}
+
+function updateProgress() {
+  const taggedCount = events.filter(event => event.tags && event.tags.length > 0).length;
+  const totalCount = events.length;
+  const percentage = totalCount > 0 ? Math.round((taggedCount / totalCount) * 100) : 0;
+  
+  const progressCount = document.getElementById('progress-count');
+  const progressFill = document.getElementById('progress-fill');
+  
+  if (progressCount) {
+    progressCount.textContent = `${taggedCount} of ${totalCount} tagged`;
+  }
+  
+  if (progressFill) {
+    progressFill.style.width = `${percentage}%`;
+  }
+}
+
+// Utility functions
+function formatEventTime(timestampMs) {
   const minutes = Math.floor(timestampMs / 60000);
   const seconds = Math.floor((timestampMs % 60000) / 1000);
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
-// Display error message
-function displayError(message) {
-  const eventList = document.getElementById('event-list');
-  eventList.innerHTML = `<p style="text-align: center; color: #EF4444; padding: 40px;">${message}</p>`;
+function formatTime(seconds) {
+  if (isNaN(seconds)) return '0:00';
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+  
+  if (hours > 0) {
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  } else {
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+  }
 }
+
+function showError(message) {
+  document.getElementById('events-list').innerHTML = `<div class="error">${message}</div>`;
+}
+
+// Global functions for event handlers
+window.selectEvent = selectEvent;
+window.skipVideo = skipVideo;
