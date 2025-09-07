@@ -23,17 +23,17 @@ document.addEventListener('DOMContentLoaded', function() {
   // Check if we're on workspace page first
   if (window.location.pathname === '/workspace.html' || window.location.pathname === '/') {
     console.log('On workspace page, checking for game ID...');
-    
+
     const urlParams = new URLSearchParams(window.location.search);
     const gameIdFromUrl = urlParams.get('gameId');
     const gameIdFromStorage = localStorage.getItem('selectedGameId');
-    
+
     console.log('Game ID from URL:', gameIdFromUrl);
     console.log('Game ID from storage:', gameIdFromStorage);
-    
+
     // Use URL game ID first, then storage, then default
     const gameId = gameIdFromUrl || gameIdFromStorage;
-    
+
     if (gameId) {
       console.log('Loading game data for workspace:', gameId);
       loadGameForWorkspace(gameId);
@@ -57,7 +57,7 @@ function setupEventListeners() {
   // Filter controls - add null checks
   const quarterFilter = document.getElementById('quarter-filter');
   const typeFilter = document.getElementById('type-filter');
-  
+
   if (quarterFilter) {
     quarterFilter.addEventListener('change', filterEvents);
   }
@@ -72,7 +72,7 @@ function setupEventListeners() {
   const annotateBtn = document.getElementById('annotate-event-btn');
   const nextBtn = document.getElementById('next-event-btn');
   const viewTagsBtn = document.getElementById('view-tags-btn');
-  
+
   if (annotateBtn) {
     annotateBtn.addEventListener('click', annotateEvent);
   }
@@ -454,7 +454,7 @@ function annotateEvent() {
 
 function nextEvent() {
   if (filteredEvents.length === 0) return;
-  
+
   const nextIndex = currentEventIndex + 1;
   if (nextIndex < filteredEvents.length) {
     currentEventIndex = nextIndex;
@@ -462,9 +462,9 @@ function nextEvent() {
     // Cycle back to the first event
     currentEventIndex = 0;
   }
-  
+
   console.log('Next event - moving to index:', currentEventIndex);
-  
+
   // Use selectEvent to properly update everything
   selectEvent(currentEventIndex);
 }
@@ -501,12 +501,12 @@ function loadEventVideo(event) {
     video.src = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
     video.load();
   }
-  
+
   // Add error handling
   video.onerror = function() {
     console.error('Video failed to load:', event.videoUrl);
   };
-  
+
   video.onloadeddata = function() {
     console.log('Video loaded successfully');
   };
@@ -631,10 +631,10 @@ async function loadGameForWorkspace(gameId) {
       throw new Error(`Failed to fetch games: ${gameResponse.status}`);
     }
 
-    const games = await gameResponse.json();
+    const games = await gamesResponse.json();
     console.log('Total games fetched:', games.length);
     console.log('Games:', games.map(g => ({ id: g.id, homeTeam: g.homeTeam, awayTeam: g.awayTeam })));
-    
+
     const game = games.find(g => g.id === gameId);
     console.log('Found matching game:', !!game);
 
@@ -683,6 +683,12 @@ async function loadGameForWorkspace(gameId) {
       // Small delay to ensure DOM is ready
       setTimeout(() => {
         selectEvent(0);
+        // Enable the annotate button after selection
+        const annotateBtn = document.getElementById('annotate-event-btn');
+        if (annotateBtn) {
+          annotateBtn.disabled = false;
+          annotateBtn.style.opacity = '1';
+        }
       }, 100);
     }
 
@@ -788,7 +794,7 @@ function formatTimestamp(timestampMs) {
 
 function selectEvent(index) {
   console.log('Selecting event at index:', index, 'Total events:', filteredEvents.length);
-  
+
   if (index < 0 || index >= filteredEvents.length || !filteredEvents[index]) {
     console.warn('Invalid event index:', index);
     return;
@@ -796,26 +802,26 @@ function selectEvent(index) {
 
   const event = filteredEvents[index];
   currentEventIndex = index;
-  
+
   console.log('Selected event:', event.type, 'at', formatEventTime(event.timestampMs));
-  
+
   // Update active event in list
   document.querySelectorAll('.event-item').forEach((item, i) => {
     item.classList.toggle('active', i === index);
   });
-  
+
   // Update event details
   updateEventDetails(event, index);
-  
+
   // Load existing evaluation data
   loadExistingEvaluation(event);
-  
+
   // Load video
   loadEventVideo(event);
-  
+
   // Check if we're on workspace page - if so, don't redirect on click
   const isWorkspacePage = window.location.pathname === '/workspace.html' || window.location.pathname === '/';
-  
+
   if (!isWorkspacePage) {
     // On evaluation page, we might want additional behavior
     console.log('Event selected on evaluation page');
