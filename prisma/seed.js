@@ -59,133 +59,125 @@ async function main() {
   const createdUsers = [adminUser, analyst1, analyst2, charter];
 
 
-  // Create teams - Women's College Basketball
-  const teams = [
-    {
-      name: "UConn Huskies",
-      shortName: "CONN",
-      primaryColor: "#000E2F",
-      secondaryColor: "#C8102E",
-    },
-    {
-      name: "South Carolina Gamecocks",
-      shortName: "SC",
-      primaryColor: "#73000A",
-      secondaryColor: "#000000",
-    },
-    {
-      name: "Stanford Cardinal",
-      shortName: "STAN",
-      primaryColor: "#8C1515",
-      secondaryColor: "#FFFFFF",
-    },
-    {
-      name: "NC State Wolfpack",
-      shortName: "NCST",
-      primaryColor: "#CC0000",
-      secondaryColor: "#000000",
-    },
-    {
-      name: "LSU Tigers",
-      shortName: "LSU",
-      primaryColor: "#461D7C",
-      secondaryColor: "#FDD023",
-    },
-    {
-      name: "Iowa Hawkeyes",
-      shortName: "IOWA",
-      primaryColor: "#FFCD00",
-      secondaryColor: "#000000",
-    },
-  ];
-
-  const createdTeams = [];
-  for (const team of teams) {
-    const createdTeam = await prisma.team.upsert({
-      where: { name: team.name },
+  // Create teams first
+  const teams = await Promise.all([
+    prisma.team.upsert({
+      where: { name: 'South Carolina Gamecocks' },
       update: {},
       create: {
-        name: team.name,
-        shortName: team.shortName,
-        primaryColor: team.primaryColor,
-        secondaryColor: team.secondaryColor,
-        logo: `https://via.placeholder.com/100?text=${team.shortName}`, // Placeholder logo
+        name: 'South Carolina Gamecocks',
+        shortName: 'SC',
+        primaryColor: '#73000A',
+        secondaryColor: '#000000'
+      }
+    }),
+    prisma.team.upsert({
+      where: { name: 'Texas Longhorns' },
+      update: {},
+      create: {
+        name: 'Texas Longhorns', 
+        shortName: 'TX',
+        primaryColor: '#BF5700',
+        secondaryColor: '#FFFFFF'
+      }
+    }),
+    prisma.team.upsert({
+      where: { name: 'Duke Blue Devils' },
+      update: {},
+      create: {
+        name: 'Duke Blue Devils',
+        shortName: 'DUKE',
+        primaryColor: '#001A57',
+        secondaryColor: '#FFFFFF'
+      }
+    }),
+    prisma.team.upsert({
+      where: { name: 'North Carolina Tar Heels' },
+      update: {},
+      create: {
+        name: 'North Carolina Tar Heels',
+        shortName: 'UNC',
+        primaryColor: '#4B9CD3',
+        secondaryColor: '#FFFFFF'
+      }
+    })
+  ]);
+
+  console.log(`Created ${teams.length} teams`);
+
+  // Create games with proper team references
+  const games = await Promise.all([
+    prisma.game.create({
+      data: {
+        date: new Date("2025-01-15T19:00:00Z"),
+        homeTeamId: teams[0].id, // South Carolina
+        awayTeamId: teams[1].id, // UConn
+        status: "COMPLETED",
+        homeScore: 78,
+        awayScore: 72,
+        venue: "Colonial Life Arena",
+        season: "2024-25",
+        gameType: "Regular Season",
+        thumbnail: "https://via.placeholder.com/300x200?text=SC+vs+CONN",
       },
-    });
-    createdTeams.push(createdTeam);
-  }
+    }),
 
-  // Create games with enhanced data
-  const game1 = await prisma.game.create({
-    data: {
-      date: new Date("2025-01-15T19:00:00Z"),
-      homeTeamId: createdTeams[1].id, // South Carolina
-      awayTeamId: createdTeams[0].id, // UConn
-      status: "COMPLETED",
-      homeScore: 78,
-      awayScore: 72,
-      venue: "Colonial Life Arena",
-      season: "2024-25",
-      gameType: "Regular Season",
-      thumbnail: "https://via.placeholder.com/300x200?text=SC+vs+CONN",
-    },
-  });
+    prisma.game.create({
+      data: {
+        date: new Date("2025-01-16T20:30:00Z"),
+        homeTeamId: teams[2].id, // Stanford
+        awayTeamId: teams[4].id, // LSU
+        status: "COMPLETED",
+        homeScore: 82,
+        awayScore: 79,
+        venue: "Maples Pavilion",
+        season: "2024-25",
+        gameType: "Regular Season",
+        thumbnail: "https://via.placeholder.com/300x200?text=STAN+vs+LSU",
+      },
+    }),
 
-  const game2 = await prisma.game.create({
-    data: {
-      date: new Date("2025-01-16T20:30:00Z"),
-      homeTeamId: createdTeams[2].id, // Stanford
-      awayTeamId: createdTeams[4].id, // LSU
-      status: "COMPLETED",
-      homeScore: 82,
-      awayScore: 79,
-      venue: "Maples Pavilion",
-      season: "2024-25",
-      gameType: "Regular Season",
-      thumbnail: "https://via.placeholder.com/300x200?text=STAN+vs+LSU",
-    },
-  });
+    prisma.game.create({
+      data: {
+        date: new Date("2025-01-18T21:00:00Z"),
+        homeTeamId: teams[5].id, // Iowa
+        awayTeamId: teams[3].id, // NC State
+        status: "COMPLETED",
+        homeScore: 85,
+        awayScore: 71,
+        venue: "Carver-Hawkeye Arena",
+        season: "2024-25",
+        gameType: "Regular Season",
+        thumbnail: "https://via.placeholder.com/300x200?text=IOWA+vs+NCST",
+      },
+    }),
 
-  const game3 = await prisma.game.create({
-    data: {
-      date: new Date("2025-01-18T21:00:00Z"),
-      homeTeamId: createdTeams[5].id, // Iowa
-      awayTeamId: createdTeams[3].id, // NC State
-      status: "COMPLETED",
-      homeScore: 85,
-      awayScore: 71,
-      venue: "Carver-Hawkeye Arena",
-      season: "2024-25",
-      gameType: "Regular Season",
-      thumbnail: "https://via.placeholder.com/300x200?text=IOWA+vs+NCST",
-    },
-  });
+    prisma.game.create({
+      data: {
+        date: new Date("2025-01-20T18:00:00Z"),
+        homeTeamId: teams[0].id, // UConn
+        awayTeamId: teams[2].id, // Stanford
+        status: "SCHEDULED",
+        venue: "Gampel Pavilion",
+        season: "2024-25",
+        gameType: "Regular Season",
+        thumbnail: "https://via.placeholder.com/300x200?text=CONN+vs+STAN",
+      },
+    }),
 
-  const game4 = await prisma.game.create({
-    data: {
-      date: new Date("2025-01-20T18:00:00Z"),
-      homeTeamId: createdTeams[0].id, // UConn
-      awayTeamId: createdTeams[2].id, // Stanford
-      status: "SCHEDULED",
-      venue: "Gampel Pavilion",
-      season: "2024-25",
-      gameType: "Regular Season",
-      thumbnail: "https://via.placeholder.com/300x200?text=CONN+vs+STAN",
-    },
-  });
-
-  const game5 = await prisma.game.create({
-    data: {
-      date: new Date("2025-01-22T19:30:00Z"),
-      homeTeamId: createdTeams[4].id, // LSU
-      awayTeamId: createdTeams[1].id, // South Carolina
-      status: "SCHEDULED",
-      venue: "Pete Maravich Assembly Center",
-      season: "2024-25",
-      gameType: "Regular Season",
-      thumbnail: "https://via.placeholder.com/300x200?text=LSU+vs+SC",
-    },
-  });
+    prisma.game.create({
+      data: {
+        date: new Date("2025-01-22T19:30:00Z"),
+        homeTeamId: teams[4].id, // LSU
+        awayTeamId: teams[1].id, // South Carolina
+        status: "SCHEDULED",
+        venue: "Pete Maravich Assembly Center",
+        season: "2024-25",
+        gameType: "Regular Season",
+        thumbnail: "https://via.placeholder.com/300x200?text=LSU+vs+SC",
+      },
+    }),
+  ]);
 
   const createdGames = [game1, game2, game3, game4, game5];
 

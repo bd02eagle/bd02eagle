@@ -12,7 +12,15 @@ r.get("/", requireAuth(["ADMIN","ANALYST","CHARTER"]), async (_req, res) => {
       awayTeam: true
     }
   });
-  res.json(games);
+
+  // Ensure consistent data format
+  const formattedGames = games.map(game => ({
+    ...game,
+    homeTeam: game.homeTeam || { name: 'Home', shortName: 'HOME' },
+    awayTeam: game.awayTeam || { name: 'Away', shortName: 'AWAY' }
+  }));
+
+  res.json(formattedGames);
 });
 
 r.post("/", requireAuth(["ADMIN"]), async (req, res) => {
