@@ -12,7 +12,7 @@ const PORT = 5000;
 
 app.use(cors());
 app.use(express.json());
-// Removed express.static('public') as it will be handled by specific routes.
+app.use(express.static('public'));
 
 // Proxy API requests to backend
 app.use('/api', async (req, res) => {
