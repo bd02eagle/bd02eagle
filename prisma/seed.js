@@ -299,7 +299,6 @@ async function main() {
 
   // Create game assignments
   console.log('Creating game assignments...');
-  const analyst1 = createdUsers.find(u => u.email === 'analyst1@refintel.com');
   const assignments = await prisma.gameAssignment.createMany({
     data: [
       {
