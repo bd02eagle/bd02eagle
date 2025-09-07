@@ -650,8 +650,14 @@ async function loadGameForWorkspace(gameId) {
     updateEventsList(loadedEvents);
     renderEventsList();
 
+    // For workspace, just select the first event without redirecting
     if (loadedEvents.length > 0) {
-      selectEvent(0);
+      currentEventIndex = 0;
+      if (loadedEvents[0]) {
+        updateEventDetails(loadedEvents[0], 0);
+        loadEventVideo(loadedEvents[0]);
+        loadExistingEvaluation(loadedEvents[0]);
+      }
     }
 
     console.log('=== Game loading completed successfully ===');
@@ -717,15 +723,17 @@ function updateEventsList(events) {
     return;
   }
 
+  const isWorkspacePage = window.location.pathname === '/workspace.html' || window.location.pathname === '/';
+
   eventsList.innerHTML = events.map((event, index) => `
-    <div class="event-item" onclick="selectEvent(${index})" data-event-id="${event.id}">
+    <div class="event-item ${index === 0 ? 'active' : ''}" onclick="selectEvent(${index})" data-event-id="${event.id}">
       <div class="event-info">
         <div class="event-timestamp">${formatTimestamp(event.timestampMs)}</div>
         <div class="event-type">${event.type || 'Unknown'}</div>
       </div>
       <div class="event-actions">
         <button class="evaluate-btn" onclick="event.stopPropagation(); evaluateEvent('${event.id}')">
-          Evaluate
+          ${isWorkspacePage ? 'Evaluate' : 'View Details'}
         </button>
       </div>
     </div>
@@ -750,9 +758,29 @@ function formatTimestamp(timestampMs) {
 
 function selectEvent(index) {
   console.log('Selecting event at index:', index);
-  if (window.events && window.events[index]) {
-    const event = window.events[index];
-    evaluateEvent(event.id);
+  
+  // Check if we're on workspace page - if so, just highlight the event
+  if (window.location.pathname === '/workspace.html' || window.location.pathname === '/') {
+    if (window.events && window.events[index]) {
+      const event = window.events[index];
+      
+      // Update active event in list
+      document.querySelectorAll('.event-item').forEach((item, i) => {
+        item.classList.toggle('active', i === index);
+      });
+      
+      // Update event details without redirecting
+      updateEventDetails(event, index);
+      loadEventVideo(event);
+      loadExistingEvaluation(event);
+      currentEventIndex = index;
+    }
+  } else {
+    // On other pages, redirect to evaluation
+    if (window.events && window.events[index]) {
+      const event = window.events[index];
+      evaluateEvent(event.id);
+    }
   }
 }
 
