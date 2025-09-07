@@ -54,46 +54,37 @@ function initializeApp() {
 }
 
 function setupEventListeners() {
-  // Filter controls - add null checks
-  const quarterFilter = document.getElementById('quarter-filter');
-  const typeFilter = document.getElementById('type-filter');
+  console.log('Setting up event listeners');
 
-  if (quarterFilter) {
-    quarterFilter.addEventListener('change', filterEvents);
-  }
-  if (typeFilter) {
-    typeFilter.addEventListener('change', filterEvents);
-  }
+  // Use a more robust approach to ensure button exists
+  setTimeout(() => {
+    const annotateBtn = document.getElementById('annotate-event-btn');
+    const nextBtn = document.getElementById('next-event-btn');
+    const prevBtn = document.getElementById('prev-event-btn');
+    const viewTagsBtn = document.getElementById('view-tags-btn');
 
-  // Form controls
-  setupFormControls();
+    if (annotateBtn) {
+      console.log('Setting up annotate button event listener');
+      // Clear any existing listeners first
+      annotateBtn.removeEventListener('click', annotateEvent);
+      annotateBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log('Annotate button physically clicked!');
+        annotateEvent();
+      });
 
-  // Action buttons - add null checks
-  const annotateBtn = document.getElementById('annotate-event-btn');
-  const nextBtn = document.getElementById('next-event-btn');
-  const viewTagsBtn = document.getElementById('view-tags-btn');
+      // Ensure button is enabled
+      annotateBtn.disabled = false;
+      annotateBtn.style.opacity = '1';
+      annotateBtn.style.pointerEvents = 'auto';
+    } else {
+      console.warn('Annotate button not found during setup');
+    }
 
-  if (annotateBtn) {
-    console.log('Setting up annotate button event listener');
-    annotateBtn.addEventListener('click', annotateEvent);
-    
-    // Also add debug logging on click
-    annotateBtn.addEventListener('click', function() {
-      console.log('Annotate button physically clicked!');
-    });
-  } else {
-    console.warn('Annotate button not found during setup');
-  }
-  
-  if (nextBtn) {
-    nextBtn.addEventListener('click', nextEvent);
-  }
-  if (viewTagsBtn) {
-    viewTagsBtn.addEventListener('click', viewEventTags);
-  }
-
-  // Video controls
-  setupVideoControls();
+    if (nextBtn) {
+      nextBtn.addEventListener('click', nextEvent);
+    }
+  }, 500);
 }
 
 function setupFormControls() {
@@ -448,51 +439,44 @@ function updateFlagButton(flagged) {
 }
 
 function annotateEvent() {
-  console.log('=== MAIN ANNOTATE BUTTON CLICKED ===');
+  console.log('=== ANNOTATE EVENT CLICKED ===');
   console.log('Current event index:', currentEventIndex);
-  console.log('Total filtered events:', filteredEvents.length);
-  
-  if (!filteredEvents[currentEventIndex]) {
-    console.error('No current event selected');
-    alert('Please select an event first');
+  console.log('Filtered events length:', filteredEvents.length);
+  console.log('Current game ID:', currentGameId);
+
+  if (currentEventIndex < 0 || currentEventIndex >= filteredEvents.length) {
+    console.error('No valid event selected');
+    alert('Please select a valid event first');
     return;
   }
 
   const event = filteredEvents[currentEventIndex];
-  console.log('Current event to annotate:', event.type, 'ID:', event.id);
-
-  // Visual feedback
-  const annotateBtn = document.getElementById('annotate-event-btn');
-  if (annotateBtn) {
-    annotateBtn.textContent = 'Opening...';
-    annotateBtn.style.background = '#059669';
+  if (!event) {
+    console.error('No event found at current index');
+    alert('No event selected');
+    return;
   }
 
-  // Store the current event context and navigate to detailed evaluation
-  localStorage.setItem('currentEventId', event.id);
-  localStorage.setItem('currentEventIndex', currentEventIndex.toString());
+  console.log('Selected event for annotation:', event);
+
+  // Set the current event ID for evaluation
+  currentEventId = event.id;
+
+  // Store in localStorage for persistence
+  localStorage.setItem('selectedEventId', event.id);
   localStorage.setItem('selectedGameId', currentGameId);
 
-  console.log('Stored in localStorage:');
-  console.log('- currentEventId:', event.id);
-  console.log('- currentEventIndex:', currentEventIndex.toString());
-  console.log('- selectedGameId:', currentGameId);
+  console.log('Navigating to evaluation page with event:', event.id);
 
-  // Navigate to evaluation page with URL parameters for immediate access
-  const evaluationUrl = `/evaluation.html?eventId=${event.id}&gameId=${currentGameId}&eventIndex=${currentEventIndex}`;
-  console.log('Navigating to:', evaluationUrl);
-  
-  // Small delay to show visual feedback
-  setTimeout(() => {
-    window.location.href = evaluationUrl;
-  }, 200);
+  // Navigate to evaluation page
+  window.location.href = `/evaluation.html?eventId=${event.id}&gameId=${currentGameId}`;
 }
 
 function annotateSpecificEvent(eventIndex) {
   console.log('=== ANNOTATE EVENT CLICKED ===');
   console.log('Event index:', eventIndex);
   console.log('Total filtered events:', filteredEvents.length);
-  
+
   if (!filteredEvents[eventIndex]) {
     console.error('No event found at index:', eventIndex);
     alert('Event not found. Please try again.');
@@ -522,7 +506,7 @@ function annotateSpecificEvent(eventIndex) {
   // Navigate to evaluation page with URL parameters for immediate access
   const evaluationUrl = `/evaluation.html?eventId=${event.id}&gameId=${currentGameId}&eventIndex=${eventIndex}`;
   console.log('Navigating to:', evaluationUrl);
-  
+
   // Small delay to show visual feedback
   setTimeout(() => {
     window.location.href = evaluationUrl;
@@ -760,7 +744,7 @@ async function loadGameForWorkspace(gameId) {
       // Small delay to ensure DOM is ready
       setTimeout(() => {
         selectEvent(0);
-        
+
         // Enable the annotate button after selection
         const annotateBtn = document.getElementById('annotate-event-btn');
         if (annotateBtn) {
@@ -769,7 +753,7 @@ async function loadGameForWorkspace(gameId) {
           annotateBtn.style.opacity = '1';
           annotateBtn.style.pointerEvents = 'auto';
           annotateBtn.style.cursor = 'pointer';
-          
+
           // Make sure the event listener is attached
           annotateBtn.removeEventListener('click', annotateEvent);
           annotateBtn.addEventListener('click', annotateEvent);
