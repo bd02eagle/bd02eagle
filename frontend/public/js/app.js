@@ -21,6 +21,19 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   initializeApp();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  // Load game data if we're on workspace page and have a game ID
+  if (window.location.pathname === '/workspace.html' || window.location.pathname === '/') {
+    const gameId = urlParams.get('gameId');
+    if (gameId) {
+      console.log('Loading game data for workspace:', gameId);
+      loadGameForWorkspace(gameId);
+    } else {
+      console.log('No game ID provided, showing default state');
+      showDefaultWorkspaceState();
+    }
+  }
 });
 
 function initializeApp() {
@@ -116,7 +129,7 @@ async function loadGameFromSelection() {
 
     const games = await gamesResponse.json();
     console.log('Fetched games:', games);
-    
+
     if (games.length === 0) {
       showError('No games found');
       return;
@@ -193,7 +206,7 @@ function updateGameHeader(game) {
 async function loadGameEvents(gameId) {
   try {
     console.log('Loading events for game:', gameId);
-    
+
     const eventsResponse = await fetch(`${API_BASE}/games/${gameId}/events`, {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
@@ -524,7 +537,7 @@ function showError(message) {
   if (eventsList) {
     eventsList.innerHTML = `<div class="error" style="color: #dc2626; padding: 20px; text-align: center;">${message}</div>`;
   }
-  
+
   // Also show error in game title if loading failed
   const gameTitle = document.getElementById('game-title');
   if (gameTitle && message.includes('game data')) {
@@ -532,6 +545,124 @@ function showError(message) {
     gameTitle.style.color = '#dc2626';
   }
 }
+
+// --- Workspace specific functions ---
+
+function showDefaultWorkspaceState() {
+  console.log('Showing default workspace state');
+  document.getElementById('game-title').textContent = 'No game selected';
+  document.getElementById('events-list').innerHTML = '<div class="loading">Please select a game from "My Games"</div>';
+}
+
+async function loadGameForWorkspace(gameId) {
+  try {
+    console.log('Fetching game data for:', gameId);
+
+    // Fetch game details
+    const gameResponse = await fetch(`${API_BASE}/games`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+
+    if (!gameResponse.ok) {
+      throw new Error('Failed to fetch games');
+    }
+
+    const games = await gameResponse.json();
+    const game = games.find(g => g.id === gameId);
+
+    if (!game) {
+      throw new Error('Game not found');
+    }
+
+    console.log('Found game:', game);
+
+    // Update game info in UI
+    updateGameInfo(game);
+
+    // Fetch events for this game
+    const eventsResponse = await fetch(`${API_BASE}/games/${gameId}/events`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+
+    if (!eventsResponse.ok) {
+      throw new Error('Failed to fetch events');
+    }
+
+    const events = await eventsResponse.json();
+    console.log('Found events:', events);
+
+    // Update events list
+    updateEventsList(events);
+
+    // Set the current game ID globally
+    window.currentGameId = gameId;
+
+  } catch (error) {
+    console.error('Error loading game for workspace:', error);
+    showError('Failed to load game data');
+  }
+}
+
+function updateGameInfo(game) {
+  console.log('Updating game info with:', game);
+
+  // Update game details in header
+  const gameInfoElement = document.querySelector('.v1_51 .v1_55');
+  if (gameInfoElement) {
+    const awayTeam = game.awayTeam?.shortName || game.awayTeam?.name || 'Away';
+    const homeTeam = game.homeTeam?.shortName || game.homeTeam?.name || 'Home';
+    gameInfoElement.textContent = `${awayTeam} vs ${homeTeam}`;
+  }
+
+  // Update date
+  const dateElement = document.querySelector('.v1_51 .v1_56');
+  if (dateElement) {
+    const gameDate = new Date(game.date);
+    dateElement.textContent = gameDate.toLocaleDateString();
+  }
+
+  // Update score if available
+  const scoreElement = document.querySelector('.v1_51 .v1_57');
+  if (scoreElement && game.homeScore !== null && game.awayScore !== null) {
+    scoreElement.textContent = `${game.awayScore} - ${game.homeScore}`;
+  }
+}
+
+function updateEventsList(events) {
+  console.log('Updating events list with:', events);
+  // This function might be similar to renderEventsList but tailored for workspace
+  // For now, let's reuse renderEventsList
+  // If specific workspace logic is needed, it should be added here.
+  // For this fix, we assume renderEventsList is sufficient.
+  
+  // Ensure the global 'events' and 'filteredEvents' are updated
+  window.events = events;
+  window.filteredEvents = [...events];
+  window.currentEventIndex = 0; // Reset index for new game
+
+  renderEventsList();
+  updateProgress(); // Update progress for the newly loaded game
+  
+  // If there are events, select the first one
+  if (events.length > 0) {
+    selectEvent(0);
+  } else {
+    // If no events, clear the event details
+    document.getElementById('event-number').textContent = '';
+    document.getElementById('event-type').textContent = '';
+    document.getElementById('event-time-detail').textContent = '';
+    document.getElementById('event-type-detail').textContent = '';
+    document.getElementById('event-status').textContent = '';
+    document.getElementById('event-tags-list').innerHTML = '';
+    const video = document.getElementById('event-video');
+    if (video) {
+      video.removeAttribute('src');
+      video.load();
+    }
+    document.getElementById('video-time').textContent = '0:00 / 0:00';
+  }
+}
+
 
 // Global functions for event handlers
 window.selectEvent = selectEvent;

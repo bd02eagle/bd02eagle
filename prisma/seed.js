@@ -179,17 +179,17 @@ async function main() {
     }),
   ]);
 
-  const createdGames = [games[0], games[1], games[2], games[3], games[4]];
+  const createdGames = games;
 
 
   // Create events for each game
   console.log('Creating events...');
   const events = [];
   const eventTypes = ["FOUL", "TECHNICAL_FOUL", "FLAGRANT_FOUL", "OFFENSIVE_FOUL", "TRAVEL"];
-  for (let i = 0; i < games.length; i++) {
+  for (let i = 0; i < createdGames.length; i++) {
     const event = await prisma.event.create({
       data: {
-        gameId: games[i].id,
+        gameId: createdGames[i].id,
         timestampMs: Math.floor(Math.random() * 3600000), // Random timestamp within an hour
         videoUrl: `https://example.com/video${i + 1}.mp4`,
         type: eventTypes[Math.floor(Math.random() * eventTypes.length)]
@@ -232,10 +232,10 @@ async function main() {
   // Create game assignments
   console.log('Creating game assignments...');
   const gameAssignments = [];
-  for (let i = 0; i < Math.min(3, games.length); i++) {
+  for (let i = 0; i < Math.min(3, createdGames.length); i++) {
     const assignment = await prisma.gameAssignment.create({
       data: {
-        gameId: games[i].id,
+        gameId: createdGames[i].id,
         analystId: analyst1.id, // Analyst user
         priority: ['high', 'medium', 'low'][i % 3],
         dueDate: new Date(Date.now() + (i + 1) * 24 * 60 * 60 * 1000) // Due in 1-3 days
