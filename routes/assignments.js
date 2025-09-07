@@ -59,10 +59,12 @@ r.get("/my-games", requireAuth(["ANALYST", "ADMIN"]), async (req, res) => {
       };
     });
 
+    console.log('Returning assignments with progress:', assignmentsWithProgress.length);
     res.json(assignmentsWithProgress);
+
   } catch (error) {
     console.error('Error fetching assignments:', error);
-    res.status(500).json({ error: 'Failed to fetch assignments' });
+    res.status(500).json({ error: 'Failed to fetch assignments', details: error.message });
   }
 });
 
