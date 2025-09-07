@@ -105,10 +105,15 @@ async function main() {
 
   console.log(`Created ${teams.length} teams`);
 
-  // Create games with proper team references
+  // Create games with proper team references (using unique identifiers)
   const games = await Promise.all([
-    prisma.game.create({
-      data: {
+    prisma.game.upsert({
+      where: { 
+        id: "game-sc-vs-tx-20250115" 
+      },
+      update: {},
+      create: {
+        id: "game-sc-vs-tx-20250115",
         date: new Date("2025-01-15T19:00:00Z"),
         homeTeamId: teams[0].id, // South Carolina
         awayTeamId: teams[1].id, // Texas Longhorns
@@ -122,8 +127,13 @@ async function main() {
       },
     }),
 
-    prisma.game.create({
-      data: {
+    prisma.game.upsert({
+      where: { 
+        id: "game-duke-vs-unc-20250116" 
+      },
+      update: {},
+      create: {
+        id: "game-duke-vs-unc-20250116",
         date: new Date("2025-01-16T20:30:00Z"),
         homeTeamId: teams[2].id, // Duke Blue Devils
         awayTeamId: teams[3].id, // North Carolina Tar Heels
@@ -137,8 +147,13 @@ async function main() {
       },
     }),
 
-    prisma.game.create({
-      data: {
+    prisma.game.upsert({
+      where: { 
+        id: "game-unc-vs-sc-20250118" 
+      },
+      update: {},
+      create: {
+        id: "game-unc-vs-sc-20250118",
         date: new Date("2025-01-18T21:00:00Z"),
         homeTeamId: teams[3].id, // North Carolina Tar Heels
         awayTeamId: teams[0].id, // South Carolina Gamecocks
@@ -152,8 +167,13 @@ async function main() {
       },
     }),
 
-    prisma.game.create({
-      data: {
+    prisma.game.upsert({
+      where: { 
+        id: "game-tx-vs-duke-20250120" 
+      },
+      update: {},
+      create: {
+        id: "game-tx-vs-duke-20250120",
         date: new Date("2025-01-20T18:00:00Z"),
         homeTeamId: teams[1].id, // Texas Longhorns
         awayTeamId: teams[2].id, // Duke Blue Devils
@@ -165,8 +185,13 @@ async function main() {
       },
     }),
 
-    prisma.game.create({
-      data: {
+    prisma.game.upsert({
+      where: { 
+        id: "game-sc-vs-unc-20250122" 
+      },
+      update: {},
+      create: {
+        id: "game-sc-vs-unc-20250122",
         date: new Date("2025-01-22T19:30:00Z"),
         homeTeamId: teams[0].id, // South Carolina Gamecocks
         awayTeamId: teams[3].id, // North Carolina Tar Heels
@@ -187,12 +212,17 @@ async function main() {
   const events = [];
   const eventTypes = ["FOUL", "TECHNICAL_FOUL", "FLAGRANT_FOUL", "OFFENSIVE_FOUL", "TRAVEL"];
   for (let i = 0; i < createdGames.length; i++) {
-    const event = await prisma.event.create({
-      data: {
+    const event = await prisma.event.upsert({
+      where: { 
+        id: `event-${createdGames[i].id}-${i}` 
+      },
+      update: {},
+      create: {
+        id: `event-${createdGames[i].id}-${i}`,
         gameId: createdGames[i].id,
-        timestampMs: Math.floor(Math.random() * 3600000), // Random timestamp within an hour
+        timestampMs: (i + 1) * 600000, // Fixed timestamps to avoid randomness
         videoUrl: `https://example.com/video${i + 1}.mp4`,
-        type: eventTypes[Math.floor(Math.random() * eventTypes.length)]
+        type: eventTypes[i % eventTypes.length]
       }
     });
     events.push(event);
@@ -203,11 +233,16 @@ async function main() {
   const tags = [];
   const tagLabels = ["Blocking Foul", "Technical Foul - Excessive Complaining", "Flagrant 1", "Offensive Foul", "Travel Violation"];
   for (let i = 0; i < events.length; i++) {
-    const tag = await prisma.tag.create({
-      data: {
+    const tag = await prisma.tag.upsert({
+      where: { 
+        id: `tag-${events[i].id}-${i}` 
+      },
+      update: {},
+      create: {
+        id: `tag-${events[i].id}-${i}`,
         eventId: events[i].id,
         createdById: charter.id, // Charter user
-        label: tagLabels[Math.floor(Math.random() * tagLabels.length)],
+        label: tagLabels[i % tagLabels.length],
         notes: `Analysis note ${i + 1}`
       }
     });
@@ -218,8 +253,13 @@ async function main() {
   console.log('Creating analyst actions...');
   const analystActions = [];
   for (let i = 0; i < Math.min(3, tags.length); i++) {
-    const action = await prisma.analystAction.create({
-      data: {
+    const action = await prisma.analystAction.upsert({
+      where: { 
+        id: `action-${tags[i].id}-${i}` 
+      },
+      update: {},
+      create: {
+        id: `action-${tags[i].id}-${i}`,
         tagId: tags[i].id,
         analystId: analyst1.id, // Analyst user
         action: i % 2 === 0 ? 'APPROVE' : 'REQUEST_CHANGES',
@@ -233,8 +273,15 @@ async function main() {
   console.log('Creating game assignments...');
   const gameAssignments = [];
   for (let i = 0; i < Math.min(3, createdGames.length); i++) {
-    const assignment = await prisma.gameAssignment.create({
-      data: {
+    const assignment = await prisma.gameAssignment.upsert({
+      where: { 
+        gameId_analystId: {
+          gameId: createdGames[i].id,
+          analystId: analyst1.id
+        }
+      },
+      update: {},
+      create: {
         gameId: createdGames[i].id,
         analystId: analyst1.id, // Analyst user
         priority: ['high', 'medium', 'low'][i % 3],
