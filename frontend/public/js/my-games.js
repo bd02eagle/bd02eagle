@@ -253,9 +253,21 @@ function viewVideo(videoUrl) {
 }
 
 function openGame(gameId) {
+  // Prevent multiple rapid clicks
+  if (window.navigatingToGame) {
+    console.log('Navigation already in progress, ignoring click');
+    return;
+  }
+  
+  window.navigatingToGame = true;
+  
   // Navigate to Initial Evaluation Workspace with game context
   console.log('Setting selectedGameId:', gameId);
-  sessionStorage.setItem('selectedGameId', gameId);
+  
+  // Use localStorage instead of sessionStorage for better persistence
+  localStorage.setItem('selectedGameId', gameId);
+  
+  // Also pass in URL for immediate access
   window.location.href = `/workspace.html?gameId=${gameId}`;
 }
 

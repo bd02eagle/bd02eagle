@@ -20,19 +20,30 @@ document.addEventListener('DOMContentLoaded', function() {
     return;
   }
 
-  initializeApp();
-
-  const urlParams = new URLSearchParams(window.location.search);
-  // Load game data if we're on workspace page and have a game ID
+  // Check if we're on workspace page first
   if (window.location.pathname === '/workspace.html' || window.location.pathname === '/') {
-    const gameId = urlParams.get('gameId');
+    console.log('On workspace page, checking for game ID...');
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameIdFromUrl = urlParams.get('gameId');
+    const gameIdFromStorage = localStorage.getItem('selectedGameId');
+    
+    console.log('Game ID from URL:', gameIdFromUrl);
+    console.log('Game ID from storage:', gameIdFromStorage);
+    
+    // Use URL game ID first, then storage, then default
+    const gameId = gameIdFromUrl || gameIdFromStorage;
+    
     if (gameId) {
       console.log('Loading game data for workspace:', gameId);
       loadGameForWorkspace(gameId);
     } else {
-      console.log('No game ID provided, showing default state');
-      showDefaultWorkspaceState();
+      console.log('No game ID found, loading default game');
+      initializeApp();
     }
+  } else {
+    // Not on workspace page, use normal initialization
+    initializeApp();
   }
 });
 
@@ -43,17 +54,34 @@ function initializeApp() {
 }
 
 function setupEventListeners() {
-  // Filter controls
-  document.getElementById('quarter-filter').addEventListener('change', filterEvents);
-  document.getElementById('type-filter').addEventListener('change', filterEvents);
+  // Filter controls - add null checks
+  const quarterFilter = document.getElementById('quarter-filter');
+  const typeFilter = document.getElementById('type-filter');
+  
+  if (quarterFilter) {
+    quarterFilter.addEventListener('change', filterEvents);
+  }
+  if (typeFilter) {
+    typeFilter.addEventListener('change', filterEvents);
+  }
 
   // Form controls
   setupFormControls();
 
-  // Action buttons
-  document.getElementById('annotate-event-btn').addEventListener('click', annotateEvent);
-  document.getElementById('next-event-btn').addEventListener('click', nextEvent);
-  document.getElementById('view-tags-btn').addEventListener('click', viewEventTags);
+  // Action buttons - add null checks
+  const annotateBtn = document.getElementById('annotate-event-btn');
+  const nextBtn = document.getElementById('next-event-btn');
+  const viewTagsBtn = document.getElementById('view-tags-btn');
+  
+  if (annotateBtn) {
+    annotateBtn.addEventListener('click', annotateEvent);
+  }
+  if (nextBtn) {
+    nextBtn.addEventListener('click', nextEvent);
+  }
+  if (viewTagsBtn) {
+    viewTagsBtn.addEventListener('click', viewEventTags);
+  }
 
   // Video controls
   setupVideoControls();
@@ -556,50 +584,83 @@ function showDefaultWorkspaceState() {
 
 async function loadGameForWorkspace(gameId) {
   try {
-    console.log('Fetching game data for:', gameId);
+    console.log('=== Loading game for workspace ===');
+    console.log('Requested game ID:', gameId);
+    console.log('Auth token present:', !!authToken);
 
     // Fetch game details
     const gameResponse = await fetch(`${API_BASE}/games`, {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
 
+    console.log('Games response status:', gameResponse.status);
+
     if (!gameResponse.ok) {
-      throw new Error('Failed to fetch games');
+      if (gameResponse.status === 401) {
+        console.error('Unauthorized - redirecting to login');
+        localStorage.removeItem('authToken');
+        window.location.href = '/login.html';
+        return;
+      }
+      throw new Error(`Failed to fetch games: ${gameResponse.status}`);
     }
 
     const games = await gameResponse.json();
+    console.log('Total games fetched:', games.length);
+    console.log('Games:', games.map(g => ({ id: g.id, homeTeam: g.homeTeam, awayTeam: g.awayTeam })));
+    
     const game = games.find(g => g.id === gameId);
+    console.log('Found matching game:', !!game);
 
     if (!game) {
-      throw new Error('Game not found');
+      console.error('Game not found with ID:', gameId);
+      console.log('Available game IDs:', games.map(g => g.id));
+      throw new Error(`Game not found: ${gameId}`);
     }
 
-    console.log('Found game:', game);
+    console.log('Selected game details:', game);
+
+    // Clear the storage after successful load
+    localStorage.removeItem('selectedGameId');
 
     // Update game info in UI
     updateGameInfo(game);
 
     // Fetch events for this game
+    console.log('Fetching events for game:', gameId);
     const eventsResponse = await fetch(`${API_BASE}/games/${gameId}/events`, {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
 
+    console.log('Events response status:', eventsResponse.status);
+
     if (!eventsResponse.ok) {
-      throw new Error('Failed to fetch events');
+      throw new Error(`Failed to fetch events: ${eventsResponse.status}`);
     }
 
     const loadedEvents = await eventsResponse.json();
-    console.log('Found events:', loadedEvents);
+    console.log('Loaded events count:', loadedEvents.length);
 
-    // Update events list
-    updateEventsList(loadedEvents);
-
-    // Set the current game ID globally
+    // Set up the workspace with this game
     currentGameId = gameId;
+    events = loadedEvents;
+    filteredEvents = [...loadedEvents];
+
+    // Update UI
+    updateEventsList(loadedEvents);
+    renderEventsList();
+
+    if (loadedEvents.length > 0) {
+      selectEvent(0);
+    }
+
+    console.log('=== Game loading completed successfully ===');
 
   } catch (error) {
-    console.error('Error loading game for workspace:', error);
-    showError('Failed to load game data');
+    console.error('=== Error loading game for workspace ===');
+    console.error('Error:', error.message);
+    console.error('Stack:', error.stack);
+    showError(`Failed to load game data: ${error.message}`);
   }
 }
 
