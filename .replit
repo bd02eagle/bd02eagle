@@ -25,7 +25,7 @@ externalPort = 5000
 expertMode = true
 
 [workflows]
-runButton = "Full Stack with Install"
+runButton = "Working Full Stack"
 
 [[workflows.workflow]]
 name = "Start Server"
@@ -221,6 +221,19 @@ args = "npm start &"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "sleep 3"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd frontend && npm install && npm start"
+
+[[workflows.workflow]]
+name = "Working Full Stack"
+author = 44371205
+mode = "parallel"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run seed && npm start"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
