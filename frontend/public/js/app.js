@@ -1,4 +1,3 @@
-
 const API_BASE = '/api';
 let authToken = localStorage.getItem('authToken');
 let currentGameId = null;
@@ -34,15 +33,15 @@ function setupEventListeners() {
   // Filter controls
   document.getElementById('quarter-filter').addEventListener('change', filterEvents);
   document.getElementById('type-filter').addEventListener('change', filterEvents);
-  
+
   // Form controls
   setupFormControls();
-  
+
   // Action buttons
   document.getElementById('annotate-event-btn').addEventListener('click', annotateEvent);
   document.getElementById('next-event-btn').addEventListener('click', nextEvent);
   document.getElementById('view-tags-btn').addEventListener('click', viewEventTags);
-  
+
   // Video controls
   setupVideoControls();
 }
@@ -100,13 +99,13 @@ function setupLogout() {
 async function loadGameFromSelection() {
   try {
     const selectedGameId = localStorage.getItem('selectedGameId');
-    
+
     const gamesResponse = await fetch(`${API_BASE}/games`, {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
 
     if (!gamesResponse.ok) throw new Error('Failed to fetch games');
-    
+
     const games = await gamesResponse.json();
     if (games.length === 0) {
       showError('No games found');
@@ -118,7 +117,7 @@ async function loadGameFromSelection() {
       game = games.find(g => g.id === selectedGameId);
       localStorage.removeItem('selectedGameId'); // Clear selection
     }
-    
+
     if (!game) {
       game = games[0]; // Default to most recent
     }
@@ -126,7 +125,7 @@ async function loadGameFromSelection() {
     currentGameId = game.id;
     updateGameHeader(game);
     await loadGameEvents(game.id);
-    
+
   } catch (error) {
     console.error('Error loading game:', error);
     showError('Failed to load game data');
@@ -136,11 +135,28 @@ async function loadGameFromSelection() {
 function updateGameHeader(game) {
   const gameTitle = document.getElementById('game-title');
   const gameStatus = document.getElementById('game-status');
-  
+
+  console.log('Updating game header with game:', game);
+
   if (gameTitle) {
-    gameTitle.textContent = `Evaluation: ${game.homeTeam.shortName} vs. ${game.awayTeam.shortName}`;
+    // Handle both old format (homeTeam/awayTeam strings) and new format (homeTeam/awayTeam objects)
+    let homeTeam, awayTeam;
+
+    if (typeof game.homeTeam === 'string') {
+      homeTeam = game.homeTeam;
+      awayTeam = game.awayTeam;
+    } else if (game.homeTeam && typeof game.homeTeam === 'object') {
+      homeTeam = game.homeTeam.shortName || game.homeTeam.name || 'Home';
+      awayTeam = game.awayTeam.shortName || game.awayTeam.name || 'Away';
+    } else {
+      homeTeam = 'Home';
+      awayTeam = 'Away';
+    }
+
+    gameTitle.textContent = `Evaluation: ${homeTeam} vs. ${awayTeam}`;
+    console.log('Updated game title:', gameTitle.textContent);
   }
-  
+
   if (gameStatus) {
     gameStatus.textContent = game.status === 'COMPLETED' ? 'PUBLISHED' : 'IN PROGRESS';
     gameStatus.className = `game-status ${game.status === 'COMPLETED' ? 'published' : 'in-progress'}`;
@@ -154,16 +170,16 @@ async function loadGameEvents(gameId) {
     });
 
     if (!eventsResponse.ok) throw new Error('Failed to fetch events');
-    
+
     events = await eventsResponse.json();
-    
+
     // Load tags for each event
     for (let i = 0; i < events.length; i++) {
       try {
         const tagsResponse = await fetch(`${API_BASE}/events/${events[i].id}/tags`, {
           headers: { 'Authorization': `Bearer ${authToken}` }
         });
-        
+
         if (tagsResponse.ok) {
           events[i].tags = await tagsResponse.json();
         } else {
@@ -177,13 +193,13 @@ async function loadGameEvents(gameId) {
 
     filteredEvents = [...events];
     renderEventsList();
-    
+
     if (events.length > 0) {
       selectEvent(0);
     }
-    
+
     updateProgress();
-    
+
   } catch (error) {
     console.error('Error loading events:', error);
     showError('Failed to load events');
@@ -192,12 +208,12 @@ async function loadGameEvents(gameId) {
 
 function renderEventsList() {
   const eventsList = document.getElementById('events-list');
-  
+
   if (!eventsList) {
     console.error('Events list element not found');
     return;
   }
-  
+
   if (filteredEvents.length === 0) {
     eventsList.innerHTML = '<div class="loading">No events found</div>';
     return;
@@ -207,10 +223,10 @@ function renderEventsList() {
     const timeStr = formatEventTime(event.timestampMs);
     const hasTag = event.tags && event.tags.length > 0;
     const tagInfo = hasTag ? event.tags[0] : null;
-    
+
     let tagClass = 'untagged';
     let tagText = 'Untagged';
-    
+
     if (tagInfo) {
       if (tagInfo.label.toLowerCase().includes('foul')) {
         tagClass = 'foul';
@@ -241,21 +257,21 @@ function renderEventsList() {
 
 function selectEvent(index) {
   if (index < 0 || index >= filteredEvents.length) return;
-  
+
   currentEventIndex = index;
   const event = filteredEvents[index];
-  
+
   // Update active event in list
   document.querySelectorAll('.event-item').forEach((item, i) => {
     item.classList.toggle('active', i === index);
   });
-  
+
   // Update event details
   updateEventDetails(event, index);
-  
+
   // Load existing tag data if available
   loadExistingEvaluation(event);
-  
+
   // Load video
   loadEventVideo(event);
 }
@@ -263,11 +279,11 @@ function selectEvent(index) {
 function updateEventDetails(event, index) {
   const eventNumber = document.getElementById('event-number');
   const eventType = document.getElementById('event-type');
-  
+
   if (eventNumber) {
     eventNumber.textContent = `EVENT #${String(index + 1).padStart(6, '0')}`;
   }
-  
+
   if (eventType) {
     eventType.textContent = event.type;
   }
@@ -284,21 +300,21 @@ function updateEventSummary(event) {
   const eventTypeDetail = document.getElementById('event-type-detail');
   const eventStatus = document.getElementById('event-status');
   const eventTagsList = document.getElementById('event-tags-list');
-  
+
   if (eventTimeDetail) {
     eventTimeDetail.textContent = `Q4 ${formatEventTime(event.timestampMs)}`;
   }
-  
+
   if (eventTypeDetail) {
     eventTypeDetail.textContent = event.type;
   }
-  
+
   if (eventStatus) {
     const hasTag = event.tags && event.tags.length > 0;
     eventStatus.textContent = hasTag ? 'Tagged' : 'Untagged';
     eventStatus.style.color = hasTag ? '#059669' : '#dc2626';
   }
-  
+
   if (eventTagsList) {
     if (event.tags && event.tags.length > 0) {
       eventTagsList.innerHTML = event.tags.map(tag => 
@@ -312,7 +328,7 @@ function updateEventSummary(event) {
 
 function selectInfractionType(type) {
   evaluationData.infractionType = type;
-  
+
   document.querySelectorAll('.infraction-buttons .form-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.value === type);
   });
@@ -320,7 +336,7 @@ function selectInfractionType(type) {
 
 function selectObservability(type) {
   evaluationData.observability = type;
-  
+
   document.querySelectorAll('.observability-buttons .form-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.value === type);
   });
@@ -341,14 +357,14 @@ function updateFlagButton(flagged) {
 
 function annotateEvent() {
   if (!filteredEvents[currentEventIndex]) return;
-  
+
   const event = filteredEvents[currentEventIndex];
-  
+
   // Store the current event context and navigate to detailed evaluation
   localStorage.setItem('currentEventId', event.id);
   localStorage.setItem('currentEventIndex', currentEventIndex.toString());
   localStorage.setItem('selectedGameId', currentGameId);
-  
+
   window.location.href = '/evaluation.html';
 }
 
@@ -363,7 +379,7 @@ function nextEvent() {
 
 function viewEventTags() {
   if (!filteredEvents[currentEventIndex]) return;
-  
+
   const event = filteredEvents[currentEventIndex];
   if (event.tags && event.tags.length > 0) {
     const tagsList = event.tags.map(tag => `• ${tag.label}${tag.notes ? ': ' + tag.notes : ''}`).join('\n');
@@ -376,7 +392,7 @@ function viewEventTags() {
 function loadEventVideo(event) {
   const video = document.getElementById('event-video');
   if (!video) return;
-  
+
   if (event.videoUrl) {
     video.src = event.videoUrl;
     video.load();
@@ -390,7 +406,7 @@ function loadEventVideo(event) {
 function updateVideoTime() {
   const video = document.getElementById('event-video');
   const timeDisplay = document.getElementById('video-time');
-  
+
   if (video && timeDisplay && video.duration) {
     const current = formatTime(video.currentTime || 0);
     const duration = formatTime(video.duration || 0);
@@ -408,16 +424,16 @@ function skipVideo(seconds) {
 function filterEvents() {
   const quarterFilter = document.getElementById('quarter-filter').value;
   const typeFilter = document.getElementById('type-filter').value;
-  
+
   filteredEvents = events.filter(event => {
     const quarterMatch = !quarterFilter || event.quarter === quarterFilter;
     const typeMatch = !typeFilter || event.type.toLowerCase().includes(typeFilter.toLowerCase());
-    
+
     return quarterMatch && typeMatch;
   });
-  
+
   renderEventsList();
-  
+
   // Select first event if available
   if (filteredEvents.length > 0) {
     selectEvent(0);
@@ -428,14 +444,14 @@ function updateProgress() {
   const taggedCount = events.filter(event => event.tags && event.tags.length > 0).length;
   const totalCount = events.length;
   const percentage = totalCount > 0 ? Math.round((taggedCount / totalCount) * 100) : 0;
-  
+
   const progressCount = document.getElementById('progress-count');
   const progressFill = document.getElementById('progress-fill');
-  
+
   if (progressCount) {
     progressCount.textContent = `${taggedCount} of ${totalCount} tagged`;
   }
-  
+
   if (progressFill) {
     progressFill.style.width = `${percentage}%`;
   }
@@ -453,7 +469,7 @@ function formatTime(seconds) {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const secs = Math.floor(seconds % 60);
-  
+
   if (hours > 0) {
     return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   } else {
