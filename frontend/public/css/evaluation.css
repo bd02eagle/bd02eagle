@@ -41,6 +41,8 @@ body {
   top: 0px;
   left: 0px;
   overflow: hidden;
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 .v1_258 {
   width: 333px;
@@ -105,9 +107,9 @@ body {
 }
 
 .breadcrumb-link {
-  color: rgba(59,130,246,1);
+  color: rgba(37,99,235,1);
   font-family: Inter;
-  font-weight: 500;
+  font-weight: 700;
   font-size: 16px;
   cursor: pointer;
   text-decoration: none;
@@ -250,12 +252,13 @@ body {
 }
 .v1_256 {
   width: 100%;
-  height: calc(100% - 120px);
+  height: calc(100vh - 120px);
   position: absolute;
   top: 64px;
   left: 0px;
   display: flex;
   overflow: hidden;
+  z-index: 1;
 }
 .v1_260 {
   width: 480px;
@@ -660,6 +663,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
+  z-index: 50;
 }
 .v1_262 {
   display: flex;
