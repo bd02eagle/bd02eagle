@@ -588,14 +588,14 @@ async function loadGameForWorkspace(gameId) {
       throw new Error('Failed to fetch events');
     }
 
-    const events = await eventsResponse.json();
-    console.log('Found events:', events);
+    const loadedEvents = await eventsResponse.json();
+    console.log('Found events:', loadedEvents);
 
     // Update events list
-    updateEventsList(events);
+    updateEventsList(loadedEvents);
 
     // Set the current game ID globally
-    window.currentGameId = gameId;
+    currentGameId = gameId;
 
   } catch (error) {
     console.error('Error loading game for workspace:', error);
@@ -604,66 +604,98 @@ async function loadGameForWorkspace(gameId) {
 }
 
 function updateGameInfo(game) {
-  console.log('Updating game info with:', game);
+  console.log('Updating game info:', game);
 
-  // Update game details in header
-  const gameInfoElement = document.querySelector('.v1_51 .v1_55');
-  if (gameInfoElement) {
-    const awayTeam = game.awayTeam?.shortName || game.awayTeam?.name || 'Away';
-    const homeTeam = game.homeTeam?.shortName || game.homeTeam?.name || 'Home';
-    gameInfoElement.textContent = `${awayTeam} vs ${homeTeam}`;
-  }
+  if (game) {
+    currentGameId = game.id;
 
-  // Update date
-  const dateElement = document.querySelector('.v1_51 .v1_56');
-  if (dateElement) {
-    const gameDate = new Date(game.date);
-    dateElement.textContent = gameDate.toLocaleDateString();
-  }
+    // Update game title and details
+    const gameTitle = document.getElementById('game-title');
+    if (gameTitle) {
+      // Handle both old format (awayTeam/homeTeam strings) and new format (team objects)
+      if (typeof game.awayTeam === 'string') {
+        gameTitle.textContent = `${game.awayTeam} @ ${game.homeTeam}`;
+      } else if (game.awayTeam && game.homeTeam) {
+        gameTitle.textContent = `${game.awayTeam.name} @ ${game.homeTeam.name}`;
+      } else {
+        gameTitle.textContent = 'Game Details';
+      }
+    }
 
-  // Update score if available
-  const scoreElement = document.querySelector('.v1_51 .v1_57');
-  if (scoreElement && game.homeScore !== null && game.awayScore !== null) {
-    scoreElement.textContent = `${game.awayScore} - ${game.homeScore}`;
+    // Update game details if elements exist
+    const gameDate = document.getElementById('game-date');
+    if (gameDate && game.date) {
+      const date = new Date(game.date);
+      gameDate.textContent = date.toLocaleDateString();
+    }
+
+    const gameVenue = document.getElementById('game-venue');
+    if (gameVenue && game.venue) {
+      gameVenue.textContent = game.venue;
+    }
+
+    // Update game status
+    const gameStatus = document.getElementById('game-status');
+    if (gameStatus && game.status) {
+      gameStatus.textContent = game.status;
+    }
   }
 }
 
 function updateEventsList(events) {
-  console.log('Updating events list with:', events);
-  // This function might be similar to renderEventsList but tailored for workspace
-  // For now, let's reuse renderEventsList
-  // If specific workspace logic is needed, it should be added here.
-  // For this fix, we assume renderEventsList is sufficient.
-  
-  // Ensure the global 'events' and 'filteredEvents' are updated
-  window.events = events;
-  window.filteredEvents = [...events];
-  window.currentEventIndex = 0; // Reset index for new game
+  console.log('Updating events list:', events);
 
-  renderEventsList();
-  updateProgress(); // Update progress for the newly loaded game
-  
-  // If there are events, select the first one
-  if (events.length > 0) {
-    selectEvent(0);
-  } else {
-    // If no events, clear the event details
-    document.getElementById('event-number').textContent = '';
-    document.getElementById('event-type').textContent = '';
-    document.getElementById('event-time-detail').textContent = '';
-    document.getElementById('event-type-detail').textContent = '';
-    document.getElementById('event-status').textContent = '';
-    document.getElementById('event-tags-list').innerHTML = '';
-    const video = document.getElementById('event-video');
-    if (video) {
-      video.removeAttribute('src');
-      video.load();
-    }
-    document.getElementById('video-time').textContent = '0:00 / 0:00';
+  const eventsList = document.getElementById('events-list');
+  if (!eventsList) {
+    console.warn('Events list element not found');
+    return;
   }
+
+  if (!events || events.length === 0) {
+    eventsList.innerHTML = '<div class="no-events">No events found for this game</div>';
+    return;
+  }
+
+  eventsList.innerHTML = events.map((event, index) => `
+    <div class="event-item" onclick="selectEvent(${index})" data-event-id="${event.id}">
+      <div class="event-info">
+        <div class="event-timestamp">${formatTimestamp(event.timestampMs)}</div>
+        <div class="event-type">${event.type || 'Unknown'}</div>
+      </div>
+      <div class="event-actions">
+        <button class="evaluate-btn" onclick="event.stopPropagation(); evaluateEvent('${event.id}')">
+          Evaluate
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  // Store events globally for navigation
+  window.events = events;
+  window.filteredEvents = events;
 }
 
 
 // Global functions for event handlers
 window.selectEvent = selectEvent;
 window.skipVideo = skipVideo;
+
+function formatTimestamp(timestampMs) {
+  if (!timestampMs) return '0:00';
+  const minutes = Math.floor(timestampMs / 60000);
+  const seconds = Math.floor((timestampMs % 60000) / 1000);
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function selectEvent(index) {
+  console.log('Selecting event at index:', index);
+  if (window.events && window.events[index]) {
+    const event = window.events[index];
+    evaluateEvent(event.id);
+  }
+}
+
+function evaluateEvent(eventId) {
+  console.log('Evaluating event:', eventId);
+  window.location.href = `/evaluation.html?eventId=${eventId}&gameId=${currentGameId}`;
+}
