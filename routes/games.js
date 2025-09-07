@@ -8,8 +8,41 @@ r.get("/", requireAuth(["ADMIN","ANALYST","CHARTER"]), async (_req, res) => {
   const games = await prisma.game.findMany({ 
     orderBy: { date: "desc" },
     include: {
-      homeTeam: true,
-      awayTeam: true
+      homeTeam: {
+        select: {
+          id: true,
+          name: true,
+          shortName: true,
+          primaryColor: true,
+          secondaryColor: true
+        }
+      },
+      awayTeam: {
+        select: {
+          id: true,
+          name: true,
+          shortName: true,
+          primaryColor: true,
+          secondaryColor: true
+        }
+      },
+      events: {
+        select: {
+          id: true,
+          type: true,
+          timestampMs: true
+        }
+      },
+      assignments: {
+        where: {
+          isActive: true
+        },
+        select: {
+          id: true,
+          priority: true,
+          dueDate: true
+        }
+      }
     }
   });
 

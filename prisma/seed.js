@@ -75,7 +75,7 @@ async function main() {
       where: { name: 'Texas Longhorns' },
       update: {},
       create: {
-        name: 'Texas Longhorns', 
+        name: 'Texas Longhorns',
         shortName: 'TX',
         primaryColor: '#BF5700',
         secondaryColor: '#FFFFFF'
@@ -111,257 +111,143 @@ async function main() {
       data: {
         date: new Date("2025-01-15T19:00:00Z"),
         homeTeamId: teams[0].id, // South Carolina
-        awayTeamId: teams[1].id, // UConn
+        awayTeamId: teams[1].id, // Texas Longhorns
         status: "COMPLETED",
         homeScore: 78,
         awayScore: 72,
         venue: "Colonial Life Arena",
         season: "2024-25",
         gameType: "Regular Season",
-        thumbnail: "https://via.placeholder.com/300x200?text=SC+vs+CONN",
+        thumbnail: "https://via.placeholder.com/300x200?text=SC+vs+TX",
       },
     }),
 
     prisma.game.create({
       data: {
         date: new Date("2025-01-16T20:30:00Z"),
-        homeTeamId: teams[2].id, // Stanford
-        awayTeamId: teams[4].id, // LSU
+        homeTeamId: teams[2].id, // Duke Blue Devils
+        awayTeamId: teams[3].id, // North Carolina Tar Heels
         status: "COMPLETED",
         homeScore: 82,
         awayScore: 79,
-        venue: "Maples Pavilion",
+        venue: "Cameron Indoor Stadium",
         season: "2024-25",
         gameType: "Regular Season",
-        thumbnail: "https://via.placeholder.com/300x200?text=STAN+vs+LSU",
+        thumbnail: "https://via.placeholder.com/300x200?text=DUKE+vs+UNC",
       },
     }),
 
     prisma.game.create({
       data: {
         date: new Date("2025-01-18T21:00:00Z"),
-        homeTeamId: teams[5].id, // Iowa
-        awayTeamId: teams[3].id, // NC State
+        homeTeamId: teams[3].id, // North Carolina Tar Heels
+        awayTeamId: teams[0].id, // South Carolina Gamecocks
         status: "COMPLETED",
         homeScore: 85,
         awayScore: 71,
-        venue: "Carver-Hawkeye Arena",
+        venue: "Dean Smith Center",
         season: "2024-25",
         gameType: "Regular Season",
-        thumbnail: "https://via.placeholder.com/300x200?text=IOWA+vs+NCST",
+        thumbnail: "https://via.placeholder.com/300x200?text=UNC+vs+SC",
       },
     }),
 
     prisma.game.create({
       data: {
         date: new Date("2025-01-20T18:00:00Z"),
-        homeTeamId: teams[0].id, // UConn
-        awayTeamId: teams[2].id, // Stanford
+        homeTeamId: teams[1].id, // Texas Longhorns
+        awayTeamId: teams[2].id, // Duke Blue Devils
         status: "SCHEDULED",
-        venue: "Gampel Pavilion",
+        venue: "Moody Center",
         season: "2024-25",
         gameType: "Regular Season",
-        thumbnail: "https://via.placeholder.com/300x200?text=CONN+vs+STAN",
+        thumbnail: "https://via.placeholder.com/300x200?text=TX+vs+DUKE",
       },
     }),
 
     prisma.game.create({
       data: {
         date: new Date("2025-01-22T19:30:00Z"),
-        homeTeamId: teams[4].id, // LSU
-        awayTeamId: teams[1].id, // South Carolina
+        homeTeamId: teams[0].id, // South Carolina Gamecocks
+        awayTeamId: teams[3].id, // North Carolina Tar Heels
         status: "SCHEDULED",
-        venue: "Pete Maravich Assembly Center",
+        venue: "Colonial Life Arena",
         season: "2024-25",
         gameType: "Regular Season",
-        thumbnail: "https://via.placeholder.com/300x200?text=LSU+vs+SC",
+        thumbnail: "https://via.placeholder.com/300x200?text=SC+vs+UNC",
       },
     }),
   ]);
 
-  const createdGames = [game1, game2, game3, game4, game5];
+  const createdGames = [games[0], games[1], games[2], games[3], games[4]];
 
-  // Create events
-  const event1 = await prisma.event.create({
-    data: {
-      gameId: game1.id,
-      timestampMs: 120000, // 2 minutes
-      videoUrl:
-        "https://dvsportreplay.blob.core.windows.net/wbb-clips//VIDEOS//2023-24//SEC//00 CLIPS//LSU//LSU VS KENT ST - 11.14.23 - 10-56-24//PLAY 103 - PGM2023-11-14T12.05.17.MP4",
-      type: "FOUL",
-    },
-  });
 
-  const event2 = await prisma.event.create({
-    data: {
-      gameId: game1.id,
-      timestampMs: 480000, // 8 minutes
-      videoUrl:
-        "https://dvsportreplay.blob.core.windows.net/wbb-clips//VIDEOS//2023-24//BIG 12//00 CLIPS//OKLAHOMA//OKLAHOMA VS ORAL ROBERTS - 11.12.23 - 13-47-33//PLAY 091 - ISO2023-11-12T14.36.15.MP4",
-      type: "TECHNICAL_FOUL",
-    },
-  });
-
-  const event3 = await prisma.event.create({
-    data: {
-      gameId: game2.id,
-      timestampMs: 300000, // 5 minutes
-      videoUrl:
-        "https://dvsportreplay.blob.core.windows.net/wbb-clips//VIDEOS//2023-24//SEC//00 CLIPS//VANDERBILT//VANDERBILT VS WESTERN KENTUCKY - 11.15.23 - 18-13-38//PLAY 107 - ISO2023-11-15T19.33.23.MP4",
-      type: "FLAGRANT_FOUL",
-    },
-  });
-
-  const event4 = await prisma.event.create({
-    data: {
-      gameId: game3.id,
-      timestampMs: 600000, // 10 minutes
-      videoUrl:
-        "https://dvsportreplay.blob.core.windows.net/wbb-clips//VIDEOS//2023-24//SEC//00 CLIPS//LSU//LSU VS KENT ST - 11.14.23 - 10-56-24//PLAY 103 - PGM2023-11-14T12.05.17.MP4",
-      type: "OFFENSIVE_FOUL",
-    },
-  });
-
-  const event5 = await prisma.event.create({
-    data: {
-      gameId: game4.id,
-      timestampMs: 240000, // 4 minutes
-      videoUrl:
-        "https://dvsportreplay.blob.core.windows.net/wbb-clips//VIDEOS//2023-24//BIG 12//00 CLIPS//OKLAHOMA//OKLAHOMA VS ORAL ROBERTS - 11.12.23 - 13-47-33//PLAY 091 - ISO2023-11-12T14.36.15.MP4",
-      type: "TRAVEL",
-    },
-  });
-
-  const createdEvents = [event1, event2, event3, event4, event5];
+  // Create events for each game
+  console.log('Creating events...');
+  const events = [];
+  const eventTypes = ["FOUL", "TECHNICAL_FOUL", "FLAGRANT_FOUL", "OFFENSIVE_FOUL", "TRAVEL"];
+  for (let i = 0; i < games.length; i++) {
+    const event = await prisma.event.create({
+      data: {
+        gameId: games[i].id,
+        timestampMs: Math.floor(Math.random() * 3600000), // Random timestamp within an hour
+        videoUrl: `https://example.com/video${i + 1}.mp4`,
+        type: eventTypes[Math.floor(Math.random() * eventTypes.length)]
+      }
+    });
+    events.push(event);
+  }
 
   // Create tags
-  const tag1 = await prisma.tag.create({
-    data: {
-      eventId: event1.id,
-      createdById: charter.id,
-      label: "Blocking Foul",
-      notes: "Player moved into path without establishing position",
-    },
-  });
-
-  const tag2 = await prisma.tag.create({
-    data: {
-      eventId: event2.id,
-      createdById: charter.id,
-      label: "Technical Foul - Excessive Complaining",
-      notes: "Player argued call for extended period",
-    },
-  });
-
-  const tag3 = await prisma.tag.create({
-    data: {
-      eventId: event3.id,
-      createdById: charter.id,
-      label: "Flagrant 1",
-      notes: "Unnecessary contact during shot attempt",
-    },
-  });
-
-  const tag4 = await prisma.tag.create({
-    data: {
-      eventId: event4.id,
-      createdById: charter.id,
-      label: "Offensive Foul",
-      notes: "Player charged into defender",
-    },
-  });
-
-  const tag5 = await prisma.tag.create({
-    data: {
-      eventId: event5.id,
-      createdById: charter.id,
-      label: "Travel Violation",
-      notes: "Player took extra steps without dribbling",
-    },
-  });
-
-  const createdTags = [tag1, tag2, tag3, tag4, tag5];
-
+  console.log('Creating tags...');
+  const tags = [];
+  const tagLabels = ["Blocking Foul", "Technical Foul - Excessive Complaining", "Flagrant 1", "Offensive Foul", "Travel Violation"];
+  for (let i = 0; i < events.length; i++) {
+    const tag = await prisma.tag.create({
+      data: {
+        eventId: events[i].id,
+        createdById: charter.id, // Charter user
+        label: tagLabels[Math.floor(Math.random() * tagLabels.length)],
+        notes: `Analysis note ${i + 1}`
+      }
+    });
+    tags.push(tag);
+  }
 
   // Create analyst actions
-  await prisma.analystAction.create({
-    data: {
-      tagId: tag1.id,
-      analystId: analyst1.id,
-      action: "APPROVE",
-      comment: "Correct call, clear blocking foul",
-    },
-  });
-
-  await prisma.analystAction.create({
-    data: {
-      tagId: tag2.id,
-      analystId: analyst2.id,
-      action: "REQUEST_CHANGES",
-      comment: "Should be classified as unsportsmanlike conduct instead",
-    },
-  });
-
-  await prisma.analystAction.create({
-    data: {
-      tagId: tag3.id,
-      analystId: analyst1.id,
-      action: "APPROVE",
-      comment: "Appropriate flagrant 1 classification",
-    },
-  });
-
-  const createdAnalystActions = [
-    {
-      tagId: tag1.id,
-      analystId: analyst1.id,
-      action: "APPROVE",
-      comment: "Correct call, clear blocking foul",
-    },
-    {
-      tagId: tag2.id,
-      analystId: analyst2.id,
-      action: "REQUEST_CHANGES",
-      comment: "Should be classified as unsportsmanlike conduct instead",
-    },
-    {
-      tagId: tag3.id,
-      analystId: analyst1.id,
-      action: "APPROVE",
-      comment: "Appropriate flagrant 1 classification",
-    },
-  ];
-
-
-  // Create sample game assignments
-  const assignments = [
-    {
-      gameId: game1.id,
-      analystId: createdUsers.find(u => u.email === 'analyst1@refintel.com').id,
-      priority: 'high',
-      dueDate: new Date('2025-01-20T23:59:59Z')
-    },
-    {
-      gameId: game2.id,
-      analystId: createdUsers.find(u => u.email === 'analyst1@refintel.com').id,
-      priority: 'medium',
-      dueDate: new Date('2025-01-22T23:59:59Z')
-    },
-    {
-      gameId: game3.id,
-      analystId: createdUsers.find(u => u.email === 'analyst2@refintel.com').id,
-      priority: 'low',
-      dueDate: new Date('2025-01-25T23:59:59Z')
-    }
-  ];
-
-  const createdAssignments = [];
-  for (const assignment of assignments) {
-    const created = await prisma.gameAssignment.create({
-      data: assignment
+  console.log('Creating analyst actions...');
+  const analystActions = [];
+  for (let i = 0; i < Math.min(3, tags.length); i++) {
+    const action = await prisma.analystAction.create({
+      data: {
+        tagId: tags[i].id,
+        analystId: analyst1.id, // Analyst user
+        action: i % 2 === 0 ? 'APPROVE' : 'REQUEST_CHANGES',
+        comment: `Analyst feedback ${i + 1}`
+      }
     });
-    createdAssignments.push(created);
+    analystActions.push(action);
   }
+
+  // Create game assignments
+  console.log('Creating game assignments...');
+  const gameAssignments = [];
+  for (let i = 0; i < Math.min(3, games.length); i++) {
+    const assignment = await prisma.gameAssignment.create({
+      data: {
+        gameId: games[i].id,
+        analystId: analyst1.id, // Analyst user
+        priority: ['high', 'medium', 'low'][i % 3],
+        dueDate: new Date(Date.now() + (i + 1) * 24 * 60 * 60 * 1000) // Due in 1-3 days
+      }
+    });
+    gameAssignments.push(assignment);
+  }
+
+  const createdEvents = events;
+  const createdTags = tags;
+  const createdAnalystActions = analystActions;
+  const createdAssignments = gameAssignments;
 
   console.log("✅ Database seeded successfully!");
   console.log(`Created ${createdUsers.length} users`);
