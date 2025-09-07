@@ -4,177 +4,30 @@
 <head>
   <link href="https://fonts.googleapis.com/css?family=Inter&display=swap" rel="stylesheet" />
   <link href="./css/main.css" rel="stylesheet" />
-  <title>RefIntel - Evaluation Workspace</title>
+  <title>RefIntel - Home</title>
 </head>
 <body>
-  <div class="workspace-container">
-    <!-- Left Navigation Sidebar -->
-    <div class="nav-sidebar">
-      <div class="nav-header">
-        <span class="nav-logo">RefIntel</span>
-      </div>
-      <div class="nav-items">
-        <div class="nav-item" onclick="window.location.href='/my-games.html'">
-          <span class="nav-icon">■</span>
-          <span class="nav-text">My Games</span>
-        </div>
-        <div class="nav-item active" onclick="window.location.href='/index.html'">
-          <span class="nav-icon">■</span>
-          <span class="nav-text">Evaluation Workspace</span>
-        </div>
-        <div class="nav-item" onclick="window.location.href='/review-management.html'">
-          <span class="nav-icon">■</span>
-          <span class="nav-text">Review Management</span>
-        </div>
-        <div class="nav-item" onclick="alert('Exports feature coming soon!')">
-          <span class="nav-icon">■</span>
-          <span class="nav-text">Exports</span>
-        </div>
-        <div class="nav-item" onclick="alert('Settings feature coming soon!')">
-          <span class="nav-icon">■</span>
-          <span class="nav-text">Settings</span>
-        </div>
-      </div>
-      <div class="nav-footer">
-        <div class="user-info">
-          <div class="user-avatar"></div>
-          <div class="user-details">
-            <span class="user-name">Ref Analyst 1</span>
-            <span class="user-role">RefIntel Analyst</span>
-          </div>
-        </div>
-      </div>
+  <div class="landing-container">
+    <div class="landing-header">
+      <h1>RefIntel</h1>
+      <p>Professional referee evaluation and analysis platform</p>
     </div>
-
-    <!-- Main Content Area -->
-    <div class="main-content">
-      <!-- Top Header with Game Info -->
-      <div class="game-header">
-        <div class="game-title-section">
-          <span class="game-title" id="game-title">Evaluation: SC vs. TX</span>
-          <span class="game-status published" id="game-status">PUBLISHED</span>
-        </div>
-        <div class="game-progress">
-          <div class="progress-info">
-            <span class="progress-label">Tagging Progress</span>
-            <span class="progress-count" id="progress-count">42 of 124 tagged</span>
-          </div>
-          <div class="progress-bar-container">
-            <div class="progress-bar">
-              <div class="progress-fill" id="progress-fill" style="width: 34%"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Content Grid -->
-      <div class="content-grid">
-        <!-- Events List Panel -->
-        <div class="events-panel">
-          <div class="events-header">
-            <h3>Filter Events</h3>
-            <div class="filter-row">
-              <select class="filter-select" id="quarter-filter">
-                <option value="">All Quarters</option>
-                <option value="Q1">1st Quarter</option>
-                <option value="Q2">2nd Quarter</option>
-                <option value="Q3">3rd Quarter</option>
-                <option value="Q4">4th Quarter</option>
-              </select>
-              <select class="filter-select" id="type-filter">
-                <option value="">All Types</option>
-                <option value="Foul">Foul</option>
-                <option value="Violation">Violation</option>
-                <option value="Turnover">Turnover</option>
-                <option value="Stoppage">Stoppage</option>
-              </select>
-            </div>
-          </div>
-          <div class="events-list" id="events-list">
-            <div class="loading">Loading events...</div>
-          </div>
-        </div>
-
-        <!-- Event Details Panel -->
-        <div class="event-details-panel">
-          <div class="event-info-header">
-            <div class="possession-info">
-              <span class="possession-label">POSSESSION: Q4 04:17.5</span>
-            </div>
-            <div class="event-title">
-              <span class="event-number" id="event-number">EVENT #100124</span>
-              <span class="event-type" id="event-type">SHOT</span>
-            </div>
-            <div class="event-actions">
-              <button class="info-btn" id="event-info-btn">Event Details</button>
-              <button class="navigate-btn" id="next-event-btn">Next Event →</button>
-            </div>
-          </div>
-
-          <!-- Video Player -->
-          <div class="video-container">
-            <video id="event-video" class="video-player" controls>
-              <source src="" type="video/mp4">
-              Your browser does not support the video tag.
-            </video>
-            <div class="video-controls">
-              <div class="video-time" id="video-time">2:28:15 / 2:35:30</div>
-              <div class="video-actions">
-                <button class="video-btn" onclick="skipVideo(-10)">-10s</button>
-                <button class="video-btn" onclick="skipVideo(-5)">-5s</button>
-                <button class="video-btn" onclick="skipVideo(5)">+5s</button>
-                <button class="video-btn" onclick="skipVideo(10)">+10s</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Event Summary Panel -->
-        <div class="event-summary-panel">
-          <div class="summary-section">
-            <h4>Event Details</h4>
-            <div class="detail-item">
-              <span class="detail-label">Time:</span>
-              <span class="detail-value" id="event-time-detail">Q4 04:17.5</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Type:</span>
-              <span class="detail-value" id="event-type-detail">Shot</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Status:</span>
-              <span class="detail-value" id="event-status">Untagged</span>
-            </div>
-          </div>
-
-          <div class="summary-section">
-            <h4>Available Tags</h4>
-            <div class="tags-container" id="event-tags-list">
-              <div class="loading">Loading tags...</div>
-            </div>
-          </div>
-
-          <div class="summary-section">
-            <h4>Actions</h4>
-            <div class="action-buttons">
-              <button class="action-btn primary" id="annotate-event-btn">
-                Annotate Event
-              </button>
-              <button class="action-btn secondary" id="view-tags-btn">
-                View All Tags
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+    
+    <div class="landing-actions">
+      <button class="action-btn primary" onclick="window.location.href='/my-games.html'">
+        Go to My Games
+      </button>
+      <button class="action-btn secondary" onclick="window.location.href='/workspace.html'">
+        Evaluation Workspace
+      </button>
     </div>
   </div>
 
-  <!-- Logout Button -->
-  <div class="logout-button" id="logoutButton">
-    <span>Logout</span>
-  </div>
-
-  <script src="./js/app.js"></script>
+  <script>
+    // Auto-redirect if user has auth token
+    if (localStorage.getItem('authToken')) {
+      window.location.href = '/my-games.html';
+    }
+  </script>
 </body>
 </html>

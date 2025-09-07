@@ -1,4 +1,3 @@
-
 // API Configuration
 const API_BASE = '/api';
 let authToken = localStorage.getItem('authToken');
@@ -14,10 +13,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Set up navigation
   setupNavigation();
-  
+
   // Get current user info from token
   getCurrentUser();
-  
+
   // Load my game assignments
   loadMyGameAssignments();
 });
@@ -25,20 +24,20 @@ document.addEventListener('DOMContentLoaded', function() {
 function setupNavigation() {
   // Set active navigation
   document.querySelector('.v1_23').style.color = 'rgba(59,130,246,1)';
-  
+
   // Add click handlers
   document.querySelector('.v1_28').addEventListener('click', function() {
     window.location.href = '/index.html';
   });
-  
+
   document.querySelector('.v1_33').addEventListener('click', function() {
     window.location.href = '/review-management.html';
   });
-  
+
   document.querySelector('.v1_516').addEventListener('click', function() {
     alert('Exports feature coming soon!');
   });
-  
+
   // Add logout handler
   const logoutButton = document.getElementById('logoutButton');
   if (logoutButton) {
@@ -101,7 +100,7 @@ function renderGames() {
   container.innerHTML = myGameAssignments.map(assignment => {
     const game = assignment.game;
     const pendingTags = assignment.totalTags - assignment.completedTags;
-    
+
     return `
       <div class="game-row">
         <div class="game-info">
@@ -139,12 +138,12 @@ function updateStats() {
   const inProgress = myGameAssignments.filter(assignment => 
     assignment.completedTags > 0 && assignment.progress < 100
   ).length;
-  
+
   // Count tags completed today
   const today = new Date().toDateString();
   let completedToday = 0;
   // This would need to be calculated from actual completion dates in a real implementation
-  
+
   document.getElementById('assigned-games-count').textContent = totalAssigned;
   document.getElementById('in-progress-count').textContent = inProgress;
   document.getElementById('completed-count').textContent = completedToday;
@@ -186,7 +185,7 @@ function showTagsLoading(gameTitle) {
 
 function displayGameTags(gameTitle, tags) {
   const container = document.getElementById('games-container');
-  
+
   if (tags.length === 0) {
     container.innerHTML = `
       <div class="tags-view">
@@ -204,7 +203,7 @@ function displayGameTags(gameTitle, tags) {
     const hasMyAction = tag.analystActions.some(action => action.analyst.id === currentUserId);
     const statusClass = hasMyAction ? 'reviewed' : 'pending';
     const statusText = hasMyAction ? 'Reviewed' : 'Pending Review';
-    
+
     return `
       <div class="tag-item ${statusClass}">
         <div class="tag-header">
@@ -254,10 +253,10 @@ function viewVideo(videoUrl) {
 }
 
 function openGame(gameId) {
-  // Navigate to main evaluation workspace with game context
+  // Navigate to Initial Evaluation Workspace with game context
   console.log('Setting selectedGameId:', gameId);
   localStorage.setItem('selectedGameId', gameId);
-  window.location.href = '/evaluation.html';
+  window.location.href = '/workspace.html';
 }
 
 function formatTimestamp(timestampMs) {
