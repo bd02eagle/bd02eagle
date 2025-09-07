@@ -25,7 +25,7 @@ externalPort = 5000
 expertMode = true
 
 [workflows]
-runButton = "Start Full Stack"
+runButton = "Start Full Stack Fixed"
 
 [[workflows.workflow]]
 name = "Start Server"
@@ -149,3 +149,28 @@ args = "echo \"Starting frontend server...\""
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd frontend && npm start"
+
+[[workflows.workflow]]
+name = "Start Full Stack Fixed"
+author = 44371205
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run seed"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm start &"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "sleep 2"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Backend started, now starting frontend...\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd frontend && node server.js"
