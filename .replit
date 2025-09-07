@@ -25,7 +25,7 @@ externalPort = 5000
 expertMode = true
 
 [workflows]
-runButton = "Simple Full Stack"
+runButton = "Full Stack with Install"
 
 [[workflows.workflow]]
 name = "Start Server"
@@ -195,3 +195,33 @@ args = "sleep 3"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd frontend && npm start"
+
+[[workflows.workflow]]
+name = "Debug Backend Only"
+author = 44371205
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm start"
+
+[[workflows.workflow]]
+name = "Full Stack with Install"
+author = 44371205
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run seed"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm start &"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "sleep 3"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd frontend && npm install && npm start"
