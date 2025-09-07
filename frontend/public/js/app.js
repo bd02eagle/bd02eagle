@@ -452,6 +452,22 @@ function annotateEvent() {
   window.location.href = `/evaluation.html?eventId=${event.id}&gameId=${currentGameId}&eventIndex=${currentEventIndex}`;
 }
 
+function annotateSpecificEvent(eventIndex) {
+  console.log('Annotating specific event at index:', eventIndex);
+  
+  if (!filteredEvents[eventIndex]) return;
+
+  const event = filteredEvents[eventIndex];
+
+  // Store the specific event context and navigate to detailed evaluation
+  localStorage.setItem('currentEventId', event.id);
+  localStorage.setItem('currentEventIndex', eventIndex.toString());
+  localStorage.setItem('selectedGameId', currentGameId);
+
+  // Navigate to evaluation page with URL parameters for immediate access
+  window.location.href = `/evaluation.html?eventId=${event.id}&gameId=${currentGameId}&eventIndex=${eventIndex}`;
+}
+
 function nextEvent() {
   if (filteredEvents.length === 0) return;
 
@@ -768,7 +784,7 @@ function updateEventsList(loadedEvents) {
         <div class="event-type">${event.type || 'Unknown'}</div>
       </div>
       <div class="event-actions">
-        <button class="evaluate-btn" onclick="event.stopPropagation(); annotateEvent()">
+        <button class="evaluate-btn" onclick="event.stopPropagation(); annotateSpecificEvent(${index})">
           ${isWorkspacePage ? 'Annotate Event' : 'View Details'}
         </button>
       </div>
