@@ -105,7 +105,14 @@ async function loadGameFromSelection() {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
 
-    if (!gamesResponse.ok) throw new Error('Failed to fetch games');
+    if (!gamesResponse.ok) {
+      if (gamesResponse.status === 401) {
+        localStorage.removeItem('authToken');
+        window.location.href = '/login.html';
+        return;
+      }
+      throw new Error('Failed to fetch games');
+    }
 
     const games = await gamesResponse.json();
     console.log('Fetched games:', games);
@@ -119,7 +126,7 @@ async function loadGameFromSelection() {
     if (selectedGameId) {
       game = games.find(g => g.id === selectedGameId);
       console.log('Found selected game:', game);
-      localStorage.removeItem('selectedGameId'); // Clear selection
+      // Don't clear selection immediately - wait until we confirm it loaded
     }
 
     if (!game) {
@@ -131,9 +138,14 @@ async function loadGameFromSelection() {
     updateGameHeader(game);
     await loadGameEvents(game.id);
 
+    // Clear selection only after successful load
+    if (selectedGameId) {
+      localStorage.removeItem('selectedGameId');
+    }
+
   } catch (error) {
     console.error('Error loading game:', error);
-    showError('Failed to load game data');
+    showError('Failed to load game data: ' + error.message);
   }
 }
 
@@ -160,21 +172,21 @@ function updateGameHeader(game) {
 
     gameTitle.textContent = `Evaluation: ${homeTeam} vs. ${awayTeam}`;
     console.log('Updated game title:', gameTitle.textContent);
+
+    // Show indicator if this game was selected from My Games
+    const wasSelected = localStorage.getItem('selectedGameId');
+    if (wasSelected) {
+      const indicator = document.createElement('span');
+      indicator.style.cssText = 'color: #10B981; font-size: 12px; margin-left: 8px;';
+      indicator.textContent = '(Selected from My Games)';
+      gameTitle.appendChild(indicator);
+    }
   }
 
   if (gameStatus) {
     const status = game.status || 'SCHEDULED';
     gameStatus.textContent = status === 'COMPLETED' ? 'PUBLISHED' : 'IN PROGRESS';
     gameStatus.className = `game-status ${status === 'COMPLETED' ? 'published' : 'in-progress'}`;
-  }
-
-  // Show indicator if this game was selected from My Games
-  const selectedGameId = localStorage.getItem('selectedGameId');
-  if (selectedGameId && gameTitle) {
-    const indicator = document.createElement('span');
-    indicator.style.cssText = 'color: #10B981; font-size: 12px; margin-left: 8px;';
-    indicator.textContent = '(Selected from My Games)';
-    gameTitle.appendChild(indicator);
   }
 }
 
@@ -508,7 +520,17 @@ function formatTime(seconds) {
 }
 
 function showError(message) {
-  document.getElementById('events-list').innerHTML = `<div class="error">${message}</div>`;
+  const eventsList = document.getElementById('events-list');
+  if (eventsList) {
+    eventsList.innerHTML = `<div class="error" style="color: #dc2626; padding: 20px; text-align: center;">${message}</div>`;
+  }
+  
+  // Also show error in game title if loading failed
+  const gameTitle = document.getElementById('game-title');
+  if (gameTitle && message.includes('game data')) {
+    gameTitle.textContent = 'Error loading game data';
+    gameTitle.style.color = '#dc2626';
+  }
 }
 
 // Global functions for event handlers
