@@ -100,21 +100,25 @@ body {
   align-items: center;
   gap: 8px;
   position: absolute;
-  top: 0px;
+  top: 18px;
   left: 117px;
-  max-width: 400px;
-  overflow: hidden;
+  max-width: 450px;
+  overflow: visible;
+  z-index: 200;
+  padding: 4px 8px;
+  margin-right: 16px;
 }
 
 .breadcrumb-link {
-  color: rgba(37,99,235,1);
+  color: rgba(29,78,216,1);
   font-family: Inter;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 16px;
   cursor: pointer;
   text-decoration: none;
   transition: color 0.2s;
   white-space: nowrap;
+  padding: 2px 4px;
 }
 
 .breadcrumb-link:hover {
@@ -125,9 +129,9 @@ body {
 .breadcrumb-separator {
   color: rgba(107,114,128,1);
   font-family: Inter;
-  font-weight: 400;
-  font-size: 14px;
-  margin: 0 4px;
+  font-weight: 600;
+  font-size: 16px;
+  margin: 0 6px;
 }
 .v1_259 {
   width: 229px;
