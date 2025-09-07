@@ -631,7 +631,7 @@ async function loadGameForWorkspace(gameId) {
       throw new Error(`Failed to fetch games: ${gameResponse.status}`);
     }
 
-    const games = await gamesResponse.json();
+    const games = await gameResponse.json();
     console.log('Total games fetched:', games.length);
     console.log('Games:', games.map(g => ({ id: g.id, homeTeam: g.homeTeam, awayTeam: g.awayTeam })));
 
