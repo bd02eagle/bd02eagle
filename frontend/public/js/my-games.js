@@ -23,20 +23,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function setupNavigation() {
   // Set active navigation
-  document.querySelector('.v1_23').style.color = 'rgba(59,130,246,1)';
+  const activeNav = document.querySelector('.v1_23');
+  if (activeNav) {
+    activeNav.style.color = 'rgba(59,130,246,1)';
+  }
 
   // Add click handlers
-  document.querySelector('.v1_28').addEventListener('click', function() {
-    window.location.href = '/index.html';
-  });
+  const homeNav = document.querySelector('.v1_28');
+  if (homeNav) {
+    homeNav.addEventListener('click', function() {
+      window.location.href = '/index.html';
+    });
+  }
 
-  document.querySelector('.v1_33').addEventListener('click', function() {
-    window.location.href = '/review-management.html';
-  });
+  const reviewNav = document.querySelector('.v1_33');
+  if (reviewNav) {
+    reviewNav.addEventListener('click', function() {
+      window.location.href = '/review-management.html';
+    });
+  }
 
-  document.querySelector('.v1_516').addEventListener('click', function() {
-    alert('Exports feature coming soon!');
-  });
+  const exportsNav = document.querySelector('.v1_516');
+  if (exportsNav) {
+    exportsNav.addEventListener('click', function() {
+      alert('Exports feature coming soon!');
+    });
+  }
 
   // Add logout handler
   const logoutButton = document.getElementById('logoutButton');
