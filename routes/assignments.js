@@ -5,54 +5,65 @@ import { requireAuth } from "../auth.js";
 const r = Router();
 
 // Get assignments for current user
-r.get("/my-games", requireAuth(["ANALYST","ADMIN"]), async (req, res) => {
-  const assignments = await prisma.gameAssignment.findMany({
-    where: { 
-      analystId: req.user.sub,
-      isActive: true 
-    },
-    include: {
-      game: {
-        include: {
-          homeTeam: true,
-          awayTeam: true,
-          events: {
-            include: {
-              tags: {
-                include: {
-                  analystActions: {
-                    where: { analystId: req.user.sub }
+r.get("/my-games", requireAuth(["ANALYST", "ADMIN"]), async (req, res) => {
+  try {
+    const assignments = await prisma.gameAssignment.findMany({
+      where: { 
+        analystId: req.user.sub,
+        isActive: true 
+      },
+      include: {
+        game: {
+          include: {
+            homeTeam: true,
+            awayTeam: true,
+            events: {
+              include: {
+                tags: {
+                  include: {
+                    analystActions: {
+                      where: {
+                        analystId: req.user.sub
+                      }
+                    }
                   }
                 }
               }
             }
           }
         }
-      }
-    },
-    orderBy: [
-      { priority: 'desc' },
-      { game: { date: 'asc' } }
-    ]
-  });
+      },
+      orderBy: [
+        { priority: 'desc' },
+        { game: { date: 'asc' } }
+      ]
+    });
 
-  // Calculate progress for each assignment
-  const assignmentsWithProgress = assignments.map(assignment => {
-    const totalTags = assignment.game.events.reduce((sum, event) => sum + event.tags.length, 0);
-    const completedTags = assignment.game.events.reduce((sum, event) => 
-      sum + event.tags.filter(tag => tag.analystActions.length > 0).length, 0
-    );
-    const progress = totalTags > 0 ? (completedTags / totalTags) * 100 : 0;
+    // Calculate progress for each assignment
+    const assignmentsWithProgress = assignments.map(assignment => {
+      const game = assignment.game;
+      const totalTags = game.events.reduce((total, event) => total + event.tags.length, 0);
+      const completedTags = game.events.reduce((total, event) => {
+        return total + event.tags.filter(tag => 
+          tag.analystActions.length > 0
+        ).length;
+      }, 0);
 
-    return {
-      ...assignment,
-      totalTags,
-      completedTags,
-      progress: Math.round(progress)
-    };
-  });
+      const progress = totalTags > 0 ? Math.round((completedTags / totalTags) * 100) : 0;
 
-  res.json(assignmentsWithProgress);
+      return {
+        ...assignment,
+        totalTags,
+        completedTags,
+        progress
+      };
+    });
+
+    res.json(assignmentsWithProgress);
+  } catch (error) {
+    console.error('Error fetching assignments:', error);
+    res.status(500).json({ error: 'Failed to fetch assignments' });
+  }
 });
 
 // Create assignment (Admin only)

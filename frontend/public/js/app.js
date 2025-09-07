@@ -193,6 +193,11 @@ async function loadGameEvents(gameId) {
 function renderEventsList() {
   const eventsList = document.getElementById('events-list');
   
+  if (!eventsList) {
+    console.error('Events list element not found');
+    return;
+  }
+  
   if (filteredEvents.length === 0) {
     eventsList.innerHTML = '<div class="loading">No events found</div>';
     return;

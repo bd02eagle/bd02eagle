@@ -105,7 +105,7 @@ function renderGames() {
     return `
       <div class="game-row">
         <div class="game-info">
-          <div class="game-title">${escapeHtml(game.homeTeam.shortName)} vs. ${escapeHtml(game.awayTeam.shortName)}</div>
+          <div class="game-title">${escapeHtml(game.homeTeam.name || game.homeTeam.shortName)} vs. ${escapeHtml(game.awayTeam.name || game.awayTeam.shortName)}</div>
           <div class="game-venue">${escapeHtml(game.venue || 'TBD')}</div>
         </div>
         <div class="game-date">${formatDate(game.date)}</div>
