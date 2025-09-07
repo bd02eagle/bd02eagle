@@ -438,38 +438,83 @@ function updateFlagButton(flagged) {
   }
 }
 
-function annotateEvent() {
+async function annotateEvent() {
   console.log('=== ANNOTATE EVENT CLICKED ===');
   console.log('Current event index:', currentEventIndex);
   console.log('Filtered events length:', filteredEvents.length);
   console.log('Current game ID:', currentGameId);
 
+  if (!filteredEvents || filteredEvents.length === 0) {
+    console.error('No events available for annotation');
+    alert('No events loaded. Please refresh the page.');
+    return;
+  }
+
   if (currentEventIndex < 0 || currentEventIndex >= filteredEvents.length) {
-    console.error('No valid event selected');
+    console.error('Invalid event index:', currentEventIndex);
     alert('Please select a valid event first');
     return;
   }
 
   const event = filteredEvents[currentEventIndex];
-  if (!event) {
-    console.error('No event found at current index');
-    alert('No event selected');
+  console.log('Annotating event:', event);
+
+  if (!event || !event.id) {
+    console.error('Invalid event data:', event);
+    alert('Invalid event selected. Please try again.');
     return;
   }
 
-  console.log('Selected event for annotation:', event);
+  // Simple prompt for now - in a real app this would be a proper modal
+  const label = prompt('Enter tag label:');
+  if (!label || label.trim() === '') {
+    console.log('Annotation cancelled - no label provided');
+    return;
+  }
 
-  // Set the current event ID for evaluation
-  currentEventId = event.id;
+  const notes = prompt('Enter notes (optional):') || '';
 
-  // Store in localStorage for persistence
-  localStorage.setItem('selectedEventId', event.id);
-  localStorage.setItem('selectedGameId', currentGameId);
+  try {
+    console.log(`Creating tag for event ${event.id} with label: "${label}"`);
 
-  console.log('Navigating to evaluation page with event:', event.id);
+    const response = await fetch(`${API_BASE}/events/${event.id}/tags`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        label: label.trim(),
+        notes: notes.trim()
+      })
+    });
 
-  // Navigate to evaluation page
-  window.location.href = `/evaluation.html?eventId=${event.id}&gameId=${currentGameId}`;
+    console.log('Tag creation response status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Tag creation failed:', errorText);
+      throw new Error(`Failed to create tag: ${response.status} - ${errorText}`);
+    }
+
+    const newTag = await response.json();
+    console.log('Successfully created tag:', newTag);
+
+    // Add the new tag to the event's tags array
+    if (!event.tags) {
+      event.tags = [];
+    }
+    event.tags.push(newTag);
+
+    // Update the display
+    updateEventTags(event);
+
+    alert('Tag created successfully!');
+
+  } catch (error) {
+    console.error('Error creating tag:', error);
+    alert('Failed to create tag: ' + error.message);
+  }
 }
 
 function annotateSpecificEvent(eventIndex) {
