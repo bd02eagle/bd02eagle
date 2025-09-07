@@ -99,6 +99,7 @@ function setupLogout() {
 async function loadGameFromSelection() {
   try {
     const selectedGameId = localStorage.getItem('selectedGameId');
+    console.log('Loading game with selectedGameId:', selectedGameId);
 
     const gamesResponse = await fetch(`${API_BASE}/games`, {
       headers: { 'Authorization': `Bearer ${authToken}` }
@@ -107,6 +108,8 @@ async function loadGameFromSelection() {
     if (!gamesResponse.ok) throw new Error('Failed to fetch games');
 
     const games = await gamesResponse.json();
+    console.log('Fetched games:', games);
+    
     if (games.length === 0) {
       showError('No games found');
       return;
@@ -115,11 +118,13 @@ async function loadGameFromSelection() {
     let game;
     if (selectedGameId) {
       game = games.find(g => g.id === selectedGameId);
+      console.log('Found selected game:', game);
       localStorage.removeItem('selectedGameId'); // Clear selection
     }
 
     if (!game) {
       game = games[0]; // Default to most recent
+      console.log('Using fallback game:', game);
     }
 
     currentGameId = game.id;
@@ -158,20 +163,41 @@ function updateGameHeader(game) {
   }
 
   if (gameStatus) {
-    gameStatus.textContent = game.status === 'COMPLETED' ? 'PUBLISHED' : 'IN PROGRESS';
-    gameStatus.className = `game-status ${game.status === 'COMPLETED' ? 'published' : 'in-progress'}`;
+    const status = game.status || 'SCHEDULED';
+    gameStatus.textContent = status === 'COMPLETED' ? 'PUBLISHED' : 'IN PROGRESS';
+    gameStatus.className = `game-status ${status === 'COMPLETED' ? 'published' : 'in-progress'}`;
+  }
+
+  // Show indicator if this game was selected from My Games
+  const selectedGameId = localStorage.getItem('selectedGameId');
+  if (selectedGameId && gameTitle) {
+    const indicator = document.createElement('span');
+    indicator.style.cssText = 'color: #10B981; font-size: 12px; margin-left: 8px;';
+    indicator.textContent = '(Selected from My Games)';
+    gameTitle.appendChild(indicator);
   }
 }
 
 async function loadGameEvents(gameId) {
   try {
+    console.log('Loading events for game:', gameId);
+    
     const eventsResponse = await fetch(`${API_BASE}/games/${gameId}/events`, {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
 
-    if (!eventsResponse.ok) throw new Error('Failed to fetch events');
+    if (!eventsResponse.ok) {
+      console.error('Events response not ok:', eventsResponse.status, eventsResponse.statusText);
+      throw new Error('Failed to fetch events');
+    }
 
     events = await eventsResponse.json();
+    console.log('Loaded events:', events.length, events);
+
+    if (events.length === 0) {
+      showError('No events found for this game');
+      return;
+    }
 
     // Load tags for each event
     for (let i = 0; i < events.length; i++) {
@@ -186,7 +212,7 @@ async function loadGameEvents(gameId) {
           events[i].tags = [];
         }
       } catch (error) {
-        console.warn(`Failed to load tags for event ${events[i].id}`);
+        console.warn(`Failed to load tags for event ${events[i].id}:`, error);
         events[i].tags = [];
       }
     }
@@ -214,13 +240,15 @@ function renderEventsList() {
     return;
   }
 
+  console.log('Rendering events list with', filteredEvents.length, 'events');
+
   if (filteredEvents.length === 0) {
     eventsList.innerHTML = '<div class="loading">No events found</div>';
     return;
   }
 
   eventsList.innerHTML = filteredEvents.map((event, index) => {
-    const timeStr = formatEventTime(event.timestampMs);
+    const timeStr = formatEventTime(event.timestampMs || 0);
     const hasTag = event.tags && event.tags.length > 0;
     const tagInfo = hasTag ? event.tags[0] : null;
 
@@ -246,13 +274,15 @@ function renderEventsList() {
     return `
       <div class="event-item ${currentEventIndex === index ? 'active' : ''}" onclick="selectEvent(${index})">
         <div class="event-time">Q4 - ${timeStr}</div>
-        <div class="event-description">${event.type}</div>
+        <div class="event-description">${event.type || 'Unknown Event'}</div>
         <div class="event-id">Event #${String(index + 1).padStart(6, '0')}
           <span class="event-tag ${tagClass}">${tagText}</span>
         </div>
       </div>
     `;
   }).join('');
+
+  console.log('Rendered events list HTML');
 }
 
 function selectEvent(index) {
