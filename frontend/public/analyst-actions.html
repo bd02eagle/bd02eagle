@@ -1,0 +1,166 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analyst Actions - RefIntel</title>
+  <link rel="stylesheet" href="./css/analyst-actions.css">
+</head>
+<body>
+  <div class="v1_460">
+    <!-- Sidebar -->
+    <div class="v1_5">
+      <div class="v1_6">
+        <!-- Logo -->
+        <div class="v1_7">
+          <span class="v1_464">RefIntel</span>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="v1_463">
+          <span class="v1_470" onclick="window.location.href='/my-games.html'" style="cursor: pointer;">My Games</span>
+          <span class="v1_475" onclick="window.location.href='/evaluation.html'" style="cursor: pointer;">Evaluation Workspace</span>
+          <span class="v1_480" onclick="window.location.href='/review-management.html'" style="cursor: pointer;">Review Management</span>
+          <span class="v1_485" style="color: #60A5FA;">My Actions</span>
+          <span class="v1_486">Exports</span>
+        </div>
+        
+        <!-- User Profile -->
+        <div class="v1_464">
+          <div class="v1_490">
+            <div class="v1_498"></div>
+            <div>
+              <span class="v1_514">Ref Analyst 1</span>
+              <span class="v1_516">RefIntel Analyst</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="v1_461">
+        <!-- Header -->
+        <div class="v1_465">
+          <span class="v1_491">My Analyst Actions</span>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-section">
+          <div class="stat-card">
+            <div class="stat-content">
+              <span class="stat-label">Total Reviews</span>
+              <span class="stat-value" id="total-reviews-count">0</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-content">
+              <span class="stat-label">Approved</span>
+              <span class="stat-value" id="approved-reviews-count">0</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-content">
+              <span class="stat-label">Changes Requested</span>
+              <span class="stat-value" id="changes-reviews-count">0</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-content">
+              <span class="stat-label">This Week</span>
+              <span class="stat-value" id="week-reviews-count">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-section">
+          <div class="filter-group">
+            <label for="period-filter">Time Period:</label>
+            <select id="period-filter">
+              <option value="all">All Time</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="action-filter">Action Type:</label>
+            <select id="action-filter">
+              <option value="all">All Actions</option>
+              <option value="APPROVE">Approved</option>
+              <option value="REQUEST_CHANGES">Changes Requested</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <input type="text" id="search-input" placeholder="Search tags, games, events...">
+          </div>
+        </div>
+
+        <!-- Actions List -->
+        <div class="actions-container">
+          <div class="actions-header">
+            <span>Tag</span>
+            <span>Game</span>
+            <span>Event</span>
+            <span>My Action</span>
+            <span>Date</span>
+            <span>Actions</span>
+          </div>
+          <div id="actions-list">
+            <div class="loading">Loading your actions...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logout Button -->
+  <button class="logout-button" id="logoutButton" onclick="logout()">
+    Logout
+  </button>
+
+  <!-- Edit Action Modal -->
+  <div id="edit-action-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Edit Review Action</h3>
+        <span class="close-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div class="tag-info">
+          <h4>Tag Information</h4>
+          <div><strong>Label:</strong> <span id="modal-tag-label"></span></div>
+          <div><strong>Game:</strong> <span id="modal-game-info"></span></div>
+          <div><strong>Event:</strong> <span id="modal-event-info"></span></div>
+        </div>
+        
+        <div class="current-action">
+          <h4>Current Action</h4>
+          <div><strong>Action:</strong> <span id="modal-current-action"></span></div>
+          <div><strong>Date:</strong> <span id="modal-action-date"></span></div>
+        </div>
+
+        <div class="edit-section">
+          <h4>Update Comment</h4>
+          <textarea id="edit-comment" placeholder="Update your comment about this tag..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="save-comment" class="submit-btn">Save Comment</button>
+        <button id="cancel-edit" class="cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userRole');
+        window.location.href = '/login.html';
+      }
+    }
+  </script>
+  <script src="./js/analyst-actions.js"></script>
+</body>
+</html>
