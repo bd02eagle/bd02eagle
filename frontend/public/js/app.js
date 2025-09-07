@@ -455,10 +455,25 @@ function annotateEvent() {
 function nextEvent() {
   const nextIndex = currentEventIndex + 1;
   if (nextIndex < filteredEvents.length) {
-    selectEvent(nextIndex);
+    currentEventIndex = nextIndex;
   } else {
     // Cycle back to the first event
-    selectEvent(0);
+    currentEventIndex = 0;
+  }
+  
+  // Update the workspace with the new event
+  if (filteredEvents[currentEventIndex]) {
+    const event = filteredEvents[currentEventIndex];
+    
+    // Update UI to show selected event
+    document.querySelectorAll('.event-item').forEach((item, i) => {
+      item.classList.toggle('active', i === currentEventIndex);
+    });
+    
+    // Update event details
+    updateEventDetails(event, currentEventIndex);
+    loadEventVideo(event);
+    loadExistingEvaluation(event);
   }
   
   // Ensure the event list UI is updated
@@ -657,14 +672,10 @@ async function loadGameForWorkspace(gameId) {
     updateEventsList(loadedEvents);
     renderEventsList();
 
-    // For workspace, just select the first event without redirecting
+    // For workspace, properly select the first event
     if (loadedEvents.length > 0) {
       currentEventIndex = 0;
-      if (loadedEvents[0]) {
-        updateEventDetails(loadedEvents[0], 0);
-        loadEventVideo(loadedEvents[0]);
-        loadExistingEvaluation(loadedEvents[0]);
-      }
+      selectEvent(0); // This will handle all the UI updates properly
     }
 
     console.log('=== Game loading completed successfully ===');
@@ -716,8 +727,8 @@ function updateGameInfo(game) {
   }
 }
 
-function updateEventsList(events) {
-  console.log('Updating events list:', events);
+function updateEventsList(loadedEvents) {
+  console.log('Updating events list:', loadedEvents);
 
   const eventsList = document.getElementById('events-list');
   if (!eventsList) {
@@ -725,14 +736,18 @@ function updateEventsList(events) {
     return;
   }
 
-  if (!events || events.length === 0) {
+  if (!loadedEvents || loadedEvents.length === 0) {
     eventsList.innerHTML = '<div class="no-events">No events found for this game</div>';
     return;
   }
 
+  // Set global events arrays
+  events = loadedEvents;
+  filteredEvents = [...loadedEvents];
+
   const isWorkspacePage = window.location.pathname === '/workspace.html' || window.location.pathname === '/';
 
-  eventsList.innerHTML = events.map((event, index) => `
+  eventsList.innerHTML = loadedEvents.map((event, index) => `
     <div class="event-item ${index === 0 ? 'active' : ''}" onclick="selectEvent(${index})" data-event-id="${event.id}">
       <div class="event-info">
         <div class="event-timestamp">${formatTimestamp(event.timestampMs)}</div>
@@ -747,8 +762,8 @@ function updateEventsList(events) {
   `).join('');
 
   // Store events globally for navigation
-  window.events = events;
-  window.filteredEvents = events;
+  window.events = loadedEvents;
+  window.filteredEvents = loadedEvents;
 }
 
 
@@ -768,8 +783,9 @@ function selectEvent(index) {
   
   // Check if we're on workspace page - if so, just highlight the event
   if (window.location.pathname === '/workspace.html' || window.location.pathname === '/') {
-    if (window.events && window.events[index]) {
-      const event = window.events[index];
+    if (filteredEvents && filteredEvents[index]) {
+      const event = filteredEvents[index];
+      currentEventIndex = index;
       
       // Update active event in list
       document.querySelectorAll('.event-item').forEach((item, i) => {
@@ -780,14 +796,27 @@ function selectEvent(index) {
       updateEventDetails(event, index);
       loadEventVideo(event);
       loadExistingEvaluation(event);
-      currentEventIndex = index;
     }
   } else {
-    // On other pages, redirect to evaluation
-    if (window.events && window.events[index]) {
-      const event = window.events[index];
-      evaluateEvent(event.id);
-    }
+    // On other pages, use the original logic
+    if (index < 0 || index >= filteredEvents.length) return;
+
+    currentEventIndex = index;
+    const event = filteredEvents[index];
+
+    // Update active event in list
+    document.querySelectorAll('.event-item').forEach((item, i) => {
+      item.classList.toggle('active', i === index);
+    });
+
+    // Update event details
+    updateEventDetails(event, index);
+
+    // Load existing tag data if available
+    loadExistingEvaluation(event);
+
+    // Load video
+    loadEventVideo(event);
   }
 }
 
