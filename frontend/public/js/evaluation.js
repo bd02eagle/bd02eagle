@@ -121,7 +121,13 @@ function selectCorrectness(type) {
 
 async function loadCurrentGame() {
   try {
-    const selectedGameId = localStorage.getItem('selectedGameId');
+    // Check for URL parameters first (from workspace navigation)
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameIdFromUrl = urlParams.get('gameId');
+    const eventIdFromUrl = urlParams.get('eventId');
+    const eventIndexFromUrl = urlParams.get('eventIndex');
+    
+    const selectedGameId = gameIdFromUrl || localStorage.getItem('selectedGameId');
     
     const gamesResponse = await fetch(`${API_BASE}/games`, {
       headers: {
@@ -139,7 +145,7 @@ async function loadCurrentGame() {
       return;
     }
 
-    // Load the selected game from My Games, or default to most recent
+    // Load the selected game from workspace or My Games, or default to most recent
     let game;
     if (selectedGameId) {
       game = games.find(g => g.id === selectedGameId);
@@ -187,6 +193,13 @@ async function loadCurrentGame() {
     }
 
     await loadEvents(game.id);
+    
+    // If we came from workspace, set the specific event
+    if (eventIndexFromUrl) {
+      currentEventIndex = parseInt(eventIndexFromUrl, 10);
+      console.log('Setting event index from workspace:', currentEventIndex);
+    }
+    
   } catch (error) {
     console.error('Error loading game:', error);
     displayError('Failed to load game data');

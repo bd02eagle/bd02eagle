@@ -448,7 +448,8 @@ function annotateEvent() {
   localStorage.setItem('currentEventIndex', currentEventIndex.toString());
   localStorage.setItem('selectedGameId', currentGameId);
 
-  window.location.href = '/evaluation.html';
+  // Navigate to evaluation page with URL parameters for immediate access
+  window.location.href = `/evaluation.html?eventId=${event.id}&gameId=${currentGameId}&eventIndex=${currentEventIndex}`;
 }
 
 function nextEvent() {
@@ -459,6 +460,9 @@ function nextEvent() {
     // Cycle back to the first event
     selectEvent(0);
   }
+  
+  // Ensure the event list UI is updated
+  renderEventsList();
 }
 
 
