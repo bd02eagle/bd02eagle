@@ -259,13 +259,15 @@ body {
   display: flex;
   overflow: hidden;
   z-index: 1;
+  margin-bottom: 56px;
 }
 .v1_260 {
   width: 480px;
-  height: 100%;
+  height: calc(100% - 8px);
   background: rgba(255,255,255,1);
   position: relative;
   overflow: auto;
+  padding-bottom: 8px;
 }
 .v1_275 {
   width: 100%;
@@ -842,7 +844,7 @@ body {
 /* Logout button */
 .logout-button {
   position: fixed;
-  top: 20px;
+  top: 80px;
   right: 20px;
   background: rgba(239, 68, 68, 1);
   color: white;
