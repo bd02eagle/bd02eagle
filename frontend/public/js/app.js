@@ -439,33 +439,85 @@ function updateFlagButton(flagged) {
 }
 
 function annotateEvent() {
-  if (!filteredEvents[currentEventIndex]) return;
+  console.log('=== MAIN ANNOTATE BUTTON CLICKED ===');
+  console.log('Current event index:', currentEventIndex);
+  console.log('Total filtered events:', filteredEvents.length);
+  
+  if (!filteredEvents[currentEventIndex]) {
+    console.error('No current event selected');
+    alert('Please select an event first');
+    return;
+  }
 
   const event = filteredEvents[currentEventIndex];
+  console.log('Current event to annotate:', event.type, 'ID:', event.id);
+
+  // Visual feedback
+  const annotateBtn = document.getElementById('annotate-event-btn');
+  if (annotateBtn) {
+    annotateBtn.textContent = 'Opening...';
+    annotateBtn.style.background = '#059669';
+  }
 
   // Store the current event context and navigate to detailed evaluation
   localStorage.setItem('currentEventId', event.id);
   localStorage.setItem('currentEventIndex', currentEventIndex.toString());
   localStorage.setItem('selectedGameId', currentGameId);
 
+  console.log('Stored in localStorage:');
+  console.log('- currentEventId:', event.id);
+  console.log('- currentEventIndex:', currentEventIndex.toString());
+  console.log('- selectedGameId:', currentGameId);
+
   // Navigate to evaluation page with URL parameters for immediate access
-  window.location.href = `/evaluation.html?eventId=${event.id}&gameId=${currentGameId}&eventIndex=${currentEventIndex}`;
+  const evaluationUrl = `/evaluation.html?eventId=${event.id}&gameId=${currentGameId}&eventIndex=${currentEventIndex}`;
+  console.log('Navigating to:', evaluationUrl);
+  
+  // Small delay to show visual feedback
+  setTimeout(() => {
+    window.location.href = evaluationUrl;
+  }, 200);
 }
 
 function annotateSpecificEvent(eventIndex) {
-  console.log('Annotating specific event at index:', eventIndex);
-
-  if (!filteredEvents[eventIndex]) return;
+  console.log('=== ANNOTATE EVENT CLICKED ===');
+  console.log('Event index:', eventIndex);
+  console.log('Total filtered events:', filteredEvents.length);
+  
+  if (!filteredEvents[eventIndex]) {
+    console.error('No event found at index:', eventIndex);
+    alert('Event not found. Please try again.');
+    return;
+  }
 
   const event = filteredEvents[eventIndex];
+  console.log('Event to annotate:', event.type, 'ID:', event.id);
+
+  // Visual feedback - show button was clicked
+  const clickedButton = event.target || document.querySelector(`button[onclick*="annotateSpecificEvent(${eventIndex})"]`);
+  if (clickedButton) {
+    clickedButton.textContent = 'Opening...';
+    clickedButton.style.background = '#059669';
+  }
 
   // Store the specific event context and navigate to detailed evaluation
   localStorage.setItem('currentEventId', event.id);
   localStorage.setItem('currentEventIndex', eventIndex.toString());
   localStorage.setItem('selectedGameId', currentGameId);
 
+  console.log('Stored in localStorage:');
+  console.log('- currentEventId:', event.id);
+  console.log('- currentEventIndex:', eventIndex.toString());
+  console.log('- selectedGameId:', currentGameId);
+
   // Navigate to evaluation page with URL parameters for immediate access
-  window.location.href = `/evaluation.html?eventId=${event.id}&gameId=${currentGameId}&eventIndex=${eventIndex}`;
+  const evaluationUrl = `/evaluation.html?eventId=${event.id}&gameId=${currentGameId}&eventIndex=${eventIndex}`;
+  console.log('Navigating to:', evaluationUrl);
+  
+  // Small delay to show visual feedback
+  setTimeout(() => {
+    window.location.href = evaluationUrl;
+  }, 200);
 }
 
 function nextEvent() {
