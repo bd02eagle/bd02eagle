@@ -454,7 +454,7 @@ function annotateEvent() {
 
 function annotateSpecificEvent(eventIndex) {
   console.log('Annotating specific event at index:', eventIndex);
-  
+
   if (!filteredEvents[eventIndex]) return;
 
   const event = filteredEvents[eventIndex];
@@ -705,6 +705,11 @@ async function loadGameForWorkspace(gameId) {
           annotateBtn.disabled = false;
           annotateBtn.style.opacity = '1';
         }
+
+        // Also ensure the first event is visually selected
+        document.querySelectorAll('.event-item').forEach((item, i) => {
+          item.classList.toggle('active', i === 0);
+        });
       }, 100);
     }
 
