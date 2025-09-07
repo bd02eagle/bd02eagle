@@ -62,9 +62,32 @@ r.post("/", requireAuth(["ADMIN"]), async (req, res) => {
   res.status(201).json(game);
 });
 
-r.get("/:gameId/events", requireAuth(["ADMIN","ANALYST","CHARTER"]), async (req, res) => {
-  const events = await prisma.event.findMany({ where: { gameId: req.params.gameId } });
-  res.json(events);
+// Get game events
+r.get("/:gameId/events", requireAuth(), async (req, res) => {
+  const { gameId } = req.params;
+  try {
+    console.log('Fetching events for game:', gameId);
+
+    const events = await prisma.event.findMany({
+      where: { gameId },
+      orderBy: { timestampMs: 'asc' },
+      include: {
+        tags: {
+          include: {
+            createdBy: {
+              select: { firstName: true, lastName: true, email: true }
+            }
+          }
+        }
+      }
+    });
+
+    console.log(`Found ${events.length} events for game ${gameId}`);
+    res.json(events);
+  } catch (error) {
+    console.error('Error fetching game events:', error);
+    res.status(500).json({ error: 'Failed to fetch events' });
+  }
 });
 
 export default r;
