@@ -768,8 +768,8 @@ function updateEventsList(loadedEvents) {
         <div class="event-type">${event.type || 'Unknown'}</div>
       </div>
       <div class="event-actions">
-        <button class="evaluate-btn" onclick="event.stopPropagation(); evaluateEvent('${event.id}')">
-          ${isWorkspacePage ? 'Evaluate' : 'View Details'}
+        <button class="evaluate-btn" onclick="event.stopPropagation(); annotateEvent()">
+          ${isWorkspacePage ? 'Annotate Event' : 'View Details'}
         </button>
       </div>
     </div>
@@ -828,7 +828,4 @@ function selectEvent(index) {
   }
 }
 
-function evaluateEvent(eventId) {
-  console.log('Evaluating event:', eventId);
-  window.location.href = `/evaluation.html?eventId=${eventId}&gameId=${currentGameId}`;
-}
+// Removed evaluateEvent function - using annotateEvent instead
