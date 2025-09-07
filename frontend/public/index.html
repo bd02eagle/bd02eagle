@@ -14,24 +14,24 @@
         <span class="nav-logo">RefIntel</span>
       </div>
       <div class="nav-items">
-        <div class="nav-item active" onclick="window.location.href='/index.html'">
-          <span class="nav-icon">📊</span>
-          <span class="nav-text">Evaluation Workspace</span>
-        </div>
         <div class="nav-item" onclick="window.location.href='/my-games.html'">
-          <span class="nav-icon">🎮</span>
+          <span class="nav-icon">■</span>
           <span class="nav-text">My Games</span>
         </div>
+        <div class="nav-item active" onclick="window.location.href='/index.html'">
+          <span class="nav-icon">■</span>
+          <span class="nav-text">Evaluation Workspace</span>
+        </div>
         <div class="nav-item" onclick="window.location.href='/review-management.html'">
-          <span class="nav-icon">📋</span>
+          <span class="nav-icon">■</span>
           <span class="nav-text">Review Management</span>
         </div>
         <div class="nav-item" onclick="alert('Exports feature coming soon!')">
-          <span class="nav-icon">📈</span>
+          <span class="nav-icon">■</span>
           <span class="nav-text">Exports</span>
         </div>
         <div class="nav-item" onclick="alert('Settings feature coming soon!')">
-          <span class="nav-icon">⚙️</span>
+          <span class="nav-icon">■</span>
           <span class="nav-text">Settings</span>
         </div>
       </div>
@@ -106,8 +106,8 @@
               <span class="event-type" id="event-type">SHOT</span>
             </div>
             <div class="event-actions">
-              <button class="flag-btn" id="flag-btn">🚩 Flag for Review</button>
-              <button class="save-btn" id="save-next-btn">Save & Next →</button>
+              <button class="info-btn" id="event-info-btn">Event Details</button>
+              <button class="navigate-btn" id="next-event-btn">Next Event →</button>
             </div>
           </div>
 
@@ -129,43 +129,41 @@
           </div>
         </div>
 
-        <!-- Evaluation Form Panel -->
-        <div class="evaluation-form-panel">
-          <div class="form-section">
-            <h4>Infraction Type</h4>
-            <div class="button-group infraction-buttons">
-              <button class="form-btn" data-value="foul">Foul</button>
-              <button class="form-btn" data-value="violation">Violation</button>
-              <button class="form-btn" data-value="turnover">Turnover</button>
-              <button class="form-btn" data-value="stoppage">Stoppage</button>
+        <!-- Event Summary Panel -->
+        <div class="event-summary-panel">
+          <div class="summary-section">
+            <h4>Event Details</h4>
+            <div class="detail-item">
+              <span class="detail-label">Time:</span>
+              <span class="detail-value" id="event-time-detail">Q4 04:17.5</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Type:</span>
+              <span class="detail-value" id="event-type-detail">Shot</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Status:</span>
+              <span class="detail-value" id="event-status">Untagged</span>
             </div>
           </div>
 
-          <div class="form-section">
-            <h4>Infraction Rating</h4>
-            <div class="rating-options">
-              <div class="rating-option">
-                <input type="radio" id="correct-call" name="rating" value="correct">
-                <label for="correct-call" class="correct-label">Correct Call</label>
-              </div>
-              <div class="rating-option">
-                <input type="radio" id="incorrect-call" name="rating" value="incorrect">
-                <label for="incorrect-call" class="incorrect-label">Incorrect Call</label>
-              </div>
+          <div class="summary-section">
+            <h4>Available Tags</h4>
+            <div class="tags-container" id="event-tags-list">
+              <div class="loading">Loading tags...</div>
             </div>
           </div>
 
-          <div class="form-section">
-            <h4>Observability</h4>
-            <div class="button-group observability-buttons">
-              <button class="form-btn" data-value="observable">Observable</button>
-              <button class="form-btn" data-value="unobservable">Unobservable</button>
+          <div class="summary-section">
+            <h4>Actions</h4>
+            <div class="action-buttons">
+              <button class="action-btn primary" id="annotate-event-btn">
+                Annotate Event
+              </button>
+              <button class="action-btn secondary" id="view-tags-btn">
+                View All Tags
+              </button>
             </div>
-          </div>
-
-          <div class="form-section">
-            <h4>Notes</h4>
-            <textarea class="notes-textarea" id="notes" placeholder="Add your evaluation notes here..."></textarea>
           </div>
         </div>
       </div>

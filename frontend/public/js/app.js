@@ -39,8 +39,9 @@ function setupEventListeners() {
   setupFormControls();
   
   // Action buttons
-  document.getElementById('flag-btn').addEventListener('click', toggleFlag);
-  document.getElementById('save-next-btn').addEventListener('click', saveAndNext);
+  document.getElementById('annotate-event-btn').addEventListener('click', annotateEvent);
+  document.getElementById('next-event-btn').addEventListener('click', nextEvent);
+  document.getElementById('view-tags-btn').addEventListener('click', viewEventTags);
   
   // Video controls
   setupVideoControls();
@@ -268,51 +269,40 @@ function updateEventDetails(event, index) {
 }
 
 function loadExistingEvaluation(event) {
-  // Reset form
-  resetEvaluationForm();
-  
-  // If event has tags, load the first one
-  if (event.tags && event.tags.length > 0) {
-    const tag = event.tags[0];
-    
-    // Try to parse evaluation data from tag
-    if (tag.label.includes('foul')) {
-      selectInfractionType('foul');
-    } else if (tag.label.includes('violation')) {
-      selectInfractionType('violation');
-    } else if (tag.label.includes('turnover')) {
-      selectInfractionType('turnover');
-    } else if (tag.label.includes('stoppage')) {
-      selectInfractionType('stoppage');
-    }
-    
-    if (tag.notes) {
-      evaluationData.notes = tag.notes;
-      document.getElementById('notes').value = tag.notes;
-    }
-  }
+  // Update event summary panel
+  updateEventSummary(event);
 }
 
-function resetEvaluationForm() {
-  evaluationData = {
-    infractionType: '',
-    rating: '',
-    observability: '',
-    notes: '',
-    flagged: false
-  };
+function updateEventSummary(event) {
+  // Update event details
+  const eventTimeDetail = document.getElementById('event-time-detail');
+  const eventTypeDetail = document.getElementById('event-type-detail');
+  const eventStatus = document.getElementById('event-status');
+  const eventTagsList = document.getElementById('event-tags-list');
   
-  // Reset UI
-  document.querySelectorAll('.form-btn').forEach(btn => {
-    btn.classList.remove('active');
-  });
+  if (eventTimeDetail) {
+    eventTimeDetail.textContent = `Q4 ${formatEventTime(event.timestampMs)}`;
+  }
   
-  document.querySelectorAll('input[name="rating"]').forEach(radio => {
-    radio.checked = false;
-  });
+  if (eventTypeDetail) {
+    eventTypeDetail.textContent = event.type;
+  }
   
-  document.getElementById('notes').value = '';
-  updateFlagButton(false);
+  if (eventStatus) {
+    const hasTag = event.tags && event.tags.length > 0;
+    eventStatus.textContent = hasTag ? 'Tagged' : 'Untagged';
+    eventStatus.style.color = hasTag ? '#059669' : '#dc2626';
+  }
+  
+  if (eventTagsList) {
+    if (event.tags && event.tags.length > 0) {
+      eventTagsList.innerHTML = event.tags.map(tag => 
+        `<div class="tag-chip">${tag.label}</div>`
+      ).join('');
+    } else {
+      eventTagsList.innerHTML = '<div class="no-tags" style="font-size: 12px; color: #64748b;">No tags available</div>';
+    }
+  }
 }
 
 function selectInfractionType(type) {
@@ -344,65 +334,37 @@ function updateFlagButton(flagged) {
   }
 }
 
-async function saveAndNext() {
-  if (!currentEventIndex >= 0 || !filteredEvents[currentEventIndex]) return;
+function annotateEvent() {
+  if (!filteredEvents[currentEventIndex]) return;
   
   const event = filteredEvents[currentEventIndex];
-  const saveBtn = document.getElementById('save-next-btn');
-  const originalText = saveBtn.textContent;
   
-  try {
-    saveBtn.textContent = 'Saving...';
-    saveBtn.disabled = true;
-    
-    // Create tag data
-    const tagData = {
-      label: `${evaluationData.infractionType}_${evaluationData.rating}_${evaluationData.observability}`,
-      notes: evaluationData.notes
-    };
-    
-    const response = await fetch(`${API_BASE}/events/${event.id}/tags`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(tagData)
-    });
-    
-    if (!response.ok) throw new Error('Failed to save evaluation');
-    
-    const savedTag = await response.json();
-    
-    // Update local data
-    if (!event.tags) event.tags = [];
-    const existingIndex = event.tags.findIndex(tag => tag.id === savedTag.id);
-    if (existingIndex >= 0) {
-      event.tags[existingIndex] = savedTag;
-    } else {
-      event.tags.push(savedTag);
-    }
-    
-    // Update UI
-    renderEventsList();
-    updateProgress();
-    
-    // Move to next event
-    setTimeout(() => {
-      const nextIndex = currentEventIndex + 1;
-      if (nextIndex < filteredEvents.length) {
-        selectEvent(nextIndex);
-      } else {
-        alert('All events completed!');
-      }
-    }, 500);
-    
-  } catch (error) {
-    console.error('Error saving evaluation:', error);
-    alert('Failed to save evaluation: ' + error.message);
-  } finally {
-    saveBtn.textContent = originalText;
-    saveBtn.disabled = false;
+  // Store the current event context and navigate to detailed evaluation
+  localStorage.setItem('currentEventId', event.id);
+  localStorage.setItem('currentEventIndex', currentEventIndex.toString());
+  localStorage.setItem('selectedGameId', currentGameId);
+  
+  window.location.href = '/evaluation.html';
+}
+
+function nextEvent() {
+  const nextIndex = currentEventIndex + 1;
+  if (nextIndex < filteredEvents.length) {
+    selectEvent(nextIndex);
+  } else {
+    alert('You have reached the last event');
+  }
+}
+
+function viewEventTags() {
+  if (!filteredEvents[currentEventIndex]) return;
+  
+  const event = filteredEvents[currentEventIndex];
+  if (event.tags && event.tags.length > 0) {
+    const tagsList = event.tags.map(tag => `• ${tag.label}${tag.notes ? ': ' + tag.notes : ''}`).join('\n');
+    alert(`Tags for this event:\n\n${tagsList}`);
+  } else {
+    alert('No tags found for this event');
   }
 }
 
