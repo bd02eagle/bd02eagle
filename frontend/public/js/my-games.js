@@ -255,8 +255,9 @@ function viewVideo(videoUrl) {
 
 function openGame(gameId) {
   // Navigate to main evaluation workspace with game context
+  console.log('Setting selectedGameId:', gameId);
   localStorage.setItem('selectedGameId', gameId);
-  window.location.href = '/index.html';
+  window.location.href = '/evaluation.html';
 }
 
 function formatTimestamp(timestampMs) {

@@ -143,6 +143,7 @@ async function loadCurrentGame() {
     let game;
     if (selectedGameId) {
       game = games.find(g => g.id === selectedGameId);
+      console.log('Found selected game:', game);
       // Clear the selection after using it
       localStorage.removeItem('selectedGameId');
     }
@@ -150,12 +151,19 @@ async function loadCurrentGame() {
     // Fallback to most recent game if no selection or game not found
     if (!game) {
       game = games[0];
+      console.log('Using fallback game:', game);
     }
 
     currentGameId = game.id;
 
     // Update game info with proper team names
-    document.getElementById('game-title').textContent = `${game.homeTeam.shortName} vs. ${game.awayTeam.shortName}`;
+    const gameTitle = document.getElementById('game-title');
+    if (gameTitle) {
+      // Use team names or shortNames, with fallback
+      const homeTeam = game.homeTeam?.shortName || game.homeTeam?.name || 'Home';
+      const awayTeam = game.awayTeam?.shortName || game.awayTeam?.name || 'Away';
+      gameTitle.textContent = `${homeTeam} vs. ${awayTeam}`;
+    }
 
     // Show indicator if this game was selected from My Games
     if (selectedGameId) {
