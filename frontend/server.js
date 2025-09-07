@@ -81,7 +81,7 @@ app.get('/review-management.html', (req, res) => {
 });
 
 // Handle SPA routing - send index.html for other routes
-app.get('/*', (req, res) => {
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
