@@ -438,7 +438,7 @@ function updateFlagButton(flagged) {
   }
 }
 
-async function annotateEvent() {
+function annotateEvent() {
   console.log('=== ANNOTATE EVENT CLICKED ===');
   console.log('Current event index:', currentEventIndex);
   console.log('Filtered events length:', filteredEvents.length);
@@ -457,7 +457,7 @@ async function annotateEvent() {
   }
 
   const event = filteredEvents[currentEventIndex];
-  console.log('Annotating event:', event);
+  console.log('Navigating to evaluation for event:', event);
 
   if (!event || !event.id) {
     console.error('Invalid event data:', event);
@@ -465,56 +465,21 @@ async function annotateEvent() {
     return;
   }
 
-  // Simple prompt for now - in a real app this would be a proper modal
-  const label = prompt('Enter tag label:');
-  if (!label || label.trim() === '') {
-    console.log('Annotation cancelled - no label provided');
-    return;
-  }
+  // Store context for the evaluation page
+  localStorage.setItem('selectedGameId', currentGameId);
+  localStorage.setItem('selectedEventId', event.id);
+  localStorage.setItem('selectedEventIndex', currentEventIndex.toString());
 
-  const notes = prompt('Enter notes (optional):') || '';
+  console.log('Stored context for evaluation:');
+  console.log('- gameId:', currentGameId);
+  console.log('- eventId:', event.id);
+  console.log('- eventIndex:', currentEventIndex);
 
-  try {
-    console.log(`Creating tag for event ${event.id} with label: "${label}"`);
+  // Navigate to evaluation page with URL parameters for immediate access
+  const evaluationUrl = `/evaluation.html?gameId=${currentGameId}&eventId=${event.id}&eventIndex=${currentEventIndex}`;
+  console.log('Navigating to evaluation page:', evaluationUrl);
 
-    const response = await fetch(`${API_BASE}/events/${event.id}/tags`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        label: label.trim(),
-        notes: notes.trim()
-      })
-    });
-
-    console.log('Tag creation response status:', response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Tag creation failed:', errorText);
-      throw new Error(`Failed to create tag: ${response.status} - ${errorText}`);
-    }
-
-    const newTag = await response.json();
-    console.log('Successfully created tag:', newTag);
-
-    // Add the new tag to the event's tags array
-    if (!event.tags) {
-      event.tags = [];
-    }
-    event.tags.push(newTag);
-
-    // Update the display
-    updateEventTags(event);
-
-    alert('Tag created successfully!');
-
-  } catch (error) {
-    console.error('Error creating tag:', error);
-    alert('Failed to create tag: ' + error.message);
-  }
+  window.location.href = evaluationUrl;
 }
 
 function annotateSpecificEvent(eventIndex) {
