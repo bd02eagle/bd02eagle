@@ -207,32 +207,60 @@ async function main() {
   const createdGames = games;
 
 
-  // Create events for each game
+  // Create multiple events for each game
   console.log('Creating events...');
   const events = [];
-  const eventTypes = ["FOUL", "TECHNICAL_FOUL", "FLAGRANT_FOUL", "OFFENSIVE_FOUL", "TRAVEL"];
-  for (let i = 0; i < createdGames.length; i++) {
-    const event = await prisma.event.upsert({
-      where: { 
-        id: `event-${createdGames[i].id}-${i}` 
-      },
-      update: {},
-      create: {
-        id: `event-${createdGames[i].id}-${i}`,
-        gameId: createdGames[i].id,
-        timestampMs: (i + 1) * 600000, // Fixed timestamps to avoid randomness
-        videoUrl: `https://example.com/video${i + 1}.mp4`,
-        type: eventTypes[i % eventTypes.length]
-      }
-    });
-    events.push(event);
+  const eventTypes = ["FOUL", "TECHNICAL_FOUL", "FLAGRANT_FOUL", "OFFENSIVE_FOUL", "TRAVEL", "BLOCKING_FOUL", "CHARGING_FOUL", "INTENTIONAL_FOUL", "LOOSE_BALL_FOUL", "SHOOTING_FOUL"];
+  const videoUrls = [
+    "https://dvsportreplay.blob.core.windows.net/wbb-clips//VIDEOS//2023-24//SEC//00%20CLIPS//LSU//LSU%20VS%20KENT%20ST%20-%2011.14.23%20-%2010-56-24//PLAY%20088%20-%20ISO2023-11-14T11.44.22.MP4",
+    "https://example.com/video2.mp4",
+    "https://example.com/video3.mp4",
+    "https://example.com/video4.mp4",
+    "https://example.com/video5.mp4"
+  ];
+
+  for (let gameIndex = 0; gameIndex < createdGames.length; gameIndex++) {
+    const game = createdGames[gameIndex];
+    const eventsPerGame = game.status === 'COMPLETED' ? 5 : 3; // More events for completed games
+    
+    for (let eventIndex = 0; eventIndex < eventsPerGame; eventIndex++) {
+      const event = await prisma.event.upsert({
+        where: { 
+          id: `event-${game.id}-${eventIndex}` 
+        },
+        update: {},
+        create: {
+          id: `event-${game.id}-${eventIndex}`,
+          gameId: game.id,
+          timestampMs: (eventIndex + 1) * 300000 + (gameIndex * 100000), // Spread events across game time
+          videoUrl: videoUrls[eventIndex % videoUrls.length],
+          type: eventTypes[(gameIndex * eventsPerGame + eventIndex) % eventTypes.length]
+        }
+      });
+      events.push(event);
+    }
   }
 
   // Create tags
   console.log('Creating tags...');
   const tags = [];
-  const tagLabels = ["Blocking Foul", "Technical Foul - Excessive Complaining", "Flagrant 1", "Offensive Foul", "Travel Violation"];
-  for (let i = 0; i < events.length; i++) {
+  const tagLabels = [
+    "Blocking Foul", 
+    "Technical Foul - Excessive Complaining", 
+    "Flagrant 1", 
+    "Offensive Foul", 
+    "Travel Violation",
+    "Charging Foul",
+    "Intentional Foul - Hard Contact",
+    "Loose Ball Foul",
+    "Shooting Foul - Contact on Shot",
+    "Technical Foul - Unsporting Behavior"
+  ];
+  
+  // Create tags for about 80% of events (some events may not have tags yet)
+  const eventsToTag = Math.floor(events.length * 0.8);
+  
+  for (let i = 0; i < eventsToTag; i++) {
     const tag = await prisma.tag.upsert({
       where: { 
         id: `tag-${events[i].id}-${i}` 
@@ -243,7 +271,7 @@ async function main() {
         eventId: events[i].id,
         createdById: charter.id, // Charter user
         label: tagLabels[i % tagLabels.length],
-        notes: `Analysis note ${i + 1}`
+        notes: `Analysis note for ${events[i].type}: ${tagLabels[i % tagLabels.length]}`
       }
     });
     tags.push(tag);
