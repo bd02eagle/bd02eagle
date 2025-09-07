@@ -299,26 +299,53 @@ async function main() {
 
   // Create game assignments
   console.log('Creating game assignments...');
-  const assignments = await prisma.gameAssignment.createMany({
-    data: [
-      {
-        gameId: games[0].id, // Duke vs UNC
-        analystId: analyst1.id,
-        priority: 'high',
-        dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000) // 2 days from now
-      },
-      {
-        gameId: games[1].id, // UNC vs SC  
-        analystId: analyst1.id,
-        priority: 'medium'
-      },
-      {
-        gameId: games[2].id, // TX vs Duke
-        analystId: analyst1.id,
-        priority: 'low'
+  const assignment1 = await prisma.gameAssignment.upsert({
+    where: {
+      gameId_analystId: {
+        gameId: games[0].id,
+        analystId: analyst1.id
       }
-    ]
+    },
+    update: {},
+    create: {
+      gameId: games[0].id, // SC vs TX
+      analystId: analyst1.id,
+      priority: 'high',
+      dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000) // 2 days from now
+    }
   });
+
+  const assignment2 = await prisma.gameAssignment.upsert({
+    where: {
+      gameId_analystId: {
+        gameId: games[1].id,
+        analystId: analyst1.id
+      }
+    },
+    update: {},
+    create: {
+      gameId: games[1].id, // Duke vs UNC
+      analystId: analyst1.id,
+      priority: 'medium'
+    }
+  });
+
+  const assignment3 = await prisma.gameAssignment.upsert({
+    where: {
+      gameId_analystId: {
+        gameId: games[2].id,
+        analystId: analyst1.id
+      }
+    },
+    update: {},
+    create: {
+      gameId: games[2].id, // UNC vs SC
+      analystId: analyst1.id,
+      priority: 'low'
+    }
+  });
+
+  const assignments = [assignment1, assignment2, assignment3];
 
   const createdEvents = events;
   const createdTags = tags;
@@ -331,7 +358,7 @@ async function main() {
   console.log(`Created ${createdEvents.length} events`);
   console.log(`Created ${createdTags.length} tags`);
   console.log(`Created ${createdAnalystActions.length} analyst actions`);
-  console.log(`Created ${createdAssignments.count} game assignments`);
+  console.log(`Created ${assignments.length} game assignments`);
 }
 
 main()
