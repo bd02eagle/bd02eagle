@@ -453,6 +453,8 @@ function annotateEvent() {
 }
 
 function nextEvent() {
+  if (filteredEvents.length === 0) return;
+  
   const nextIndex = currentEventIndex + 1;
   if (nextIndex < filteredEvents.length) {
     currentEventIndex = nextIndex;
@@ -461,23 +463,10 @@ function nextEvent() {
     currentEventIndex = 0;
   }
   
-  // Update the workspace with the new event
-  if (filteredEvents[currentEventIndex]) {
-    const event = filteredEvents[currentEventIndex];
-    
-    // Update UI to show selected event
-    document.querySelectorAll('.event-item').forEach((item, i) => {
-      item.classList.toggle('active', i === currentEventIndex);
-    });
-    
-    // Update event details
-    updateEventDetails(event, currentEventIndex);
-    loadEventVideo(event);
-    loadExistingEvaluation(event);
-  }
+  console.log('Next event - moving to index:', currentEventIndex);
   
-  // Ensure the event list UI is updated
-  renderEventsList();
+  // Use selectEvent to properly update everything
+  selectEvent(currentEventIndex);
 }
 
 
@@ -496,16 +485,31 @@ function viewEventTags() {
 
 function loadEventVideo(event) {
   const video = document.getElementById('event-video');
-  if (!video) return;
+  if (!video) {
+    console.warn('Video element not found');
+    return;
+  }
+
+  console.log('Loading video for event:', event.type, 'URL:', event.videoUrl);
 
   if (event.videoUrl) {
     video.src = event.videoUrl;
     video.load();
   } else {
     // Use sample video for demo
+    console.log('No video URL, using sample video');
     video.src = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
     video.load();
   }
+  
+  // Add error handling
+  video.onerror = function() {
+    console.error('Video failed to load:', event.videoUrl);
+  };
+  
+  video.onloadeddata = function() {
+    console.log('Video loaded successfully');
+  };
 }
 
 function updateVideoTime() {
@@ -674,8 +678,12 @@ async function loadGameForWorkspace(gameId) {
 
     // For workspace, properly select the first event
     if (loadedEvents.length > 0) {
+      console.log('Auto-selecting first event');
       currentEventIndex = 0;
-      selectEvent(0); // This will handle all the UI updates properly
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        selectEvent(0);
+      }, 100);
     }
 
     console.log('=== Game loading completed successfully ===');
@@ -779,44 +787,38 @@ function formatTimestamp(timestampMs) {
 }
 
 function selectEvent(index) {
-  console.log('Selecting event at index:', index);
+  console.log('Selecting event at index:', index, 'Total events:', filteredEvents.length);
   
-  // Check if we're on workspace page - if so, just highlight the event
-  if (window.location.pathname === '/workspace.html' || window.location.pathname === '/') {
-    if (filteredEvents && filteredEvents[index]) {
-      const event = filteredEvents[index];
-      currentEventIndex = index;
-      
-      // Update active event in list
-      document.querySelectorAll('.event-item').forEach((item, i) => {
-        item.classList.toggle('active', i === index);
-      });
-      
-      // Update event details without redirecting
-      updateEventDetails(event, index);
-      loadEventVideo(event);
-      loadExistingEvaluation(event);
-    }
-  } else {
-    // On other pages, use the original logic
-    if (index < 0 || index >= filteredEvents.length) return;
+  if (index < 0 || index >= filteredEvents.length || !filteredEvents[index]) {
+    console.warn('Invalid event index:', index);
+    return;
+  }
 
-    currentEventIndex = index;
-    const event = filteredEvents[index];
-
-    // Update active event in list
-    document.querySelectorAll('.event-item').forEach((item, i) => {
-      item.classList.toggle('active', i === index);
-    });
-
-    // Update event details
-    updateEventDetails(event, index);
-
-    // Load existing tag data if available
-    loadExistingEvaluation(event);
-
-    // Load video
-    loadEventVideo(event);
+  const event = filteredEvents[index];
+  currentEventIndex = index;
+  
+  console.log('Selected event:', event.type, 'at', formatEventTime(event.timestampMs));
+  
+  // Update active event in list
+  document.querySelectorAll('.event-item').forEach((item, i) => {
+    item.classList.toggle('active', i === index);
+  });
+  
+  // Update event details
+  updateEventDetails(event, index);
+  
+  // Load existing evaluation data
+  loadExistingEvaluation(event);
+  
+  // Load video
+  loadEventVideo(event);
+  
+  // Check if we're on workspace page - if so, don't redirect on click
+  const isWorkspacePage = window.location.pathname === '/workspace.html' || window.location.pathname === '/';
+  
+  if (!isWorkspacePage) {
+    // On evaluation page, we might want additional behavior
+    console.log('Event selected on evaluation page');
   }
 }
 
