@@ -222,7 +222,7 @@ async function main() {
   for (let gameIndex = 0; gameIndex < createdGames.length; gameIndex++) {
     const game = createdGames[gameIndex];
     const eventsPerGame = game.status === 'COMPLETED' ? 5 : 3; // More events for completed games
-    
+
     for (let eventIndex = 0; eventIndex < eventsPerGame; eventIndex++) {
       const event = await prisma.event.upsert({
         where: { 
@@ -256,10 +256,10 @@ async function main() {
     "Shooting Foul - Contact on Shot",
     "Technical Foul - Unsporting Behavior"
   ];
-  
+
   // Create tags for about 80% of events (some events may not have tags yet)
   const eventsToTag = Math.floor(events.length * 0.8);
-  
+
   for (let i = 0; i < eventsToTag; i++) {
     const tag = await prisma.tag.upsert({
       where: { 
@@ -299,30 +299,32 @@ async function main() {
 
   // Create game assignments
   console.log('Creating game assignments...');
-  const gameAssignments = [];
-  for (let i = 0; i < Math.min(3, createdGames.length); i++) {
-    const assignment = await prisma.gameAssignment.upsert({
-      where: { 
-        gameId_analystId: {
-          gameId: createdGames[i].id,
-          analystId: analyst1.id
-        }
+  const analyst1 = createdUsers.find(u => u.email === 'analyst1@refintel.com');
+  const assignments = await prisma.gameAssignment.createMany({
+    data: [
+      {
+        gameId: games[0].id, // Duke vs UNC
+        analystId: analyst1.id,
+        priority: 'high',
+        dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000) // 2 days from now
       },
-      update: {},
-      create: {
-        gameId: createdGames[i].id,
-        analystId: analyst1.id, // Analyst user
-        priority: ['high', 'medium', 'low'][i % 3],
-        dueDate: new Date(Date.now() + (i + 1) * 24 * 60 * 60 * 1000) // Due in 1-3 days
+      {
+        gameId: games[1].id, // UNC vs SC  
+        analystId: analyst1.id,
+        priority: 'medium'
+      },
+      {
+        gameId: games[2].id, // TX vs Duke
+        analystId: analyst1.id,
+        priority: 'low'
       }
-    });
-    gameAssignments.push(assignment);
-  }
+    ]
+  });
 
   const createdEvents = events;
   const createdTags = tags;
   const createdAnalystActions = analystActions;
-  const createdAssignments = gameAssignments;
+  const createdAssignments = assignments;
 
   console.log("✅ Database seeded successfully!");
   console.log(`Created ${createdUsers.length} users`);
@@ -330,7 +332,7 @@ async function main() {
   console.log(`Created ${createdEvents.length} events`);
   console.log(`Created ${createdTags.length} tags`);
   console.log(`Created ${createdAnalystActions.length} analyst actions`);
-  console.log(`Created ${createdAssignments.length} game assignments`);
+  console.log(`Created ${createdAssignments.count} game assignments`);
 }
 
 main()
