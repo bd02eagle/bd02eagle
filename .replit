@@ -25,7 +25,7 @@ externalPort = 5000
 expertMode = true
 
 [workflows]
-runButton = "Simple Working Stack"
+runButton = "Fresh Start"
 
 [[workflows.workflow]]
 name = "Start API Server"
@@ -274,3 +274,16 @@ args = "sleep 3"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd frontend && npm install && npm start"
+
+[[workflows.workflow]]
+name = "Fresh Start"
+author = 44371205
+mode = "parallel"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run seed && npm start"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd frontend && npm start"
