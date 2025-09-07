@@ -74,8 +74,17 @@ function setupEventListeners() {
   const viewTagsBtn = document.getElementById('view-tags-btn');
 
   if (annotateBtn) {
+    console.log('Setting up annotate button event listener');
     annotateBtn.addEventListener('click', annotateEvent);
+    
+    // Also add debug logging on click
+    annotateBtn.addEventListener('click', function() {
+      console.log('Annotate button physically clicked!');
+    });
+  } else {
+    console.warn('Annotate button not found during setup');
   }
+  
   if (nextBtn) {
     nextBtn.addEventListener('click', nextEvent);
   }
@@ -751,11 +760,21 @@ async function loadGameForWorkspace(gameId) {
       // Small delay to ensure DOM is ready
       setTimeout(() => {
         selectEvent(0);
+        
         // Enable the annotate button after selection
         const annotateBtn = document.getElementById('annotate-event-btn');
         if (annotateBtn) {
+          console.log('Enabling annotate button');
           annotateBtn.disabled = false;
           annotateBtn.style.opacity = '1';
+          annotateBtn.style.pointerEvents = 'auto';
+          annotateBtn.style.cursor = 'pointer';
+          
+          // Make sure the event listener is attached
+          annotateBtn.removeEventListener('click', annotateEvent);
+          annotateBtn.addEventListener('click', annotateEvent);
+        } else {
+          console.error('Annotate button not found!');
         }
 
         // Also ensure the first event is visually selected
@@ -857,6 +876,14 @@ function updateEventsList(loadedEvents) {
 // Global functions for event handlers
 window.selectEvent = selectEvent;
 window.skipVideo = skipVideo;
+window.annotateEvent = annotateEvent;
+window.testAnnotate = function() {
+  console.log('=== MANUAL TEST ANNOTATE ===');
+  console.log('Current event index:', currentEventIndex);
+  console.log('Filtered events length:', filteredEvents.length);
+  console.log('Current game ID:', currentGameId);
+  annotateEvent();
+};
 
 function formatTimestamp(timestampMs) {
   if (!timestampMs) return '0:00';
