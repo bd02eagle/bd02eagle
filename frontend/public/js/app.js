@@ -72,7 +72,6 @@ function setupEventListeners() {
   const annotateBtn = document.getElementById('annotate-event-btn');
   const nextBtn = document.getElementById('next-event-btn');
   const viewTagsBtn = document.getElementById('view-tags-btn');
-  const eventInfoBtn = document.getElementById('event-info-btn');
   
   if (annotateBtn) {
     annotateBtn.addEventListener('click', annotateEvent);
@@ -82,9 +81,6 @@ function setupEventListeners() {
   }
   if (viewTagsBtn) {
     viewTagsBtn.addEventListener('click', viewEventTags);
-  }
-  if (eventInfoBtn) {
-    eventInfoBtn.addEventListener('click', showEventDetails);
   }
 
   // Video controls
@@ -460,26 +456,12 @@ function nextEvent() {
   if (nextIndex < filteredEvents.length) {
     selectEvent(nextIndex);
   } else {
-    alert('You have reached the last event');
+    // Cycle back to the first event
+    selectEvent(0);
   }
 }
 
-function showEventDetails() {
-  if (!filteredEvents[currentEventIndex]) return;
 
-  const event = filteredEvents[currentEventIndex];
-  const details = [
-    `Event ID: ${event.id}`,
-    `Type: ${event.type}`,
-    `Timestamp: ${formatTimestamp(event.timestampMs)}`,
-    `Game Time: Q4 ${formatEventTime(event.timestampMs)}`,
-    `Video URL: ${event.videoUrl}`,
-    `Tags Count: ${event.tags ? event.tags.length : 0}`,
-    `Created: ${new Date(event.createdAt).toLocaleString()}`
-  ];
-  
-  alert(`Event Details:\n\n${details.join('\n')}`);
-}
 
 function viewEventTags() {
   if (!filteredEvents[currentEventIndex]) return;
