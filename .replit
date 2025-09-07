@@ -25,29 +25,7 @@ externalPort = 5000
 expertMode = true
 
 [workflows]
-runButton = "Fixed Full Stack"
-
-[[workflows.workflow]]
-name = "Start Server"
-author = 44371205
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run seed"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm start"
-
-[[workflows.workflow]]
-name = "Start Frontend"
-author = 44371205
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd frontend && npm install && npm start"
+runButton = "Working Full Stack"
 
 [[workflows.workflow]]
 name = "Start API Server"
@@ -206,43 +184,9 @@ task = "shell.exec"
 args = "npm start"
 
 [[workflows.workflow]]
-name = "Full Stack with Install"
-author = 44371205
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run seed"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm start &"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "sleep 3"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd frontend && npm install && npm start"
-
-[[workflows.workflow]]
-name = "Working Full Stack"
-author = 44371205
-mode = "parallel"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run seed && npm start"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd frontend && npm install && npm start"
-
-[[workflows.workflow]]
 name = "Fixed Full Stack"
 author = 44371205
-mode = "sequential"
+mode = "parallel"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
@@ -263,6 +207,27 @@ args = "echo \"Backend started on port 3000, now starting frontend...\""
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd frontend && npm install"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd frontend && npm start"
+
+[[workflows.workflow]]
+name = "Working Full Stack"
+author = 44371205
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run seed"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm start &"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "sleep 3"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
