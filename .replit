@@ -58,23 +58,6 @@ task = "shell.exec"
 args = "cd frontend && npm start"
 
 [[workflows.workflow]]
-name = "Backend First"
-author = 44371205
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run seed"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm start &"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd frontend && npm start"
-
-[[workflows.workflow]]
 name = "Start Full Stack"
 author = 44371205
 mode = "sequential"
@@ -326,3 +309,16 @@ args = "sleep 2"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "echo \"Backend running on port 3000, frontend should be accessible on port 5000\""
+
+[[workflows.workflow]]
+name = "Backend Start"
+author = 44371205
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run seed"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm start"
