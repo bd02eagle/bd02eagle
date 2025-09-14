@@ -44,9 +44,9 @@ app.get("/metrics", async (_req, res) => {
 app.post("/api/auth/login", login);
 
 // domain routes
-app.use("/api/tags", tagsRoutes);
-app.use("/api/events", eventsRoutes);
 app.use("/api/games", gamesRoutes);
+app.use("/api/events", eventsRoutes);
+app.use("/api/tags", tagsRoutes);
 app.use("/api/tags", analystActionsRoutes);
 app.use("/api/assignments", assignmentsRoutes);
 
