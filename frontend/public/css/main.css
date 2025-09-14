@@ -635,6 +635,12 @@ body {
   font-size: 14px;
 }
 
+/* Hide game selection tooltips */
+.workspace-container div[style*="FEF3C7"],
+.workspace-container div[style*="background: #FEF3C7"] {
+  display: none !important;
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
   .content-grid {
