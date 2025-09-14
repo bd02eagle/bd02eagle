@@ -775,20 +775,33 @@ async function loadGameForWorkspace(gameId) {
     updateEventsList(loadedEvents);
     renderEventsList();
 
-    // Determine which event to select
+    // Determine which event to select - prioritize URL parameters
     let targetEventIndex = 0;
     
-    if (selectedEventIndex !== null && !isNaN(parseInt(selectedEventIndex))) {
-      const index = parseInt(selectedEventIndex);
+    // First check URL parameters (from evaluation page navigation)
+    if (eventIndexFromUrl !== null && !isNaN(parseInt(eventIndexFromUrl))) {
+      const index = parseInt(eventIndexFromUrl);
       if (index >= 0 && index < loadedEvents.length) {
         targetEventIndex = index;
         console.log('Using event index from URL:', targetEventIndex);
+      }
+    } else if (eventIdFromUrl) {
+      const foundIndex = loadedEvents.findIndex(event => event.id === eventIdFromUrl);
+      if (foundIndex !== -1) {
+        targetEventIndex = foundIndex;
+        console.log('Found event by URL ID, using index:', targetEventIndex);
+      }
+    } else if (selectedEventIndex !== null && !isNaN(parseInt(selectedEventIndex))) {
+      const index = parseInt(selectedEventIndex);
+      if (index >= 0 && index < loadedEvents.length) {
+        targetEventIndex = index;
+        console.log('Using event index from storage:', targetEventIndex);
       }
     } else if (selectedEventId) {
       const foundIndex = loadedEvents.findIndex(event => event.id === selectedEventId);
       if (foundIndex !== -1) {
         targetEventIndex = foundIndex;
-        console.log('Found event by ID, using index:', targetEventIndex);
+        console.log('Found event by storage ID, using index:', targetEventIndex);
       }
     }
 

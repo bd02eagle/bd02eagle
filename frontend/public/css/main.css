@@ -114,7 +114,40 @@ body {
   overflow: hidden;
 }
 
+/* Breadcrumb Navigation */
+.breadcrumb-nav {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.breadcrumb-link {
+  color: #3b82f6;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.breadcrumb-link:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb-separator {
+  margin: 0 8px;
+  color: #94a3b8;
+}
+
+.breadcrumb-current {
+  color: #1e293b;
+  font-weight: 500;
+}
+
 /* Game Header */
+.workspace-header {
+  background: white;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
 .game-header {
   background: white;
   padding: 16px 24px;
