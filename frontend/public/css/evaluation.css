@@ -100,15 +100,19 @@ body {
   align-items: center;
   gap: 8px;
   position: absolute;
-  top: 18px;
-  left: 120px;
-  max-width: 500px;
+  top: 20px;
+  left: 140px;
+  max-width: 600px;
   overflow: visible;
-  z-index: 200;
-  padding: 0;
+  z-index: 999;
+  padding: 6px 12px;
   margin: 0;
-  height: 28px;
+  height: auto;
   visibility: visible;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border: 1px solid rgba(229,231,235,0.8);
 }
 
 .breadcrumb-link {
@@ -118,23 +122,26 @@ body {
   font-size: 14px;
   cursor: pointer;
   text-decoration: none;
-  transition: color 0.2s;
+  transition: all 0.2s;
   white-space: nowrap;
   display: inline-block;
   opacity: 1;
+  padding: 2px 4px;
+  border-radius: 3px;
 }
 
 .breadcrumb-link:hover {
   color: rgba(29,78,216,1);
-  text-decoration: underline;
+  background: rgba(239,246,255,1);
+  text-decoration: none;
 }
 
 .breadcrumb-separator {
   color: rgba(107,114,128,1);
   font-family: Inter;
   font-weight: 400;
-  font-size: 12px;
-  margin: 0 6px;
+  font-size: 14px;
+  margin: 0 4px;
   display: inline-block;
 }
 .v1_259 {
