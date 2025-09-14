@@ -25,58 +25,7 @@ externalPort = 5000
 expertMode = true
 
 [workflows]
-runButton = "Stable Stack"
-
-[[workflows.workflow]]
-name = "Start API Server"
-author = 44371205
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm start"
-
-[[workflows.workflow]]
-name = "Full Stack Dev"
-author = 44371205
-mode = "parallel"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run seed"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm start &"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "sleep 3"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd frontend && npm start"
-
-[[workflows.workflow]]
-name = "Start Full Stack"
-author = 44371205
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run seed"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm start &"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "sleep 3"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd frontend && npm start"
+runButton = "Full Stack"
 
 [[workflows.workflow]]
 name = "Start Full Stack Debug"
@@ -140,10 +89,6 @@ args = "cd frontend && node server.js"
 name = "Simple Full Stack"
 author = 44371205
 mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run seed"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
@@ -311,19 +256,6 @@ task = "shell.exec"
 args = "echo \"Backend running on port 3000, frontend should be accessible on port 5000\""
 
 [[workflows.workflow]]
-name = "Backend Start"
-author = 44371205
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run seed"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm start"
-
-[[workflows.workflow]]
 name = "Reliable Full Stack"
 author = 44371205
 mode = "sequential"
@@ -349,7 +281,7 @@ task = "shell.exec"
 args = "cd frontend && node server.js"
 
 [[workflows.workflow]]
-name = "Seed Database Only"
+name = "Start Backend"
 author = 44371205
 mode = "sequential"
 
@@ -357,78 +289,28 @@ mode = "sequential"
 task = "shell.exec"
 args = "npm run seed"
 
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm start"
+
 [[workflows.workflow]]
-name = "Start Without Seed"
+name = "Start Frontend"
 author = 44371205
 mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "node index.js &"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "sleep 3"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "echo \"Backend started on port 3000\""
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd frontend && node server.js"
+args = "cd frontend && npm start"
 
 [[workflows.workflow]]
-name = "Simple Stack"
+name = "Full Stack"
 author = 44371205
 mode = "parallel"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "node index.js"
+args = "npm start"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd frontend && node server.js"
-
-[[workflows.workflow]]
-name = "Working Stack"
-author = 44371205
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "echo \"Starting backend server...\""
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "node index.js &"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "sleep 2"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "echo \"Backend running on port 3000\""
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "echo \"Starting frontend server...\""
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd frontend && node server.js"
-
-[[workflows.workflow]]
-name = "Stable Stack"
-author = 44371205
-mode = "parallel"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "node index.js"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd frontend && node server.js"
+args = "cd frontend && npm start"
