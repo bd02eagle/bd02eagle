@@ -100,15 +100,16 @@ body {
   align-items: center;
   gap: 8px;
   position: absolute;
-  top: 18px;
-  left: 120px;
+  top: 20px;
+  left: 140px;
   max-width: 500px;
   overflow: visible;
-  z-index: 150;
+  z-index: 200;
   padding: 0;
   margin: 0;
   height: 28px;
   visibility: visible;
+  background: transparent;
 }
 
 .breadcrumb-link {
@@ -122,6 +123,7 @@ body {
   white-space: nowrap;
   display: inline-block;
   opacity: 1;
+  text-shadow: 0 0 2px rgba(255,255,255,0.8);
 }
 
 .breadcrumb-link:hover {
@@ -136,6 +138,7 @@ body {
   font-size: 12px;
   margin: 0 6px;
   display: inline-block;
+  text-shadow: 0 0 2px rgba(255,255,255,0.8);
 }
 .v1_259 {
   width: 229px;
