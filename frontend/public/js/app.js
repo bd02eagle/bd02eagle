@@ -687,10 +687,14 @@ async function loadGameForWorkspace(gameId) {
 
     // Check for URL parameters to get selected event
     const urlParams = new URLSearchParams(window.location.search);
-    const selectedEventIndex = urlParams.get('eventIndex');
+    const eventIndexFromUrl = urlParams.get('eventIndex');
+    const eventIdFromUrl = urlParams.get('eventId');
+    const selectedEventIndex = localStorage.getItem('selectedEventIndex');
     const selectedEventId = localStorage.getItem('selectedEventId');
     
-    console.log('Selected event index from URL:', selectedEventIndex);
+    console.log('Event index from URL:', eventIndexFromUrl);
+    console.log('Event ID from URL:', eventIdFromUrl);
+    console.log('Selected event index from storage:', selectedEventIndex);
     console.log('Selected event ID from storage:', selectedEventId);
 
     // Fetch game details
@@ -843,7 +847,24 @@ async function loadGameForWorkspace(gameId) {
     console.error('=== Error loading game for workspace ===');
     console.error('Error:', error.message);
     console.error('Stack:', error.stack);
-    showError(`Failed to load game data: ${error.message}`);
+    console.error('Game ID requested:', gameId);
+    console.error('Auth token present:', !!authToken);
+    
+    // Show more specific error message
+    let errorMessage = 'Failed to load game data';
+    if (error.message.includes('401')) {
+      errorMessage = 'Authentication failed - please login again';
+      localStorage.removeItem('authToken');
+      window.location.href = '/login.html';
+      return;
+    } else if (error.message.includes('Game not found')) {
+      errorMessage = 'Selected game not found - redirecting to My Games';
+      setTimeout(() => {
+        window.location.href = '/my-games.html';
+      }, 2000);
+    }
+    
+    showError(errorMessage);
   }
 }
 
