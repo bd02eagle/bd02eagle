@@ -43,6 +43,45 @@ async function main() {
     },
   });
 
+  const analyst3 = await prisma.user.upsert({
+    where: { email: "analyst3@refintel.com" },
+    update: {},
+    create: {
+      email: "analyst3@refintel.com",
+      password: await bcrypt.hash("analyst123", 10),
+      role: "ANALYST",
+      firstName: "Emily",
+      lastName: "Martinez",
+      profilePicture: "https://via.placeholder.com/150?text=EM",
+    },
+  });
+
+  const analyst4 = await prisma.user.upsert({
+    where: { email: "analyst4@refintel.com" },
+    update: {},
+    create: {
+      email: "analyst4@refintel.com",
+      password: await bcrypt.hash("analyst123", 10),
+      role: "ANALYST",
+      firstName: "James",
+      lastName: "Wilson",
+      profilePicture: "https://via.placeholder.com/150?text=JW",
+    },
+  });
+
+  const analyst5 = await prisma.user.upsert({
+    where: { email: "analyst5@refintel.com" },
+    update: {},
+    create: {
+      email: "analyst5@refintel.com",
+      password: await bcrypt.hash("analyst123", 10),
+      role: "ANALYST",
+      firstName: "Lisa",
+      lastName: "Thompson",
+      profilePicture: "https://via.placeholder.com/150?text=LT",
+    },
+  });
+
   const charter = await prisma.user.upsert({
     where: { email: "charter@refintel.com" },
     update: {},
@@ -56,7 +95,7 @@ async function main() {
     },
   });
 
-  const createdUsers = [adminUser, analyst1, analyst2, charter];
+  const createdUsers = [adminUser, analyst1, analyst2, analyst3, analyst4, analyst5, charter];
 
 
   // Create teams first
@@ -345,7 +384,68 @@ async function main() {
     }
   });
 
-  const assignments = [assignment1, assignment2, assignment3];
+  // Additional assignments for other analysts
+  const assignment4 = await prisma.gameAssignment.upsert({
+    where: {
+      gameId_analystId: {
+        gameId: games[3].id,
+        analystId: analyst2.id
+      }
+    },
+    update: {},
+    create: {
+      gameId: games[3].id, // TX vs Duke
+      analystId: analyst2.id,
+      priority: 'high'
+    }
+  });
+
+  const assignment5 = await prisma.gameAssignment.upsert({
+    where: {
+      gameId_analystId: {
+        gameId: games[4].id,
+        analystId: analyst3.id
+      }
+    },
+    update: {},
+    create: {
+      gameId: games[4].id, // SC vs UNC
+      analystId: analyst3.id,
+      priority: 'medium'
+    }
+  });
+
+  const assignment6 = await prisma.gameAssignment.upsert({
+    where: {
+      gameId_analystId: {
+        gameId: games[0].id,
+        analystId: analyst4.id
+      }
+    },
+    update: {},
+    create: {
+      gameId: games[0].id, // SC vs TX
+      analystId: analyst4.id,
+      priority: 'low'
+    }
+  });
+
+  const assignment7 = await prisma.gameAssignment.upsert({
+    where: {
+      gameId_analystId: {
+        gameId: games[1].id,
+        analystId: analyst5.id
+      }
+    },
+    update: {},
+    create: {
+      gameId: games[1].id, // Duke vs UNC
+      analystId: analyst5.id,
+      priority: 'high'
+    }
+  });
+
+  const assignments = [assignment1, assignment2, assignment3, assignment4, assignment5, assignment6, assignment7];
 
   const createdEvents = events;
   const createdTags = tags;
