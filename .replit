@@ -38,4 +38,4 @@ args = "npm start"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm start --prefix frontend"
+args = "cd frontend && npm start"
