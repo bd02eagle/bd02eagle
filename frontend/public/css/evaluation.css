@@ -45,7 +45,7 @@ body {
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 .v1_258 {
-  width: 333px;
+  width: 533px;
   height: 28px;
   position: absolute;
   top: 17px;
@@ -96,12 +96,12 @@ body {
 }
 
 .breadcrumb-nav {
-  display: flex;
+  /*display: flex;*/
   align-items: center;
   gap: 8px;
-  position: absolute;
-  top: 20px;
-  left: 140px;
+  position: relative;
+  top: -6px;
+  left: 80px;
   max-width: 600px;
   overflow: visible;
   z-index: 999;
@@ -111,8 +111,8 @@ body {
   visibility: visible;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  border: 1px solid rgba(229,231,235,0.8);
+  /*box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border: 1px solid rgba(229,231,235,0.8);*/
 }
 
 .breadcrumb-link {
