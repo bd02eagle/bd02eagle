@@ -685,6 +685,14 @@ async function loadGameForWorkspace(gameId) {
     console.log('Requested game ID:', gameId);
     console.log('Auth token present:', !!authToken);
 
+    // Check for URL parameters to get selected event
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedEventIndex = urlParams.get('eventIndex');
+    const selectedEventId = localStorage.getItem('selectedEventId');
+    
+    console.log('Selected event index from URL:', selectedEventIndex);
+    console.log('Selected event ID from storage:', selectedEventId);
+
     // Fetch game details
     const gameResponse = await fetch(`${API_BASE}/games`, {
       headers: { 'Authorization': `Bearer ${authToken}` }
@@ -719,6 +727,8 @@ async function loadGameForWorkspace(gameId) {
 
     // Clear the storage after successful load
     localStorage.removeItem('selectedGameId');
+    localStorage.removeItem('selectedEventId');
+    localStorage.removeItem('selectedEventIndex');
 
     // Update game info in UI
     updateGameInfo(game);
@@ -738,6 +748,24 @@ async function loadGameForWorkspace(gameId) {
     const loadedEvents = await eventsResponse.json();
     console.log('Loaded events count:', loadedEvents.length);
 
+    // Load tags for each event
+    for (let i = 0; i < loadedEvents.length; i++) {
+      try {
+        const tagsResponse = await fetch(`${API_BASE}/events/${loadedEvents[i].id}/tags`, {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (tagsResponse.ok) {
+          loadedEvents[i].tags = await tagsResponse.json();
+        } else {
+          loadedEvents[i].tags = [];
+        }
+      } catch (error) {
+        console.warn(`Failed to load tags for event ${loadedEvents[i].id}:`, error);
+        loadedEvents[i].tags = [];
+      }
+    }
+
     // Set up the workspace with this game
     currentGameId = gameId;
     events = loadedEvents;
@@ -747,13 +775,31 @@ async function loadGameForWorkspace(gameId) {
     updateEventsList(loadedEvents);
     renderEventsList();
 
-    // For workspace, properly select the first event
+    // Determine which event to select
+    let targetEventIndex = 0;
+    
+    if (selectedEventIndex !== null && !isNaN(parseInt(selectedEventIndex))) {
+      const index = parseInt(selectedEventIndex);
+      if (index >= 0 && index < loadedEvents.length) {
+        targetEventIndex = index;
+        console.log('Using event index from URL:', targetEventIndex);
+      }
+    } else if (selectedEventId) {
+      const foundIndex = loadedEvents.findIndex(event => event.id === selectedEventId);
+      if (foundIndex !== -1) {
+        targetEventIndex = foundIndex;
+        console.log('Found event by ID, using index:', targetEventIndex);
+      }
+    }
+
+    // For workspace, select the determined event
     if (loadedEvents.length > 0) {
-      console.log('Auto-selecting first event');
-      currentEventIndex = 0;
+      console.log('Selecting event at index:', targetEventIndex);
+      currentEventIndex = targetEventIndex;
+      
       // Small delay to ensure DOM is ready
       setTimeout(() => {
-        selectEvent(0);
+        selectEvent(targetEventIndex);
 
         // Enable the annotate button after selection
         const annotateBtn = document.getElementById('annotate-event-btn');
@@ -771,9 +817,9 @@ async function loadGameForWorkspace(gameId) {
           console.error('Annotate button not found!');
         }
 
-        // Also ensure the first event is visually selected
+        // Ensure the correct event is visually selected
         document.querySelectorAll('.event-item').forEach((item, i) => {
-          item.classList.toggle('active', i === 0);
+          item.classList.toggle('active', i === targetEventIndex);
         });
       }, 100);
     }

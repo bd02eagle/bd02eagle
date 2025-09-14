@@ -563,6 +563,39 @@ function setupNavigation() {
       }
     });
   }
+
+  // Add breadcrumb navigation
+  const breadcrumbLinks = document.querySelectorAll('.breadcrumb-link');
+  breadcrumbLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      const text = this.textContent.trim();
+      
+      if (text === 'Evaluation Workspace') {
+        // Navigate back to workspace with current context
+        const urlParams = new URLSearchParams(window.location.search);
+        const gameId = urlParams.get('gameId') || currentGameId;
+        const eventIndex = currentEventIndex;
+        
+        // Store context for workspace
+        if (gameId) {
+          localStorage.setItem('selectedGameId', gameId);
+        }
+        if (eventIndex !== null && eventIndex !== undefined) {
+          localStorage.setItem('selectedEventIndex', eventIndex.toString());
+        }
+        if (events && events[eventIndex]) {
+          localStorage.setItem('selectedEventId', events[eventIndex].id);
+        }
+        
+        // Navigate to workspace with parameters
+        const workspaceUrl = `/workspace.html?gameId=${gameId}&eventIndex=${eventIndex}`;
+        window.location.href = workspaceUrl;
+      } else if (text === 'My Games') {
+        window.location.href = '/my-games.html';
+      }
+    });
+  });
 }
 
 // Video state management

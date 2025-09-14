@@ -35,8 +35,8 @@ r.get("/events/:eventId", requireAuth(["ADMIN","ANALYST","CHARTER"]), async (req
   res.json(tags);
 });
 
-// create tag on an event (charter/admin)
-r.post("/events/:eventId", requireAuth(["CHARTER","ADMIN"]), async (req, res) => {
+// create tag on an event (charter/admin/analyst)
+r.post("/events/:eventId", requireAuth(["CHARTER","ADMIN","ANALYST"]), async (req, res) => {
   const { label, notes } = req.body || {};
   const tag = await prisma.tag.create({
     data: { eventId: req.params.eventId, createdById: req.user.sub, label, notes }
@@ -44,14 +44,14 @@ r.post("/events/:eventId", requireAuth(["CHARTER","ADMIN"]), async (req, res) =>
   res.status(201).json(tag);
 });
 
-// edit tag (owner/admin)
-r.patch("/:tagId", requireAuth(["CHARTER","ADMIN"]), async (req, res) => {
+// edit tag (owner/admin/analyst)
+r.patch("/:tagId", requireAuth(["CHARTER","ADMIN","ANALYST"]), async (req, res) => {
   const tag = await prisma.tag.update({ where: { id: req.params.tagId }, data: req.body });
   res.json(tag);
 });
 
-// delete tag (owner/admin)
-r.delete("/:tagId", requireAuth(["CHARTER","ADMIN"]), async (req, res) => {
+// delete tag (owner/admin/analyst)
+r.delete("/:tagId", requireAuth(["CHARTER","ADMIN","ANALYST"]), async (req, res) => {
   await prisma.tag.delete({ where: { id: req.params.tagId } });
   res.status(204).end();
 });

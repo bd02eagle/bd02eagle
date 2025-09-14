@@ -46,7 +46,7 @@ r.get("/:eventId/tags", requireAuth(), async (req, res) => {
 });
 
 // Create a tag for an event
-r.post("/:eventId/tags", requireAuth(["CHARTER", "ADMIN"]), async (req, res) => {
+r.post("/:eventId/tags", requireAuth(["CHARTER", "ADMIN", "ANALYST"]), async (req, res) => {
   const { eventId } = req.params;
   const { label, notes } = req.body || {};
   const userId = req.user.sub;
