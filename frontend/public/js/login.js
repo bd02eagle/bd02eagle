@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize login form
     initializeLoginForm();
-    initializeDemoCredentials();
 });
 
 function initializeLoginForm() {
@@ -94,35 +93,6 @@ function initializeLoginForm() {
     function hideError() {
         errorMessage.style.display = 'none';
     }
-}
-
-function initializeDemoCredentials() {
-    const credentialRows = document.querySelectorAll('.credential-row');
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
-
-    credentialRows.forEach(row => {
-        row.addEventListener('click', function() {
-            const text = row.textContent;
-
-            if (text.includes('analyst1@refintel.com')) {
-                emailInput.value = 'analyst1@refintel.com';
-                passwordInput.value = 'analyst123';
-            } else if (text.includes('admin@refintel.com')) {
-                emailInput.value = 'admin@refintel.com';
-                passwordInput.value = 'admin123';
-            } else if (text.includes('charter1@refintel.com')) {
-                emailInput.value = 'charter1@refintel.com';
-                passwordInput.value = 'charter123';
-            }
-
-            // Add visual feedback
-            row.style.background = '#e0e7ff';
-            setTimeout(() => {
-                row.style.background = '#f9fafb';
-            }, 200);
-        });
-    });
 }
 
 async function verifyToken(token) {

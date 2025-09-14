@@ -123,34 +123,3 @@ body {
   margin-top: 16px;
   font-size: 14px;
 }
-
-.demo-credentials {
-  border-top: 1px solid #e5e7eb;
-  padding-top: 20px;
-}
-
-.demo-credentials h3 {
-  color: #374151;
-  font-size: 14px;
-  margin-bottom: 12px;
-  text-align: center;
-}
-
-.credential-row {
-  padding: 8px 12px;
-  background: #f9fafb;
-  border-radius: 6px;
-  margin-bottom: 8px;
-  font-size: 13px;
-  color: #6b7280;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.credential-row:hover {
-  background: #f3f4f6;
-}
-
-.credential-row strong {
-  color: #374151;
-}
