@@ -45,18 +45,38 @@ async function loadTagsForReview() {
   try {
     showLoading();
 
-    // Fetch all games first
+    // Fetch game assignments for the logged-in user first
+    const assignmentsResponse = await fetch(`${API_BASE}/assignments/my-assignments`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+
+    if (!assignmentsResponse.ok) throw new Error('Failed to fetch assignments');
+    const assignments = await assignmentsResponse.json();
+
+    // Get the assigned game IDs
+    const assignedGameIds = assignments.map(assignment => assignment.gameId);
+
+    if (assignedGameIds.length === 0) {
+      allTags = [];
+      filteredTags = [];
+      renderTags();
+      updateStats();
+      return;
+    }
+
+    // Fetch all games and filter to only assigned games
     const gamesResponse = await fetch(`${API_BASE}/games`, {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
 
     if (!gamesResponse.ok) throw new Error('Failed to fetch games');
-    const games = await gamesResponse.json();
+    const allGames = await gamesResponse.json();
+    const assignedGames = allGames.filter(game => assignedGameIds.includes(game.id));
 
     allTags = [];
 
-    // For each game, get events and their tags
-    for (const game of games) {
+    // For each assigned game, get events and their tags
+    for (const game of assignedGames) {
       const eventsResponse = await fetch(`${API_BASE}/games/${game.id}/events`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
