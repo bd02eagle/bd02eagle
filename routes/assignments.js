@@ -4,7 +4,35 @@ import { requireAuth } from "../auth.js";
 
 const r = Router();
 
-// Get assignments for current user
+// Get assignments for current user (simple list)
+r.get("/my-assignments", requireAuth(["ANALYST", "ADMIN"]), async (req, res) => {
+  try {
+    const assignments = await prisma.gameAssignment.findMany({
+      where: { 
+        analystId: req.user.sub,
+        isActive: true 
+      },
+      select: {
+        id: true,
+        gameId: true,
+        priority: true,
+        dueDate: true,
+        assignedAt: true
+      },
+      orderBy: [
+        { priority: 'desc' },
+        { assignedAt: 'desc' }
+      ]
+    });
+
+    res.json(assignments);
+  } catch (error) {
+    console.error('Error fetching assignments:', error);
+    res.status(500).json({ error: 'Failed to fetch assignments' });
+  }
+});
+
+// Get assignments for current user (with full game details)
 r.get("/my-games", requireAuth(["ANALYST", "ADMIN"]), async (req, res) => {
   try {
     const assignments = await prisma.gameAssignment.findMany({
