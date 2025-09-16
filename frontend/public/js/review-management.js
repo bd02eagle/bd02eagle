@@ -132,8 +132,8 @@ function filterTags() {
     // Text search
     const matchesSearch = !searchTerm || 
       tag.label.toLowerCase().includes(searchTerm) ||
-      tag.game.homeTeam.toLowerCase().includes(searchTerm) ||
-      tag.game.awayTeam.toLowerCase().includes(searchTerm) ||
+      tag.game.homeTeam.name.toLowerCase().includes(searchTerm) ||
+      tag.game.awayTeam.name.toLowerCase().includes(searchTerm) ||
       tag.event.type.toLowerCase().includes(searchTerm) ||
       (tag.notes && tag.notes.toLowerCase().includes(searchTerm));
 
@@ -160,7 +160,7 @@ function renderTags() {
         <div class="tag-label">${escapeHtml(tag.label)}</div>
         ${tag.notes ? `<div class="tag-notes">${escapeHtml(tag.notes)}</div>` : ''}
       </div>
-      <div>${escapeHtml(tag.game.homeTeam)} vs. ${escapeHtml(tag.game.awayTeam)}</div>
+      <div>${escapeHtml(tag.game.homeTeam.name)} vs. ${escapeHtml(tag.game.awayTeam.name)}</div>
       <div>
         <div>${escapeHtml(tag.event.type)}</div>
         <div style="font-size: 12px; color: #6B7280;">${formatTimestamp(tag.event.timestampMs)}</div>
