@@ -297,6 +297,7 @@
       if (confirm('Are you sure you want to logout?')) {
         localStorage.removeItem('authToken');
         localStorage.removeItem('userRole');
+        localStorage.removeItem('gameInputDraft'); // Clean up draft data
         window.location.href = '/login.html';
       }
     }

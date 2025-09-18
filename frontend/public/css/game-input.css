@@ -534,18 +534,21 @@
   background: #dc2626;
   color: white;
   border: none;
-  padding: 8px 16px;
+  padding: 10px 16px;
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  z-index: 1000;
-  width: auto;
-  height: auto;
-  writing-mode: horizontal-tb;
+  font-weight: 500;
+  z-index: 2001;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  font-family: Inter, sans-serif;
 }
 
 .logout-button:hover {
   background: #b91c1c;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
 }
 
 /* Loading and Error States */
