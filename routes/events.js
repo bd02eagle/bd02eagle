@@ -4,13 +4,29 @@ import { requireAuth } from "../auth.js";
 
 const r = Router();
 
-// create event for a game (admin only)
-r.post("/", requireAuth(["ADMIN"]), async (req, res) => {
-  const { gameId, timestampMs, videoUrl, type } = req.body || {};
-  const event = await prisma.event.create({
-    data: { gameId, timestampMs, videoUrl, type }
-  });
-  res.status(201).json(event);
+// Create a new event
+r.post("/", requireAuth(["ADMIN", "ANALYST", "CHARTER"]), async (req, res) => {
+  try {
+    const { gameId, timestampMs, videoUrl, type } = req.body;
+
+    if (!gameId || timestampMs === undefined || !videoUrl || !type) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const event = await prisma.event.create({
+      data: {
+        gameId,
+        timestampMs,
+        videoUrl,
+        type
+      }
+    });
+
+    res.status(201).json(event);
+  } catch (error) {
+    console.error('Error creating event:', error);
+    res.status(500).json({ error: 'Failed to create event' });
+  }
 });
 
 // Get tags for an event

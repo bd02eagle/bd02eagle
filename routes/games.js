@@ -56,10 +56,49 @@ r.get("/", requireAuth(["ADMIN","ANALYST","CHARTER"]), async (_req, res) => {
   res.json(formattedGames);
 });
 
-r.post("/", requireAuth(["ADMIN"]), async (req, res) => {
-  const { date, homeTeam, awayTeam } = req.body || {};
-  const game = await prisma.game.create({ data: { date: new Date(date), homeTeam, awayTeam } });
-  res.status(201).json(game);
+r.post("/", requireAuth(["ADMIN", "ANALYST"]), async (req, res) => {
+  try {
+    const { 
+      date, 
+      homeTeamId, 
+      awayTeamId, 
+      status = "SCHEDULED",
+      homeScore,
+      awayScore,
+      venue,
+      season,
+      gameType,
+      thumbnail
+    } = req.body || {};
+    
+    if (!date || !homeTeamId || !awayTeamId) {
+      return res.status(400).json({ error: 'Missing required fields: date, homeTeamId, awayTeamId' });
+    }
+    
+    const game = await prisma.game.create({ 
+      data: { 
+        date: new Date(date), 
+        homeTeamId,
+        awayTeamId,
+        status,
+        homeScore,
+        awayScore,
+        venue,
+        season,
+        gameType,
+        thumbnail
+      },
+      include: {
+        homeTeam: true,
+        awayTeam: true
+      }
+    });
+    
+    res.status(201).json(game);
+  } catch (error) {
+    console.error('Error creating game:', error);
+    res.status(500).json({ error: 'Failed to create game' });
+  }
 });
 
 // Get game events

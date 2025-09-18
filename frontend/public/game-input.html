@@ -1,0 +1,306 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Data Input - RefIntel</title>
+  <link rel="stylesheet" href="./css/game-input.css">
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-content">
+        <div class="logo">
+          <span>RefIntel</span>
+        </div>
+        
+        <div class="navigation">
+          <span onclick="window.location.href='/my-games.html'" style="cursor: pointer;">My Games</span>
+          <span onclick="window.location.href='/workspace.html'" style="cursor: pointer;">Evaluation Workspace</span>
+          <span onclick="window.location.href='/review-management.html'" style="cursor: pointer;">Review Management</span>
+          <span onclick="window.location.href='/analyst-actions.html'" style="cursor: pointer;">My Actions</span>
+          <span style="color: #60A5FA;">Game Data Input</span>
+          <span>Exports</span>
+        </div>
+        
+        <div class="user-profile">
+          <div class="profile-info">
+            <div class="profile-avatar"></div>
+            <div>
+              <span class="profile-name">Ref Analyst 1</span>
+              <span class="profile-role">RefIntel Analyst</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Header -->
+      <div class="header">
+        <h1>Game Data Input</h1>
+        <div class="header-actions">
+          <button id="save-draft-btn" class="btn-secondary">Save Draft</button>
+          <button id="submit-game-btn" class="btn-primary">Submit Game</button>
+        </div>
+      </div>
+
+      <!-- Progress Indicator -->
+      <div class="progress-indicator">
+        <div class="progress-step active" data-step="1">
+          <span class="step-number">1</span>
+          <span class="step-label">Game Details</span>
+        </div>
+        <div class="progress-step" data-step="2">
+          <span class="step-number">2</span>
+          <span class="step-label">Teams</span>
+        </div>
+        <div class="progress-step" data-step="3">
+          <span class="step-number">3</span>
+          <span class="step-label">Events</span>
+        </div>
+        <div class="progress-step" data-step="4">
+          <span class="step-number">4</span>
+          <span class="step-label">Review</span>
+        </div>
+      </div>
+
+      <!-- Form Container -->
+      <div class="form-container">
+        <!-- Step 1: Game Details -->
+        <div class="form-step active" data-step="1">
+          <div class="form-section">
+            <h2>Game Details</h2>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="game-date">Game Date & Time</label>
+                <input type="datetime-local" id="game-date" required>
+              </div>
+              <div class="form-group">
+                <label for="venue">Venue</label>
+                <input type="text" id="venue" placeholder="e.g., Colonial Life Arena">
+              </div>
+              <div class="form-group">
+                <label for="season">Season</label>
+                <input type="text" id="season" placeholder="e.g., 2024-25" value="2024-25">
+              </div>
+              <div class="form-group">
+                <label for="game-type">Game Type</label>
+                <select id="game-type">
+                  <option value="Regular Season">Regular Season</option>
+                  <option value="Playoffs">Playoffs</option>
+                  <option value="Championship">Championship</option>
+                  <option value="Tournament">Tournament</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="status">Game Status</label>
+                <select id="status">
+                  <option value="SCHEDULED">Scheduled</option>
+                  <option value="IN_PROGRESS">In Progress</option>
+                  <option value="COMPLETED">Completed</option>
+                  <option value="CANCELLED">Cancelled</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="thumbnail">Thumbnail URL</label>
+                <input type="url" id="thumbnail" placeholder="https://example.com/image.jpg">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Teams -->
+        <div class="form-step" data-step="2">
+          <div class="form-section">
+            <h2>Team Information</h2>
+            <div class="teams-container">
+              <!-- Home Team -->
+              <div class="team-section">
+                <h3>Home Team</h3>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="home-team-search">Search Existing Team</label>
+                    <input type="text" id="home-team-search" placeholder="Start typing team name...">
+                    <div id="home-team-suggestions" class="suggestions-dropdown"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="home-team-name">Team Name</label>
+                    <input type="text" id="home-team-name" placeholder="e.g., South Carolina Gamecocks" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="home-team-short">Short Name</label>
+                    <input type="text" id="home-team-short" placeholder="e.g., SC" maxlength="10">
+                  </div>
+                  <div class="form-group">
+                    <label for="home-team-primary">Primary Color</label>
+                    <input type="color" id="home-team-primary" value="#73000A">
+                  </div>
+                  <div class="form-group">
+                    <label for="home-team-secondary">Secondary Color</label>
+                    <input type="color" id="home-team-secondary" value="#000000">
+                  </div>
+                  <div class="form-group">
+                    <label for="home-score">Final Score (if completed)</label>
+                    <input type="number" id="home-score" min="0" max="200">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Away Team -->
+              <div class="team-section">
+                <h3>Away Team</h3>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="away-team-search">Search Existing Team</label>
+                    <input type="text" id="away-team-search" placeholder="Start typing team name...">
+                    <div id="away-team-suggestions" class="suggestions-dropdown"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="away-team-name">Team Name</label>
+                    <input type="text" id="away-team-name" placeholder="e.g., Texas Longhorns" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="away-team-short">Short Name</label>
+                    <input type="text" id="away-team-short" placeholder="e.g., TX" maxlength="10">
+                  </div>
+                  <div class="form-group">
+                    <label for="away-team-primary">Primary Color</label>
+                    <input type="color" id="away-team-primary" value="#BF5700">
+                  </div>
+                  <div class="form-group">
+                    <label for="away-team-secondary">Secondary Color</label>
+                    <input type="color" id="away-team-secondary" value="#FFFFFF">
+                  </div>
+                  <div class="form-group">
+                    <label for="away-score">Final Score (if completed)</label>
+                    <input type="number" id="away-score" min="0" max="200">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Events -->
+        <div class="form-step" data-step="3">
+          <div class="form-section">
+            <h2>Game Events</h2>
+            <div class="events-header">
+              <button id="add-event-btn" class="btn-secondary">Add Event</button>
+              <button id="bulk-import-btn" class="btn-secondary">Bulk Import CSV</button>
+            </div>
+            <div id="events-list" class="events-list">
+              <!-- Events will be dynamically added here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: Review -->
+        <div class="form-step" data-step="4">
+          <div class="form-section">
+            <h2>Review & Submit</h2>
+            <div id="review-content" class="review-content">
+              <!-- Review content will be populated here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="form-navigation">
+          <button id="prev-btn" class="btn-secondary" style="display: none;">Previous</button>
+          <button id="next-btn" class="btn-primary">Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Event Modal -->
+  <div id="event-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Add/Edit Event</h3>
+        <span class="close-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="event-type">Event Type</label>
+          <select id="event-type" required>
+            <option value="">Select event type...</option>
+            <option value="FOUL">Foul</option>
+            <option value="TECHNICAL_FOUL">Technical Foul</option>
+            <option value="FLAGRANT_FOUL">Flagrant Foul</option>
+            <option value="OFFENSIVE_FOUL">Offensive Foul</option>
+            <option value="TRAVEL">Travel</option>
+            <option value="BLOCKING_FOUL">Blocking Foul</option>
+            <option value="CHARGING_FOUL">Charging Foul</option>
+            <option value="INTENTIONAL_FOUL">Intentional Foul</option>
+            <option value="LOOSE_BALL_FOUL">Loose Ball Foul</option>
+            <option value="SHOOTING_FOUL">Shooting Foul</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="event-time">Game Time (MM:SS)</label>
+          <input type="text" id="event-time" placeholder="e.g., 15:30" pattern="[0-9]{1,2}:[0-9]{2}" required>
+        </div>
+        <div class="form-group">
+          <label for="event-video">Video URL</label>
+          <input type="url" id="event-video" placeholder="https://example.com/video.mp4" required>
+        </div>
+        <div class="form-group">
+          <label for="event-notes">Notes (optional)</label>
+          <textarea id="event-notes" placeholder="Additional notes about this event..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="save-event-btn" class="btn-primary">Save Event</button>
+        <button id="cancel-event-btn" class="btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CSV Import Modal -->
+  <div id="csv-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Import Events from CSV</h3>
+        <span class="close-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="csv-file">CSV File</label>
+          <input type="file" id="csv-file" accept=".csv" required>
+        </div>
+        <div class="csv-format-info">
+          <h4>Expected CSV Format:</h4>
+          <p>event_type, time, video_url, notes</p>
+          <p><em>Example: FOUL, 15:30, https://example.com/video.mp4, Contact foul on shot</em></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="import-csv-btn" class="btn-primary">Import</button>
+        <button id="cancel-csv-btn" class="btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logout Button -->
+  <button class="logout-button" onclick="logout()">
+    Logout
+  </button>
+
+  <script>
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userRole');
+        window.location.href = '/login.html';
+      }
+    }
+  </script>
+  <script src="./js/game-input.js"></script>
+</body>
+</html>
