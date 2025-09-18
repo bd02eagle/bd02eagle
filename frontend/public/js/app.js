@@ -691,7 +691,7 @@ async function loadGameForWorkspace(gameId) {
     const eventIdFromUrl = urlParams.get('eventId');
     const selectedEventIndex = localStorage.getItem('selectedEventIndex');
     const selectedEventId = localStorage.getItem('selectedEventId');
-    
+
     console.log('Event index from URL:', eventIndexFromUrl);
     console.log('Event ID from URL:', eventIdFromUrl);
     console.log('Selected event index from storage:', selectedEventIndex);
@@ -781,7 +781,7 @@ async function loadGameForWorkspace(gameId) {
 
     // Determine which event to select - prioritize URL parameters
     let targetEventIndex = 0;
-    
+
     // First check URL parameters (from evaluation page navigation)
     if (eventIndexFromUrl !== null && !isNaN(parseInt(eventIndexFromUrl))) {
       const index = parseInt(eventIndexFromUrl);
@@ -813,7 +813,7 @@ async function loadGameForWorkspace(gameId) {
     if (loadedEvents.length > 0) {
       console.log('Selecting event at index:', targetEventIndex);
       currentEventIndex = targetEventIndex;
-      
+
       // Small delay to ensure DOM is ready
       setTimeout(() => {
         selectEvent(targetEventIndex);
@@ -849,7 +849,7 @@ async function loadGameForWorkspace(gameId) {
     console.error('Stack:', error.stack);
     console.error('Game ID requested:', gameId);
     console.error('Auth token present:', !!authToken);
-    
+
     // Show more specific error message
     let errorMessage = 'Failed to load game data';
     if (error.message.includes('401')) {
@@ -863,7 +863,7 @@ async function loadGameForWorkspace(gameId) {
         window.location.href = '/my-games.html';
       }, 2000);
     }
-    
+
     showError(errorMessage);
   }
 }
@@ -874,17 +874,16 @@ function updateGameInfo(game) {
   if (game) {
     currentGameId = game.id;
 
-    // Update game title and details
+    // Update game title and metadata
     const gameTitle = document.getElementById('game-title');
-    if (gameTitle) {
-      // Handle both old format (awayTeam/homeTeam strings) and new format (team objects)
-      if (typeof game.awayTeam === 'string') {
-        gameTitle.textContent = `${game.awayTeam} @ ${game.homeTeam}`;
-      } else if (game.awayTeam && game.homeTeam) {
-        gameTitle.textContent = `${game.awayTeam.name} @ ${game.homeTeam.name}`;
-      } else {
-        gameTitle.textContent = 'Game Details';
-      }
+    const possessionTeam = document.getElementById('possession-team');
+
+    if (gameTitle && game) {
+      gameTitle.textContent = `${game.homeTeam.shortName || game.homeTeam.name} vs. ${game.awayTeam.shortName || game.awayTeam.name}`;
+    }
+
+    if (possessionTeam && game) {
+      possessionTeam.textContent = game.homeTeam.name;
     }
 
     // Update game details if elements exist
