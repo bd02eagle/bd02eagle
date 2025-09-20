@@ -51,24 +51,22 @@ body {
   top: 17px;
   left: 24px;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 24px;
 }
 .v1_265 {
   width: 76px;
   color: rgba(13,27,63,1);
-  position: absolute;
-  top: 0px;
-  left: 0px;
   font-family: Inter;
   font-weight: bold;
   font-size: 20px;
   text-align: left;
+  flex-shrink: 0;
 }
 .v1_266 {
   width: 10px;
   height: 16px;
-  position: absolute;
-  top: 6px;
-  left: 91px;
   overflow: hidden;
 }
 .v1_267 {
@@ -98,7 +96,8 @@ body {
 .header-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 24px;
+  width: 100%;
 }
 
 .breadcrumb-nav {
@@ -107,6 +106,7 @@ body {
   gap: 8px;
   font-size: 14px;
   color: #64748b;
+  flex: 1;
 }
 
 .breadcrumb-link {
@@ -862,8 +862,8 @@ body {
 /* Logout button */
 .logout-button {
   position: fixed;
-  top: 80px;
-  right: 20px;
+  bottom: 20px;
+  left: 20px;
   background: rgba(239, 68, 68, 1);
   color: white;
   border: none;

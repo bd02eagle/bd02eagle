@@ -28,31 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function checkGameSelection() {
-  const selectedGameId = localStorage.getItem('selectedGameId');
-  
-  // If no game was selected and user came from somewhere other than My Games,
-  // show a helpful message
-  if (!selectedGameId && !document.referrer.includes('my-games')) {
-    const gameTitle = document.getElementById('game-title');
-    if (gameTitle) {
-      const notice = document.createElement('div');
-      notice.style.cssText = `
-        background: #FEF3C7;
-        border: 1px solid #F59E0B;
-        border-radius: 6px;
-        padding: 12px;
-        margin: 12px 0;
-        font-size: 14px;
-        color: #92400E;
-      `;
-      notice.innerHTML = `
-        <strong>Tip:</strong> Select a specific game from 
-        <a href="/my-games.html" style="color: #3B82F6; text-decoration: underline;">My Games</a> 
-        to evaluate your assigned events, or continue with the most recent game.
-      `;
-      gameTitle.parentNode.insertBefore(notice, gameTitle.nextSibling);
-    }
-  }
+  // Tooltip functionality removed as requested
 }
 
 function initializeEventListeners() {
