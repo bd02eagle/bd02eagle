@@ -88,8 +88,8 @@ body {
 .v1_270 {
   color: rgba(31,41,55,1);
   font-family: Inter;
-  font-weight: 600;
-  font-size: 20px;
+  font-weight: 500;
+  font-size: 14px;
   text-align: left;
 }
 
@@ -137,7 +137,10 @@ body {
 
 .v1_270 {
   color: #1e293b;
+  font-family: Inter;
   font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
 }
 
 .breadcrumb-separator {
