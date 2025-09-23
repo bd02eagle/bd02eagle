@@ -93,6 +93,18 @@ r.post("/", requireAuth(["ADMIN", "ANALYST"]), async (req, res) => {
         awayTeam: true
       }
     });
+
+    // Automatically create a game assignment for the user who created the game
+    await prisma.gameAssignment.create({
+      data: {
+        gameId: game.id,
+        analystId: req.user.sub, // The logged-in user's ID
+        priority: 'medium',
+        isActive: true
+      }
+    });
+
+    console.log(`Created game assignment for user ${req.user.sub} on game ${game.id}`);
     
     res.status(201).json(game);
   } catch (error) {
