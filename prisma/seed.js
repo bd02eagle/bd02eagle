@@ -445,7 +445,53 @@ async function main() {
     }
   });
 
-  const assignments = [assignment1, assignment2, assignment3, assignment4, assignment5, assignment6, assignment7];
+  // Create Test Team game
+  const testTeam = await prisma.team.upsert({
+    where: { name: 'Test Team' },
+    update: {},
+    create: {
+      name: 'Test Team',
+      shortName: 'TT',
+      primaryColor: '#FF0000',
+      secondaryColor: '#000000'
+    }
+  });
+
+  const testGame = await prisma.game.upsert({
+    where: { 
+      id: "game-test-team-20250120" 
+    },
+    update: {},
+    create: {
+      id: "game-test-team-20250120",
+      date: new Date("2025-01-20T19:00:00Z"),
+      homeTeamId: testTeam.id,
+      awayTeamId: testTeam.id, // TT vs TT2
+      status: "IN_PROGRESS",
+      venue: "Test Arena",
+      season: "2024-25",
+      gameType: "Regular Season",
+      thumbnail: "https://via.placeholder.com/300x200?text=TT+vs+TT2",
+    },
+  });
+
+  // Add assignment for Test Team game to analyst1
+  const assignment8 = await prisma.gameAssignment.upsert({
+    where: {
+      gameId_analystId: {
+        gameId: testGame.id,
+        analystId: analyst1.id
+      }
+    },
+    update: {},
+    create: {
+      gameId: testGame.id,
+      analystId: analyst1.id,
+      priority: 'high'
+    }
+  });
+
+  const assignments = [assignment1, assignment2, assignment3, assignment4, assignment5, assignment6, assignment7, assignment8];
 
   const createdEvents = events;
   const createdTags = tags;
