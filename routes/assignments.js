@@ -8,9 +8,9 @@ const r = Router();
 r.get("/my-assignments", requireAuth(["ANALYST", "ADMIN"]), async (req, res) => {
   try {
     const assignments = await prisma.gameAssignment.findMany({
-      where: { 
+      where: {
         analystId: req.user.sub,
-        isActive: true 
+        isActive: true
       },
       select: {
         id: true,
@@ -36,9 +36,9 @@ r.get("/my-assignments", requireAuth(["ANALYST", "ADMIN"]), async (req, res) => 
 r.get("/my-games", requireAuth(["ANALYST", "ADMIN"]), async (req, res) => {
   try {
     const assignments = await prisma.gameAssignment.findMany({
-      where: { 
+      where: {
         analystId: req.user.sub,
-        isActive: true 
+        isActive: true
       },
       include: {
         game: {
@@ -72,7 +72,7 @@ r.get("/my-games", requireAuth(["ANALYST", "ADMIN"]), async (req, res) => {
       const game = assignment.game;
       const totalTags = game.events.reduce((total, event) => total + event.tags.length, 0);
       const completedTags = game.events.reduce((total, event) => {
-        return total + event.tags.filter(tag => 
+        return total + event.tags.filter(tag =>
           tag.analystActions.length > 0
         ).length;
       }, 0);
