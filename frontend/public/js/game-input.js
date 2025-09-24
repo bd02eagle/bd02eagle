@@ -1,4 +1,3 @@
-
 // API Configuration
 const API_BASE = '/api';
 
@@ -30,34 +29,34 @@ function initializeEventListeners() {
   // Navigation buttons
   document.getElementById('next-btn').addEventListener('click', nextStep);
   document.getElementById('prev-btn').addEventListener('click', prevStep);
-  
+
   // Header buttons
   document.getElementById('save-draft-btn').addEventListener('click', saveDraft);
   document.getElementById('submit-game-btn').addEventListener('click', submitGame);
-  
+
   // Event management
   document.getElementById('add-event-btn').addEventListener('click', () => openEventModal());
   document.getElementById('bulk-import-btn').addEventListener('click', () => openCSVModal());
-  
+
   // Modal controls
   document.querySelectorAll('.close-modal').forEach(btn => {
     btn.addEventListener('click', closeModals);
   });
-  
+
   document.getElementById('save-event-btn').addEventListener('click', saveEvent);
   document.getElementById('cancel-event-btn').addEventListener('click', closeModals);
   document.getElementById('import-csv-btn').addEventListener('click', importCSV);
   document.getElementById('cancel-csv-btn').addEventListener('click', closeModals);
-  
+
   // Team search functionality
   document.getElementById('home-team-search').addEventListener('input', (e) => {
     searchTeams(e.target.value, 'home');
   });
-  
+
   document.getElementById('away-team-search').addEventListener('input', (e) => {
     searchTeams(e.target.value, 'away');
   });
-  
+
   // Form validation
   document.querySelectorAll('input, select, textarea').forEach(input => {
     input.addEventListener('change', validateCurrentStep);
@@ -69,7 +68,7 @@ async function loadExistingTeams() {
     const response = await fetch(`${API_BASE}/teams`, {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
-    
+
     if (response.ok) {
       allTeams = await response.json();
     } else {
@@ -84,53 +83,65 @@ async function loadExistingTeams() {
 
 function searchTeams(query, teamType) {
   const suggestionsDiv = document.getElementById(`${teamType}-team-suggestions`);
-  
+
   if (!query || query.length < 2) {
     suggestionsDiv.style.display = 'none';
     return;
   }
-  
+
   const matches = allTeams.filter(team => 
     team.name.toLowerCase().includes(query.toLowerCase()) ||
     (team.shortName && team.shortName.toLowerCase().includes(query.toLowerCase()))
   );
-  
+
   if (matches.length === 0) {
     suggestionsDiv.style.display = 'none';
     return;
   }
-  
+
   suggestionsDiv.innerHTML = matches.map(team => `
     <div class="suggestion-item" onclick="selectTeam('${teamType}', ${JSON.stringify(team).replace(/"/g, '&quot;')})">
       <strong>${escapeHtml(team.name)}</strong>
       ${team.shortName ? `<br><small>${escapeHtml(team.shortName)}</small>` : ''}
     </div>
   `).join('');
-  
+
   suggestionsDiv.style.display = 'block';
 }
 
 function selectTeam(teamType, team) {
-  const prefix = teamType === 'home' ? 'home' : 'away';
-  
-  document.getElementById(`${prefix}-team-name`).value = team.name;
-  document.getElementById(`${prefix}-team-short`).value = team.shortName || '';
-  document.getElementById(`${prefix}-team-primary`).value = team.primaryColor || '#000000';
-  document.getElementById(`${prefix}-team-secondary`).value = team.secondaryColor || '#FFFFFF';
-  
-  document.getElementById(`${prefix}-team-suggestions`).style.display = 'none';
-  
-  // Store team ID if it exists
-  gameData[`${teamType}Team`].existingId = team.id;
+  // Ensure team has required fields
+  const teamData = {
+    id: team.id,
+    teamId: team.id, // Ensure teamId is set
+    name: team.name,
+    shortName: team.shortName
+  };
+
+  if (teamType === 'home') {
+    gameData.homeTeam = teamData;
+    document.querySelector('[data-team="home"] .team-display').textContent = team.name || team.shortName;
+    document.querySelector('[data-team="home"] .team-search').style.display = 'none';
+    document.querySelector('[data-team="home"] .team-display').style.display = 'block';
+  } else {
+    gameData.awayTeam = teamData;
+    document.querySelector('[data-team="away"] .team-display').textContent = team.name || team.shortName;
+    document.querySelector('[data-team="away"] .team-search').style.display = 'none';
+    document.querySelector('[data-team="away"] .team-display').style.display = 'block';
+  }
+
+  // Clear search
+  document.querySelector(`[data-team="${teamType}"] input`).value = '';
+  currentSearchResults = [];
 }
 
 function nextStep() {
   if (!validateCurrentStep()) {
     return;
   }
-  
+
   saveCurrentStepData();
-  
+
   if (currentStep < 4) {
     currentStep++;
     updateStepVisibility();
@@ -142,7 +153,7 @@ function nextStep() {
 
 function prevStep() {
   saveCurrentStepData();
-  
+
   if (currentStep > 1) {
     currentStep--;
     updateStepVisibility();
@@ -156,20 +167,20 @@ function updateStepVisibility() {
     step.classList.toggle('active', stepNumber === currentStep);
     step.classList.toggle('completed', stepNumber < currentStep);
   });
-  
+
   // Update form steps
   document.querySelectorAll('.form-step').forEach((step, index) => {
     const stepNumber = index + 1;
     step.classList.toggle('active', stepNumber === currentStep);
   });
-  
+
   // Update navigation buttons
   const prevBtn = document.getElementById('prev-btn');
   const nextBtn = document.getElementById('next-btn');
-  
+
   prevBtn.style.display = currentStep === 1 ? 'none' : 'block';
   nextBtn.textContent = currentStep === 4 ? 'Submit Game' : 'Next';
-  
+
   // Load step-specific content
   if (currentStep === 4) {
     populateReviewStep();
@@ -179,7 +190,7 @@ function updateStepVisibility() {
 function validateCurrentStep() {
   const currentStepDiv = document.querySelector(`.form-step[data-step="${currentStep}"]`);
   const requiredInputs = currentStepDiv.querySelectorAll('input[required], select[required]');
-  
+
   for (const input of requiredInputs) {
     if (!input.value.trim()) {
       input.focus();
@@ -187,7 +198,7 @@ function validateCurrentStep() {
       return false;
     }
   }
-  
+
   // Step-specific validation
   if (currentStep === 1) {
     const dateInput = document.getElementById('game-date');
@@ -196,22 +207,22 @@ function validateCurrentStep() {
       return false;
     }
   }
-  
+
   if (currentStep === 2) {
     const homeTeamName = document.getElementById('home-team-name').value.trim();
     const awayTeamName = document.getElementById('away-team-name').value.trim();
-    
+
     if (!homeTeamName || !awayTeamName) {
       showError('Please enter both home and away team names');
       return false;
     }
-    
+
     if (homeTeamName === awayTeamName) {
       showError('Home and away teams cannot be the same');
       return false;
     }
   }
-  
+
   return true;
 }
 
@@ -233,7 +244,7 @@ function saveCurrentStepData() {
       secondaryColor: document.getElementById('home-team-secondary').value,
       existingId: gameData.homeTeam.existingId
     };
-    
+
     gameData.awayTeam = {
       name: document.getElementById('away-team-name').value,
       shortName: document.getElementById('away-team-short').value,
@@ -241,10 +252,10 @@ function saveCurrentStepData() {
       secondaryColor: document.getElementById('away-team-secondary').value,
       existingId: gameData.awayTeam.existingId
     };
-    
+
     const homeScore = document.getElementById('home-score').value;
     const awayScore = document.getElementById('away-score').value;
-    
+
     if (homeScore) gameData.gameDetails.homeScore = parseInt(homeScore);
     if (awayScore) gameData.gameDetails.awayScore = parseInt(awayScore);
   }
@@ -252,7 +263,7 @@ function saveCurrentStepData() {
 
 function openEventModal(eventIndex = -1) {
   currentEditingEventIndex = eventIndex;
-  
+
   if (eventIndex >= 0) {
     // Edit existing event
     const event = gameData.events[eventIndex];
@@ -267,7 +278,7 @@ function openEventModal(eventIndex = -1) {
     document.getElementById('event-video').value = '';
     document.getElementById('event-notes').value = '';
   }
-  
+
   document.getElementById('event-modal').style.display = 'flex';
 }
 
@@ -276,19 +287,19 @@ function saveEvent() {
   const timeDisplay = document.getElementById('event-time').value;
   const videoUrl = document.getElementById('event-video').value;
   const notes = document.getElementById('event-notes').value;
-  
+
   if (!type || !timeDisplay || !videoUrl) {
     showError('Please fill in all required event fields');
     return;
   }
-  
+
   // Convert time to milliseconds
   const timestampMs = convertTimeToMs(timeDisplay);
   if (timestampMs === null) {
     showError('Please enter time in format MM:SS (e.g., 15:30)');
     return;
   }
-  
+
   const eventData = {
     type,
     timeDisplay,
@@ -296,13 +307,13 @@ function saveEvent() {
     videoUrl,
     notes
   };
-  
+
   if (currentEditingEventIndex >= 0) {
     gameData.events[currentEditingEventIndex] = eventData;
   } else {
     gameData.events.push(eventData);
   }
-  
+
   renderEventsList();
   closeModals();
 }
@@ -310,21 +321,21 @@ function saveEvent() {
 function convertTimeToMs(timeStr) {
   const match = timeStr.match(/^(\d{1,2}):(\d{2})$/);
   if (!match) return null;
-  
+
   const minutes = parseInt(match[1]);
   const seconds = parseInt(match[2]);
-  
+
   return (minutes * 60 + seconds) * 1000;
 }
 
 function renderEventsList() {
   const container = document.getElementById('events-list');
-  
+
   if (gameData.events.length === 0) {
     container.innerHTML = '<div class="empty-state">No events added yet. Click "Add Event" to get started.</div>';
     return;
   }
-  
+
   container.innerHTML = gameData.events.map((event, index) => `
     <div class="event-item">
       <div class="event-details">
@@ -354,29 +365,29 @@ function openCSVModal() {
 function importCSV() {
   const fileInput = document.getElementById('csv-file');
   const file = fileInput.files[0];
-  
+
   if (!file) {
     showError('Please select a CSV file');
     return;
   }
-  
+
   const reader = new FileReader();
   reader.onload = function(e) {
     try {
       const csv = e.target.result;
       const lines = csv.split('\n').filter(line => line.trim());
       let importedCount = 0;
-      
+
       // Skip header row if it exists
       const startIndex = lines[0].toLowerCase().includes('event_type') ? 1 : 0;
-      
+
       for (let i = startIndex; i < lines.length; i++) {
         const parts = lines[i].split(',').map(part => part.trim().replace(/"/g, ''));
-        
+
         if (parts.length >= 3) {
           const [type, time, videoUrl, notes = ''] = parts;
           const timestampMs = convertTimeToMs(time);
-          
+
           if (timestampMs !== null) {
             gameData.events.push({
               type: type.toUpperCase().replace(/\s+/g, '_'),
@@ -389,23 +400,23 @@ function importCSV() {
           }
         }
       }
-      
+
       renderEventsList();
       closeModals();
       showSuccess(`Successfully imported ${importedCount} events`);
-      
+
     } catch (error) {
       console.error('Error parsing CSV:', error);
       showError('Error parsing CSV file. Please check the format.');
     }
   };
-  
+
   reader.readAsText(file);
 }
 
 function populateReviewStep() {
   const reviewContent = document.getElementById('review-content');
-  
+
   reviewContent.innerHTML = `
     <div class="review-section">
       <h3>Game Details</h3>
@@ -430,7 +441,7 @@ function populateReviewStep() {
         <span class="review-value">${escapeHtml(gameData.gameDetails.status)}</span>
       </div>
     </div>
-    
+
     <div class="review-section">
       <h3>Teams</h3>
       <div class="review-item">
@@ -448,7 +459,7 @@ function populateReviewStep() {
         </div>
       ` : ''}
     </div>
-    
+
     <div class="review-section">
       <h3>Events</h3>
       <div class="review-item">
@@ -472,16 +483,16 @@ async function submitGame() {
   if (!validateCurrentStep()) {
     return;
   }
-  
+
   saveCurrentStepData();
-  
+
   try {
     showLoading('Submitting game data...');
-    
+
     // Create or get team IDs
     const homeTeamId = await createOrGetTeam(gameData.homeTeam);
     const awayTeamId = await createOrGetTeam(gameData.awayTeam);
-    
+
     // Create game
     const gamePayload = {
       date: new Date(gameData.gameDetails.date).toISOString(),
@@ -495,7 +506,7 @@ async function submitGame() {
       homeScore: gameData.gameDetails.homeScore,
       awayScore: gameData.gameDetails.awayScore
     };
-    
+
     const gameResponse = await fetch(`${API_BASE}/games`, {
       method: 'POST',
       headers: {
@@ -504,13 +515,13 @@ async function submitGame() {
       },
       body: JSON.stringify(gamePayload)
     });
-    
+
     if (!gameResponse.ok) {
       throw new Error('Failed to create game');
     }
-    
+
     const game = await gameResponse.json();
-    
+
     // Create events
     for (const event of gameData.events) {
       const eventPayload = {
@@ -519,7 +530,7 @@ async function submitGame() {
         videoUrl: event.videoUrl,
         type: event.type
       };
-      
+
       const eventResponse = await fetch(`${API_BASE}/events`, {
         method: 'POST',
         headers: {
@@ -528,19 +539,19 @@ async function submitGame() {
         },
         body: JSON.stringify(eventPayload)
       });
-      
+
       if (!eventResponse.ok) {
         console.warn('Failed to create event:', event);
       }
     }
-    
+
     showSuccess('Game created successfully!');
-    
+
     // Redirect to my games page after a delay
     setTimeout(() => {
       window.location.href = '/my-games.html';
     }, 2000);
-    
+
   } catch (error) {
     console.error('Error submitting game:', error);
     showError('Failed to create game. Please try again.');
@@ -551,7 +562,7 @@ async function createOrGetTeam(teamData) {
   if (teamData.existingId) {
     return teamData.existingId;
   }
-  
+
   try {
     const payload = {
       name: teamData.name,
@@ -559,7 +570,7 @@ async function createOrGetTeam(teamData) {
       primaryColor: teamData.primaryColor,
       secondaryColor: teamData.secondaryColor
     };
-    
+
     const response = await fetch(`${API_BASE}/teams`, {
       method: 'POST',
       headers: {
@@ -568,14 +579,14 @@ async function createOrGetTeam(teamData) {
       },
       body: JSON.stringify(payload)
     });
-    
+
     if (!response.ok) {
       throw new Error('Failed to create team');
     }
-    
+
     const team = await response.json();
     return team.id;
-    
+
   } catch (error) {
     console.error('Error creating team:', error);
     throw error;
@@ -680,7 +691,7 @@ function populateFormFromDraft() {
     document.getElementById('venue').value = gameData.gameDetails.venue;
   }
   // ... populate other fields as needed
-  
+
   // Render events if any
   if (gameData.events && gameData.events.length > 0) {
     renderEventsList();

@@ -17,7 +17,7 @@ import assignmentsRoutes from "./routes/assignments.js";
 import teamsRoutes from "./routes/teams.js";
 
 // Import the requireAuth middleware
-import { requireAuth } from "./middleware/auth.js";
+import { requireAuth } from "./auth.js";
 
 dotenv.config();
 const app = express();
