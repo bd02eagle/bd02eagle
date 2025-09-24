@@ -6,6 +6,7 @@ import pinoHttp from "pino-http";
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
 import client from "prom-client";
+import { PrismaClient } from '@prisma/client';
 
 import { login } from "./auth.js";
 import gamesRoutes from "./routes/games.js";
@@ -15,10 +16,13 @@ import analystActionsRoutes from "./routes/analyst-actions.js";
 import assignmentsRoutes from "./routes/assignments.js";
 import teamsRoutes from "./routes/teams.js";
 
+// Import the requireAuth middleware
+import { requireAuth } from "./middleware/auth.js";
 
 dotenv.config();
 const app = express();
 const log = pino();
+const prisma = new PrismaClient();
 
 // Prometheus setup
 const register = new client.Registry();
@@ -52,6 +56,41 @@ app.use("/api/tags", tagsRoutes);
 app.use("/api/analyst-actions", analystActionsRoutes);
 app.use("/api/assignments", assignmentsRoutes);
 app.use("/api/teams", teamsRoutes);
+
+// Users endpoint for fetching user details
+app.get('/api/users/:userId', requireAuth(), async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Only allow users to fetch their own details (or admins to fetch any)
+    if (req.user.sub !== userId && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        firstName: true,
+        lastName: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 
 const port = process.env.PORT || 3000;

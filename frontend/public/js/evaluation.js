@@ -544,7 +544,7 @@ function setupNavigation() {
   }
 }
 
-function updateUserDisplay() {
+async function updateUserDisplay() {
   const userNameElement = document.getElementById('user-name-display');
   
   if (userNameElement && authToken) {
@@ -554,7 +554,7 @@ function updateUserDisplay() {
       const userId = payload.sub;
       const userRole = localStorage.getItem('userRole');
       
-      const userName = getUserDisplayName(userRole, userId);
+      const userName = await getUserDisplayName(userRole, userId);
       userNameElement.textContent = userName;
       console.log('Updated evaluation page user display to:', userName);
     } catch (error) {
@@ -563,15 +563,37 @@ function updateUserDisplay() {
   }
 }
 
-function getUserDisplayName(role, userId) {
+async function getUserDisplayName(role, userId) {
   if (role === 'ANALYST') {
-    // Try to determine which analyst based on known IDs from seed data
+    try {
+      // Make API call to get user details
+      const response = await fetch(`${API_BASE}/users/${userId}`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+      
+      if (response.ok) {
+        const user = await response.json();
+        if (user.firstName && user.lastName) {
+          return `${user.firstName} ${user.lastName}`;
+        } else if (user.email) {
+          // Extract analyst number from email
+          const emailMatch = user.email.match(/analyst(\d+)/);
+          if (emailMatch) {
+            return `Ref Analyst ${emailMatch[1]}`;
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Could not fetch user details:', error);
+    }
+    
+    // Fallback: try to determine from known seed data IDs
     if (userId === '6ca4cb13-9fc2-4b4a-9b45-15b796e1793a') {
       return 'Ref Analyst 1';
     } else if (userId === '7da5dc14-8fd3-4c5b-8c46-16c897f2804b') {
       return 'Ref Analyst 2';
     } else {
-      // Fallback for unknown analyst IDs
+      // Final fallback
       return 'Ref Analyst';
     }
   } else if (role === 'CHARTER') {
