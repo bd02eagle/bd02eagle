@@ -15,6 +15,7 @@ import tagsRoutes from "./routes/tags.js";
 import analystActionsRoutes from "./routes/analyst-actions.js";
 import assignmentsRoutes from "./routes/assignments.js";
 import teamsRoutes from "./routes/teams.js";
+import usersRouter from "./routes/users.js";
 
 // Import the requireAuth middleware
 import { requireAuth } from "./auth.js";
@@ -56,6 +57,7 @@ app.use("/api/tags", tagsRoutes);
 app.use("/api/analyst-actions", analystActionsRoutes);
 app.use("/api/assignments", assignmentsRoutes);
 app.use("/api/teams", teamsRoutes);
+app.use("/api/users", usersRouter);
 
 // Users endpoint for fetching user details
 app.get('/api/users/:userId', requireAuth(), async (req, res) => {

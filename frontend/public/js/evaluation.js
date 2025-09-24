@@ -1,8 +1,12 @@
 const API_BASE = '/api';
 let currentEventId = null;
 let currentGameId = null;
+let currentGame = null;
 let events = [];
+let currentGameEvents = [];
 let currentEventIndex = 0;
+let currentEvent = null;
+let eventTags = [];
 let authToken = localStorage.getItem('authToken');
 
 // Form state
@@ -18,13 +22,25 @@ let formData = {
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
   if (!authToken) {
-    window.location.href = '/';
+    window.location.href = '/login.html';
     return;
   }
 
-  initializeEventListeners();
-  checkGameSelection();
-  loadCurrentGame();
+  setupNavigation();
+  setupEventListeners();
+  updateUserDisplay();
+
+  // Get game ID from URL params or localStorage
+  const urlParams = new URLSearchParams(window.location.search);
+  currentGameId = urlParams.get('gameId') || localStorage.getItem('selectedGameId');
+
+  if (currentGameId) {
+    console.log('Loading game from URL/localStorage:', currentGameId);
+    loadGameData(currentGameId);
+  } else {
+    console.log('No game ID provided');
+    showError('No game selected. Please select a game from My Games.');
+  }
 });
 
 function checkGameSelection() {
@@ -34,7 +50,7 @@ function checkGameSelection() {
 function initializeEventListeners() {
   // Navigation setup
   setupNavigation();
-  
+
   // Form controls
   document.querySelectorAll('.infraction-btn').forEach(btn => {
     btn.addEventListener('click', () => selectInfraction(btn.dataset.value));
@@ -95,90 +111,52 @@ function selectCorrectness(type) {
   document.querySelector(`.correctness-btn[data-value="${type}"]`).classList.add('active');
 }
 
-async function loadCurrentGame() {
+async function loadGameData(gameId) {
   try {
-    // Check for URL parameters first (from workspace navigation)
-    const urlParams = new URLSearchParams(window.location.search);
-    const gameIdFromUrl = urlParams.get('gameId');
-    const eventIdFromUrl = urlParams.get('eventId');
-    const eventIndexFromUrl = urlParams.get('eventIndex');
-    
-    const selectedGameId = gameIdFromUrl || localStorage.getItem('selectedGameId');
-    
-    const gamesResponse = await fetch(`${API_BASE}/games`, {
-      headers: {
-        'Authorization': `Bearer ${authToken}`
-      }
+    console.log('Loading game data for gameId:', gameId);
+
+    // First get the game details
+    const gameResponse = await fetch(`${API_BASE}/games`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
     });
 
-    if (!gamesResponse.ok) {
-      throw new Error('Failed to fetch games');
+    if (!gameResponse.ok) {
+      throw new Error(`Failed to fetch games: ${gameResponse.status}`);
     }
 
-    const games = await gamesResponse.json();
-    if (games.length === 0) {
-      displayError('No games found');
-      return;
+    const games = await gameResponse.json();
+    currentGame = games.find(game => game.id === gameId);
+
+    if (!currentGame) {
+      throw new Error('Game not found');
     }
 
-    // Load the selected game from workspace or My Games, or default to most recent
-    let game;
-    if (selectedGameId) {
-      game = games.find(g => g.id === selectedGameId);
-      console.log('Found selected game:', game);
-      // Clear the selection after using it
-      localStorage.removeItem('selectedGameId');
-    }
-    
-    // Fallback to most recent game if no selection or game not found
-    if (!game) {
-      game = games[0];
-      console.log('Using fallback game:', game);
+    console.log('Found game:', currentGame);
+    updateGameHeader(currentGame);
+
+    // Then get the events for this game
+    const eventsResponse = await fetch(`${API_BASE}/games/${gameId}/events`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+
+    if (!eventsResponse.ok) {
+      throw new Error(`Failed to fetch game events: ${response.status}`);
     }
 
-    currentGameId = game.id;
+    currentGameEvents = await eventsResponse.json();
+    console.log(`Loaded ${currentGameEvents.length} events for game ${gameId}`);
 
-    // Update game info with proper team names
-    const gameTitle = document.getElementById('game-title');
-    if (gameTitle) {
-      // Use team names or shortNames, with fallback
-      const homeTeam = game.homeTeam?.shortName || game.homeTeam?.name || 'Home';
-      const awayTeam = game.awayTeam?.shortName || game.awayTeam?.name || 'Away';
-      gameTitle.textContent = `${homeTeam} vs. ${awayTeam}`;
+    if (currentGameEvents.length > 0) {
+      // Load the first event by default
+      currentEventIndex = 0;
+      await loadEventData(currentGameEvents[currentEventIndex]);
+    } else {
+      showError('No events found for this game');
     }
 
-    // Show indicator if this game was selected from My Games
-    if (selectedGameId) {
-      const gameTitle = document.getElementById('game-title');
-      const indicator = document.createElement('span');
-      indicator.style.cssText = 'color: #10B981; font-size: 12px; margin-left: 8px;';
-      indicator.textContent = '(Selected from My Games)';
-      gameTitle.appendChild(indicator);
-    }
-
-    // Update game status and time
-    const gameTimeElement = document.getElementById('game-time');
-    if (gameTimeElement) {
-      gameTimeElement.textContent = 'Q4 | 04:39.5';
-    }
-
-    // Update possession
-    const possessionElement = document.getElementById('possession-team');
-    if (possessionElement) {
-      possessionElement.textContent = game.homeTeam.name;
-    }
-
-    await loadEvents(game.id);
-    
-    // If we came from workspace, set the specific event
-    if (eventIndexFromUrl) {
-      currentEventIndex = parseInt(eventIndexFromUrl, 10);
-      console.log('Setting event index from workspace:', currentEventIndex);
-    }
-    
   } catch (error) {
-    console.error('Error loading game:', error);
-    displayError('Failed to load game data');
+    console.error('Error loading game data:', error);
+    showError('Failed to load game data');
   }
 }
 
@@ -544,21 +522,36 @@ function setupNavigation() {
   }
 }
 
+async function getCurrentUser() {
+  try {
+    // Extract user ID from JWT token
+    const payload = JSON.parse(atob(authToken.split('.')[1]));
+    const currentUserId = payload.sub;
+
+    // You could also make an API call to get full user details if needed
+    // For now, we'll use the role from localStorage
+    const userRole = localStorage.getItem('userRole');
+
+    return {
+      id: currentUserId,
+      role: userRole
+    };
+  } catch (error) {
+    console.error('Error getting current user:', error);
+    return null;
+  }
+}
+
 async function updateUserDisplay() {
-  const userNameElement = document.getElementById('user-name-display');
-  
-  if (userNameElement && authToken) {
-    try {
-      // Extract user ID from JWT token
-      const payload = JSON.parse(atob(authToken.split('.')[1]));
-      const userId = payload.sub;
-      const userRole = localStorage.getItem('userRole');
-      
-      const userName = await getUserDisplayName(userRole, userId);
+  // Update user name in the profile section
+  const userNameElement = document.querySelector('.user-name');
+
+  if (userNameElement) {
+    const user = await getCurrentUser();
+    if (user) {
+      const userName = await getUserDisplayName(user.role, user.id);
       userNameElement.textContent = userName;
-      console.log('Updated evaluation page user display to:', userName);
-    } catch (error) {
-      console.error('Error updating user display:', error);
+      console.log('Updated user display to:', userName);
     }
   }
 }
@@ -570,7 +563,7 @@ async function getUserDisplayName(role, userId) {
       const response = await fetch(`${API_BASE}/users/${userId}`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
-      
+
       if (response.ok) {
         const user = await response.json();
         if (user.firstName && user.lastName) {
@@ -586,7 +579,7 @@ async function getUserDisplayName(role, userId) {
     } catch (error) {
       console.warn('Could not fetch user details:', error);
     }
-    
+
     // Fallback: try to determine from known seed data IDs
     if (userId === '6ca4cb13-9fc2-4b4a-9b45-15b796e1793a') {
       return 'Ref Analyst 1';
@@ -601,8 +594,29 @@ async function getUserDisplayName(role, userId) {
   } else if (role === 'ADMIN') {
     return 'Admin User';
   }
-  
+
   return 'User';
+}
+
+function updateGameHeader(game) {
+  // Update the game title in the header
+  const gameTitle = `${game.awayTeam.shortName || game.awayTeam.name} vs. ${game.homeTeam.shortName || game.homeTeam.name}`;
+
+  // Find and update all elements that show the game title
+  const headerElements = document.querySelectorAll('.game-header, .game-title');
+  headerElements.forEach(element => {
+    if (element.textContent.includes('vs.')) {
+      element.textContent = gameTitle;
+    }
+  });
+
+  // Also update any breadcrumb or title elements
+  const breadcrumbGame = document.querySelector('.breadcrumb-game');
+  if (breadcrumbGame) {
+    breadcrumbGame.textContent = gameTitle;
+  }
+
+  console.log('Updated game header to:', gameTitle);
 }
 
   // Add breadcrumb navigation
@@ -611,13 +625,13 @@ async function getUserDisplayName(role, userId) {
     link.addEventListener('click', function(e) {
       e.preventDefault();
       const text = this.textContent.trim();
-      
+
       if (text === 'Evaluation Workspace') {
         // Navigate back to workspace with current context
         const urlParams = new URLSearchParams(window.location.search);
         const gameId = urlParams.get('gameId') || currentGameId;
         const eventIndex = currentEventIndex;
-        
+
         // Store context for workspace
         if (gameId) {
           localStorage.setItem('selectedGameId', gameId);
@@ -628,7 +642,7 @@ async function getUserDisplayName(role, userId) {
         if (events && events[eventIndex]) {
           localStorage.setItem('selectedEventId', events[eventIndex].id);
         }
-        
+
         // Navigate to workspace with parameters
         const workspaceUrl = `/workspace.html?gameId=${gameId}&eventIndex=${eventIndex}`;
         window.location.href = workspaceUrl;
