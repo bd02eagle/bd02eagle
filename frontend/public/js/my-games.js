@@ -15,40 +15,23 @@ document.addEventListener('DOMContentLoaded', function() {
   setupNavigation();
 
   // Get current user info from token
-  getCurrentUser();
+  getCurrentUser().then(user => {
+    if (user) {
+      updateUserDisplay();
+    }
+  });
 
   // Load my game assignments
   loadMyGameAssignments();
 });
 
 function setupNavigation() {
-  // Set active navigation
-  const activeNav = document.querySelector('.v1_23');
-  if (activeNav) {
-    activeNav.style.color = 'rgba(59,130,246,1)';
-  }
-
-  // Add click handlers
-  const homeNav = document.querySelector('.v1_28');
-  if (homeNav) {
-    homeNav.addEventListener('click', function() {
-      window.location.href = '/index.html';
-    });
-  }
-
-  const reviewNav = document.querySelector('.v1_33');
-  if (reviewNav) {
-    reviewNav.addEventListener('click', function() {
-      window.location.href = '/review-management.html';
-    });
-  }
-
-  const exportsNav = document.querySelector('.v1_516');
-  if (exportsNav) {
-    exportsNav.addEventListener('click', function() {
-      alert('Exports feature coming soon!');
-    });
-  }
+  // Add click handlers for navigation items
+  const navItems = document.querySelectorAll('.v1_505 span[onclick]');
+  navItems.forEach(item => {
+    // Navigation items already have onclick handlers in HTML
+    console.log('Navigation item:', item.textContent);
+  });
 
   // Add logout handler
   const logoutButton = document.getElementById('logoutButton');
@@ -63,15 +46,59 @@ function setupNavigation() {
   }
 }
 
-function getCurrentUser() {
+async function getCurrentUser() {
   try {
-    const token = authToken.replace('Bearer ', '');
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    // Extract user ID from JWT token
+    const payload = JSON.parse(atob(authToken.split('.')[1]));
     currentUserId = payload.sub;
+
+    // You could also make an API call to get full user details if needed
+    // For now, we'll use the role from localStorage
+    const userRole = localStorage.getItem('userRole');
+
+    return {
+      id: currentUserId,
+      role: userRole
+    };
   } catch (error) {
-    console.error('Error parsing token:', error);
-    window.location.href = '/login.html';
+    console.error('Error getting current user:', error);
+    return null;
   }
+}
+
+function updateUserDisplay() {
+  // Update user name in the profile section
+  const userNameElement = document.getElementById('user-name-display');
+
+  if (userNameElement) {
+    const userRole = localStorage.getItem('userRole');
+    const userName = getUserDisplayName(userRole, currentUserId);
+    userNameElement.textContent = userName;
+    console.log('Updated user display to:', userName);
+  }
+}
+
+function getUserDisplayName(role, userId) {
+  // Extract the user number from the user ID or create a display name
+  // This is a simple approach - you might want to fetch actual user names from an API
+
+  if (role === 'ANALYST') {
+    // Try to determine which analyst based on known IDs from seed data
+    if (userId === '6ca4cb13-9fc2-4b4a-9b45-15b796e1793a') {
+      return 'Ref Analyst 1';
+    } else if (userId === '7da5dc14-8fd3-4c5b-8c46-16c897f2804b') {
+      return 'Ref Analyst 2';
+    } else {
+      // Fallback for unknown analyst IDs
+      return 'Ref Analyst';
+    }
+  } else if (role === 'CHARTER') {
+    return 'Charter User';
+  } else if (role === 'ADMIN') {
+    return 'Admin User';
+  }
+
+  return 'User';
 }
 
 async function loadMyGameAssignments() {
@@ -270,15 +297,15 @@ function openGame(gameId) {
     console.log('Navigation already in progress, ignoring click');
     return;
   }
-  
+
   window.navigatingToGame = true;
-  
+
   // Navigate to Initial Evaluation Workspace with game context
   console.log('Setting selectedGameId:', gameId);
-  
+
   // Use localStorage instead of sessionStorage for better persistence
   localStorage.setItem('selectedGameId', gameId);
-  
+
   // Also pass in URL for immediate access
   window.location.href = `/workspace.html?gameId=${gameId}`;
 }

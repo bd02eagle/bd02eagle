@@ -527,6 +527,9 @@ function formatTime(seconds) {
 }
 
 function setupNavigation() {
+  // Update user display
+  updateUserDisplay();
+
   // Add logout handler
   const logoutButton = document.getElementById('logoutButton');
   if (logoutButton) {
@@ -539,6 +542,46 @@ function setupNavigation() {
       }
     });
   }
+}
+
+function updateUserDisplay() {
+  const userNameElement = document.getElementById('user-name-display');
+  
+  if (userNameElement && authToken) {
+    try {
+      // Extract user ID from JWT token
+      const payload = JSON.parse(atob(authToken.split('.')[1]));
+      const userId = payload.sub;
+      const userRole = localStorage.getItem('userRole');
+      
+      const userName = getUserDisplayName(userRole, userId);
+      userNameElement.textContent = userName;
+      console.log('Updated evaluation page user display to:', userName);
+    } catch (error) {
+      console.error('Error updating user display:', error);
+    }
+  }
+}
+
+function getUserDisplayName(role, userId) {
+  if (role === 'ANALYST') {
+    // Try to determine which analyst based on known IDs from seed data
+    if (userId === '6ca4cb13-9fc2-4b4a-9b45-15b796e1793a') {
+      return 'Ref Analyst 1';
+    } else if (userId === '7da5dc14-8fd3-4c5b-8c46-16c897f2804b') {
+      return 'Ref Analyst 2';
+    } else {
+      // Fallback for unknown analyst IDs
+      return 'Ref Analyst';
+    }
+  } else if (role === 'CHARTER') {
+    return 'Charter User';
+  } else if (role === 'ADMIN') {
+    return 'Admin User';
+  }
+  
+  return 'User';
+}
 
   // Add breadcrumb navigation
   const breadcrumbLinks = document.querySelectorAll('.breadcrumb-link');
