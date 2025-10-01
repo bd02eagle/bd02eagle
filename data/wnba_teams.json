@@ -1,19 +1,17 @@
+
 [
   {
     "team_id": "1611661328",
     "tri_code": "NYL",
     "full_name": "New York Liberty",
     "city": "New York",
-    "nickname": "Liberty",
-    //"logo_url": "https://.../NYL.png"
+    "nickname": "Liberty"
   },
   {
     "team_id": "1611661319",
     "tri_code": "LAS",
     "full_name": "Los Angeles Sparks",
     "city": "Los Angeles",
-    "nickname": "Sparks",
-    //"logo_url": "https://.../LAS.png"
+    "nickname": "Sparks"
   }
-  // ...add the rest
 ]
