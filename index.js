@@ -16,7 +16,8 @@ import analystActionsRoutes from "./routes/analyst-actions.js";
 import assignmentsRoutes from "./routes/assignments.js";
 import teamsRoutes from "./routes/teams.js";
 import usersRouter from "./routes/users.js";
-import teams from "./data/wnba_teams.json" assert { type: "json" };
+import videoRoutes from "./routes/video.js";
+import teams from "./data/wnba_teams.json" with { type: "json" };
 import { cached } from "./lib/cache.js";
 import { resolveWnbaGameId } from "./lib/game_id_resolver.js";
 import { wnbaVideoStatus } from "./lib/wnba_stats_video.js";
@@ -62,28 +63,9 @@ app.use("/api/analyst-actions", analystActionsRoutes);
 app.use("/api/assignments", assignmentsRoutes);
 app.use("/api/teams", teamsRoutes);
 app.use("/api/users", usersRouter);
+app.use("/api/wnba", videoRoutes);
 
 app.get("/api/wnba/teams", (_, res) => res.json(teams));
-
-app.get("/api/wnba/game-id", async (req, res) => {
-  const { date, home, away } = req.query;
-  if (!date || !home || !away) return res.status(400).json({ error: "date, home, away required" });
-  try {
-    const gameId = await cached(`gid:${date}:${home}:${away}`, 86_400_000, () =>
-      resolveWnbaGameId({ gameDate: String(date), homeTeamId: home, awayTeamId: away })
-    );
-    res.json({ gameId });
-  } catch (e) { res.status(502).json({ error: String(e.message || e) }); }
-});
-
-app.get("/api/wnba/video/status", async (req, res) => {
-  const { game_id } = req.query;
-  if (!game_id) return res.status(400).json({ error: "game_id required" });
-  try {
-    const data = await cached(`vstat:${game_id}`, 60_000, () => wnbaVideoStatus({ game_id }));
-    res.json(data);
-  } catch (e) { res.status(502).json({ error: String(e.message || e) }); }
-});
 
 // Users endpoint for fetching user details
 app.get('/api/users/:userId', requireAuth(), async (req, res) => {
