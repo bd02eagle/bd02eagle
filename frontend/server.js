@@ -3,7 +3,6 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fetch from 'node-fetch';
-import videoRoutes from "./routes/video.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,7 +13,6 @@ const PORT = 5000;
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
-app.use("/api/wnba", videoRoutes);
 
 // Proxy API requests to backend
 app.use('/api', async (req, res) => {
